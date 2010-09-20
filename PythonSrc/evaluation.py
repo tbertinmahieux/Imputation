@@ -115,7 +115,7 @@ def test_random_col_on_dataset(datasetdir,ncols=1):
         btchroma = sio.loadmat(matfile)['btchroma']
         if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
             continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols)
+        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
         # reconstruction
         recon = IMPUTATION.random_col(btchroma,mask,masked_cols)
         # measure recon
@@ -185,6 +185,38 @@ def test_eucldist_cols_on_dataset(datasetdir,ncols=1,win=3):
         mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
         # reconstruction
         recon,used_cols = IMPUTATION.eucldist_cols(btchroma,mask,masked_cols,win=win)
+        # measure recon
+        err = recon_error(btchroma,mask,recon,measure='eucl')
+        errs.append( err )
+        total_cnt += 1
+    # done
+    print 'number of songs tested:',total_cnt
+    print 'average sq euclidean dist:',np.mean(errs),'(',np.std(errs),')'
+
+
+def test_lintransform_cols_on_dataset(datasetdir,ncols=1,win=1):
+    """
+    Test the method of imputation by similar patterns in the same
+    song on every mat file in a given dataset
+    INPUT
+      dataset    - dir we'll use every matfile in that dir and subdirs
+      ncols      - number of columns to randomly mask
+      win        - windows around columns to reconstruct
+    """
+    MINLENGTH = 50
+    # get all matfiles
+    matfiles = get_all_matfiles(datasetdir)
+    # init
+    total_cnt = 0
+    errs = []
+    # iterate
+    for matfile in matfiles:
+        btchroma = sio.loadmat(matfile)['btchroma']
+        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
+            continue
+        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
+        # reconstruction
+        recon,proj = IMPUTATION.lintransform_cols(btchroma,mask,masked_cols,win=win)
         # measure recon
         err = recon_error(btchroma,mask,recon,measure='eucl')
         errs.append( err )

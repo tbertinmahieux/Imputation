@@ -8,7 +8,7 @@ tb2332@columbia.edu
 import os
 import sys
 import numpy as np
-
+from scipy.linalg import pinv
 
 
 class LinTrans():
@@ -114,6 +114,17 @@ class LinTrans():
         return np.dot(datain.reshape(1,self._inputlen) , self._transform) + self._bias
 
 
+
+def solve_linear_equation(datain,dataout):
+    """
+    Datainis one big matrix, one example per row
+    Dataout is one big matrix, one example per row
+    """
+    #tmp = np.asmatrix(np.dot(datain.T,datain)).I
+    tmp = pinv(np.dot(datain.T,datain))
+    tmp = np.dot( tmp , datain.T )
+    projection = np.dot( tmp , dataout )
+    return projection
 
 
 def die_with_usage():

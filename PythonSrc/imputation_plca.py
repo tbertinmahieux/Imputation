@@ -72,10 +72,12 @@ class SIPLCA_mask(PLCA.SIPLCA):
         #V /= norm
 
         # ADDED FOR MASKING
+        recon = V.copy()
         maskzeros = np.where(mask==0)
         maskones = np.where(mask==1)
         norm_justones = V[maskones].sum()
         # approximate sum of missing data
+        V = V.copy()
         norm = norm_justones * V.size / len(maskones[0])
         V /= norm
         # *****************
@@ -133,7 +135,8 @@ class SIPLCA_mask(PLCA.SIPLCA):
         # norm can be slightly wrong from missing data
         norm = norm_justones / params.V[maskones].sum()
         # *****************
-        recon = norm * WZH
+        reconall = norm * WZH
+        recon[maskzeros] = reconall[maskzeros]
         return W, Z, H, norm, recon, logprob
 
 

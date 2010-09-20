@@ -104,13 +104,13 @@ def compare_all(btchroma,mask,masked_cols,codebook=None):
         im8_err = EVAL.recon_error(btchroma,mask,recon,measure='eucl')
         im8 = recon[:,pos1:pos2].copy()
         allimages.append(im8)
-        titles.append('codebook,'+str(codebook.shape[0])+' codes of length '+str(codebook.shape[1]/12))
+        titles.append('codebook, '+str(codebook.shape[0])+' codes of length '+str(codebook.shape[1]/12))
         xlabels.append('err='+str(im8_err))
     # ALL IMAGES CREATED
     fig = plt.figure()
     fig.subplots_adjust(hspace=0.4)
     blackbarsfun = lambda: plt.gca().axvline(linewidth=2,color='0.',x=4.5) and plt.gca().axvline(linewidth=2,color='0.',x=5.5)
     # plotall
-    plotall(allimages,subplot=(3,3),cmap='gray_r',title=titles,xlabel=xlabels,axvlines=blackbarsfun)
+    plotall(allimages,subplot=(3,3),cmap='gray_r',title=titles,xlabel=xlabels,axvlines=blackbarsfun,colorbar=False)
 
 

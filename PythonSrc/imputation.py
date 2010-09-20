@@ -242,7 +242,20 @@ def lintransform_cols(btchroma,mask,masked_cols,win=1,niter=1000,lrate=.1):
     allpatches = filter(lambda x: not np.isnan(x).any(), allpatches)
     # cut into indata and outdata
     indata = map(lambda x: x[:,:win].flatten(), allpatches)
-    outdata = map(lambda x: x[:,win:], allpatches)
+    outdata = map(lambda x: x[:,win:].flatten(), allpatches)
+
+    # use linear regression
+    indata = np.concatenate( [np.array(indata) , np.ones((len(indata),1))], axis=1)
+    outdata = np.array(outdata)
+    # learn linear projection
+    proj = LINTRANS.solve_linear_equation(indata,outdata)
+    for colidx, col in enumerate(masked_cols):
+        indata = np.concatenate([btchroma[:,col-win:col].flatten(),[1]])
+        recon = np.dot(indata.reshape(1,indata.size) , proj)
+        full_recon[:,col] = recon
+    return full_recon, proj
+
+        
     # train
     lintrans = LINTRANS.LinTrans(len(indata[0]),len(outdata[0]))
     preverr = np.inf
