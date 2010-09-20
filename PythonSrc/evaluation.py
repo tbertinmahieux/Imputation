@@ -28,10 +28,10 @@ def symm_kl_div(v1,v2):
     """
     Normalize and return the symmetric kldivergence
     """
-    v1 = v1.copy() / v1.sum()
-    v2 = v2.copy() / v2.sum()
-    div1 = (v1 * np.log(v1 / v2 + EPS)).sum()
-    div2 = (v2 * np.log(v2 / v1 + EPS)).sum()
+    v1 = v1.copy() / v1.sum() + EPS
+    v2 = v2.copy() / v2.sum() + EPS
+    div1 = (v1 * np.log(v1 / v2)).sum()
+    div2 = (v2 * np.log(v2 / v1)).sum()
     return (div1 + div2) / 2.
 
 
@@ -111,7 +111,7 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
             recon = IMPUTATION.average_col(btchroma,mask,masked_cols,win=win)
         elif method == 'codebook':
             if not type(codebook) == type([]):
-                codebook = [p.reshape(12,codebook.shape[1]/12 for p in codebook]
+                codebook = [p.reshape(12,codebook.shape[1]/12) for p in codebook]
             recon,used_codes = IMPUTATION.codebook_cols(btchroma,mask,masked_cols,codebook)
         elif method == 'knn_eucl':
                 recon,used_cols = IMPUTATION.eucldist_cols(btchroma,mask,masked_cols,win=win)
