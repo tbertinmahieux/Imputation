@@ -30,8 +30,11 @@ class LinTrans():
         """
         Initialize the matrix randomly
         """
-        self._transform = np.random.rand(self._inputlen,
-                                         self._outputlen)
+        #self._transform = np.random.rand(self._inputlen,
+        #                                 self._outputlen)
+        #self._bias = np.random.rand(1,self._outputlen)
+        self._transform = np.ones((self._inputlen,self._outputlen)) / self._inputlen
+        self._bias = np.zeros((1,self._outputlen))
 
     def __computeerrors__(self,datain,dataout):
         """
@@ -40,7 +43,7 @@ class LinTrans():
            datain    - array of inputs
            dataout   - array of outputs
         """
-        return map(lambda x: self.__computerror__(datain[x],dataout[x]),
+        return map(lambda x: self.__computeerror__(datain[x],dataout[x]),
                    range(len(datain)))
 
     def __computeerror__(self,datain,dataout):
@@ -71,7 +74,8 @@ class LinTrans():
            datain    - array of inputs
            dataout   - array of outputs
         """
-        return 2 * (self.predicts(datain) - dataout) * datain
+        res = 2 * (self.predicts(datain) - dataout.reshape(1,self._outputlen))
+        return res
 
     def train(self,datain,dataout,lrate=.1,niter=100):
         """
@@ -86,11 +90,15 @@ class LinTrans():
         for it in xrange(niter):
             # compute gradients
             grads = self.__computegrads__(datain,dataout)
-            # average them
-            batchgrad = np.array(grads).mean(axis=0)
+            # transform gradients
+            transgrads = [grads[i] * datain[i] for i in range(len(datain))]
+            batchtransgrad = np.array(transgrads).mean(axis=0)
             # update transform
-            self._transform -= lrate * batchgrad
-        
+            self._transform -= lrate * batchtransgrad
+            # bias gradient
+            batchbiasgrad = np.array(grads).mean(axis=0)
+            # update bias
+            self._bias -= lrate * batchbiasgrad.reshape(self._bias.shape)
         
     def predicts_all(self,datain):
         """
@@ -102,7 +110,9 @@ class LinTrans():
         """
         Apply the linear transform on one input
         """
-        return datain.reshape(1,self._inputlen) * self._transform
+        #return datain.reshape(1,self._inputlen) * self._transform
+        return np.dot(datain.reshape(1,self._inputlen) , self._transform) + self._bias
+
 
 
 
@@ -136,7 +146,7 @@ if __name__ == '__main__':
     trans = np.random.rand(inlen,outlen)
     # create data
     indata = map(lambda x: np.random.rand(inlen,1),range(ndata))
-    outdata = map(lambda x: x.T * trans,indata)
+    outdata = map(lambda x: np.dot(x.T , trans),indata)
     # init linear transform
     lintrans = LinTrans(inlen,outlen)
     # transform error

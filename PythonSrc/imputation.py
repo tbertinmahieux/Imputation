@@ -11,7 +11,7 @@ import os
 import sys
 import numpy as np
 import scipy.io as sio
-
+import linear_transform as LINTRANS
 
 
 def masked_eucl_dist_sq(f1,mask1,f2,mask2):
@@ -213,3 +213,62 @@ def eucldist_cols(btchroma,mask,masked_cols,win=21):
     return full_recon, used_cols
 
 
+
+def lintransform_cols(btchroma,mask,masked_cols,win=1,niter=1000,lrate=.1):
+    """
+    Does imputation for columns by simple euclidean distance
+    with the rest of the data.
+    INPUT
+      btchroma     - feature matrix
+      mask         - binary mask
+      masked_cols  - indices of the masked columns
+      win          - window to consider before masked column
+      niter        - number of iterations for training
+      lrate        - learning rate for training
+    RETURN
+      recon        - full reconstruction, same size as btchroma
+      lintrans     - learned linear transform class
+    """
+    # sanity checks
+    assert btchroma.shape == mask.shape,'wrong mask shape'
+    assert win > 0,'window of size 0,-1,... has no sense'
+    # some init
+    full_recon = btchroma.copy()
+    # cut btchroma in every possible patches of size win+1
+    btchromamasked = btchroma.copy()
+    btchromamasked[np.where(btchromamasked==0)] = np.nan
+    allpatches = map(lambda x: btchromamasked[:,x-win:x+1], range(win,btchroma.shape[1]))
+    # remove patches containing masked columns
+    allpatches = filter(lambda x: not np.isnan(x).any(), allpatches)
+    # cut into indata and outdata
+    indata = map(lambda x: x[:,:win].flatten(), allpatches)
+    outdata = map(lambda x: x[:,win:], allpatches)
+    # train
+    lintrans = LINTRANS.LinTrans(len(indata[0]),len(outdata[0]))
+    preverr = np.inf
+    besttransform = None
+    bestbias = None
+    while lrate > 1e-10:
+         lintrans.train(indata,outdata,niter=1,lrate=lrate)
+         err = np.average(lintrans.__computeerrors__(indata,outdata))
+         if np.isinf(preverr) or err < preverr:
+             preverr = err
+             besttransform = lintrans._transform.copy()
+             bestbias = lintrans._bias.copy()
+         else:
+             print 'err =',err,', preverr =',preverr,', new lrate =',lrate
+             lrate *= .1
+             lintrans._transform = besttransform.copy()
+             lintrans._bias = bestbias.copy()
+    #for it in xrange(niter):
+    #    lintrans.train(indata,outdata,niter=1,lrate=lrate)
+    #    # error
+    #    errs = lintrans.__computeerrors__(indata,outdata)
+    #    print 'average error:',np.average(errs)
+    # predict
+    for colidx, col in enumerate(masked_cols):
+        indata = btchroma[:,col-win:col].flatten()
+        recon = lintrans.predicts(indata).flatten()
+        full_recon[:,col] = recon
+    # done
+    return full_recon, lintrans
