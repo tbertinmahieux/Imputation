@@ -4,6 +4,7 @@
 % --------------------------------------------------------------------------
 \documentclass{article}
 \usepackage{spconf,amsmath,graphicx}
+\usepackage{url}
 
 % Example definitions.
 % --------------------
@@ -32,7 +33,7 @@
 	{Columbia University / New York University\\
           LabROSA / MARL\\
 	New York, USA}
-  {Graham Grindlay, Daniel P.W. Ellis}
+  {Graham Grindlay and Daniel P.W. Ellis}
 	{Columbia University\\
           LabROSA\\
 	New York, USA}
@@ -66,14 +67,38 @@ results.
 
 Paris Smaragdis on speech data \cite{Smaragdis2009}.
 
-Similarity with work on automatic music composition such as \cite{Mozer1994a} or music
+Similarity with work on automatic music composition such as \cite{Eck2002d,Mozer1994a} or music
 expectation \cite{Hazan2010}, but we do not further consider these tasks in this work.
 
 Learned patterns for music data recently includes: \cite{Bertin-Mahieux2010a,Casey2007,Weiss2010}.
 
 \section{TASK DEFINITION}
 \label{sec:task}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{basic_example}
+\end{center}
+\caption{Basic example}
+\label{fig:code}
+\end{figure}
+
 Beat-chroma features used in \cite{Ellis2007a}.
+Note that they are extracted from actual audio signals unlike work on automatic composition
+\cite{Eck2002d}. That makes them noisier and more complex, but more realistic and usefull
+in practice.
+
+The most general definition is that we remove some pixels from a beat-chroma matrix and
+we try to recover them. However, in does not make much sense to miss only some frequencies
+at a given beat, for instance all the `G' notes. Therefore, we will only remove full
+beats.
+
+The final definition is, given a song and a window of missing beats (one or more),
+try to impute the missing beats as close to the original ones as possible.
+
+The reconstruction error (or divergence) measure is not obvious. In this work,
+we report the euclidean distance and the symmetric Kullback-Leibler divergence.
+A discussion on this choice follows in section \ref{sec:experiments}.
 
 
 \section{METHODS}
@@ -90,8 +115,21 @@ segmentation, similarity and compression.
 
 \subsection{TRIVIAL METHODS}
 \label{ssec:trivialmethods}
-
-Random, average, knn.
+Below are four of the methods we evaluate, starting by the name we use in the experiments
+to refer to them.
+\begin{enumerate}
+\item \textbf{Random}: each missing pixel is filled with a pseudo-random number drawn from
+a constant $[0,1)$ distribution.
+\item \textbf{Random-song}: each missing beat is filled with another beat from the song,
+chosen at random.
+\item \textbf{Average}: each missing beat is filled with the average of the nearby beats,
+the window size of nearby beats being a parameter. Note that we look at both previous and
+later beats.
+\item \textbf{Knn-song}: we compare a window of beats around the missing one with
+all possible windows of the same size in the song. We use the closest one (based on euclidean
+distance or KL-divergence) to fill in the missing beat. Note that we look at both
+previous and later beats.
+\end{enumerate}
 
 \subsection{LEARNED MODELS}
 \label{ssec:learnedmodels}
@@ -102,7 +140,7 @@ SIPLCA code available online \cite{Weiss2010}. Code to get Echo Nest features an
 online clustering available online \cite{Bertin-Mahieux2010a}.
 
 \section{EXPERIMENTS}
-\label{sec:page}
+\label{sec:experiments}
 
 \subsection{ERROR MEASURES}
 \label{ssec:errmeasures}
@@ -114,10 +152,29 @@ A poisson noise model (versus a gaussian one) seems to better fit audio percepti
 which result in the use of KL. See also \cite{Fevotte2009} for a comparison on a piano
 excerpt.
 
-\centering
-\centerline{\includegraphics[width=\columnwidth]{imputation}}
-\vspace{.1cm}
-\centerline{Caption here, hein???}\medskip
+Note that in the following experiments, the two measures seem to agree.
+
+\subsection{DATA}
+\label{ssec:data}
+We build beat-align chromagrams using the beat tracking and chroma features as
+returned by the Echo Nest API \cite{EchoNest}. Our results are on the Cowbell
+dataset made of $43,000$ songs \cite{Bertin-Mahieux2010a}.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{imputation}
+\end{center}
+\caption{Basic example}
+\label{fig:imputation}
+\end{figure}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{lintrans_curves}
+\end{center}
+\caption{Basic example}
+\label{fig:lintrans}
+\end{figure}
 
 
 \section{ILLUSTRATIONS, GRAPHS, AND PHOTOGRAPHS}
@@ -140,6 +197,7 @@ Many algorithms remain to be tried, for instance large scale or deep recurrent
 neural network, or using the nonlocal-means algorithm as has been done for
 images \cite{Buades2005}.
 
+Code available at \footnote{Code available at: \url{http://www.columbia.edu/~tb2332/something}}.
 
 
 
