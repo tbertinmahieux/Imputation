@@ -33,5 +33,6 @@ if __name__ == '__main__':
     l2 = P.plot(winsize,kl,'--')
     P.ylabel('KL divergence')
     P.xticks( winsize )
+    P.xlabel('window size')
     P.legend( (l1,l2) , ('euclidean','KL') )
     P.show()
