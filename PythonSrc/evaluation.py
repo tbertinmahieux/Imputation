@@ -97,7 +97,7 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
     Used arguments vary based on the method. For SIPLCA, we can use **kwargs
     to set priors.
     """
-    MINLENGTH = 50
+    MINLENGTH = 70
     # get all matfiles
     matfiles = get_all_matfiles(datasetdir)
     # init
@@ -113,7 +113,7 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
         btchroma = sio.loadmat(matfile)['btchroma']
         if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
             continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
+        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=25)
         ########## ALGORITHM DEPENDENT
         if method == 'random':
             recon = IMPUTATION.random_col(btchroma,mask,masked_cols)
@@ -171,7 +171,7 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
     Used arguments vary based on the method. For SIPLCA, we can use **kwargs
     to set priors.
     """
-    MINLENGTH = 50
+    MINLENGTH = 70
     # get all matfiles
     matfiles = get_all_matfiles(datasetdir)
     # init
@@ -187,7 +187,7 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
         btchroma = sio.loadmat(matfile)['btchroma']
         if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
             continue
-        mask,p1,p2 = MASKING.random_patch_mask(btchroma,ncols=ncols,win=30)
+        mask,p1,p2 = MASKING.random_patch_mask(btchroma,ncols=ncols,win=25)
         ########## ALGORITHM DEPENDENT
         if method == 'random':
             recon = IMPUTATION.random_patch(btchroma,mask,p1,p2)
