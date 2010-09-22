@@ -42,6 +42,30 @@ def random_col_mask(btchroma,ncols,win=3,seed=123):
     return mask, masked_cols
 
 
+def random_patch_mask(btchroma,ncols,win=30,seed=123456):
+    """
+    Returns a binary mask where 'ncols' successive columns are zero,
+    chosen at random (see param 'seed')
+    INPUT
+      btchroma    - features matrix (usually 12 x nbeats)
+      ncols       - number of columns to mask
+      win         - available beats around the masked patches
+      seed        - seed (columns chosen at random)
+    RETURN
+      mask        - binary matrix, same shape as btchroma
+      p1          - mask between cols p1 and p2
+      p2            so mask[:,p1:p2] = 0, 1 everywhere else
+    """
+    assert btchroma.shape[1] > win * 2 + ncols,'btchroma too short'
+    np.random.seed(seed)
+    possible_p1 = range(win,btchroma.shape[1]-win-ncols)
+    np.random.shuffle(possible_p1)
+    p1 = possible_p1[0]
+    p2 = p1 + ncols
+    mask = np.ones(btchroma.shape)
+    mask[:,p1:p2] = 0.
+    return mask,p1,p2
+
 
 def get_masked_cols(colmask):
     """
