@@ -99,36 +99,8 @@ def euclidean_dist_sq(v1,v2):
     """
     Trivial averaged squared euclidean distance from too flatten vectors
     """
+    raise DeprecationWarning('use similar function in evaluation.py')
     return np.square(v1.flatten()-v2.flatten()).mean()
 
-
-def recon_error(btchroma,mask,recon,measure='eucl'):
-    """
-
-    INPUT
-       btchroma   - original feature matrix
-       mask       - binary mask, same shape as btchroma
-       recon      - reconstruction, same shape as btchroma
-       measure    - 'eucl' (euclidean distance, default)
-                  - 'kl' (symmetric KL-divergence)
-    RETURN
-       div        - divergence, or reconstruction error
-    """
-    raise DeprecationWarning('use function in evaluation.py instead')
-    """
-    # sanity checks
-    assert btchroma.shape == mask.shape,'bad mask shape'
-    assert btchroma.shape == recon.shape,'bad recon shape'
-    # get measure function
-    if measure == 'eucl':
-        measfun = euclidean_dist_sq
-    elif measure == 'kl':
-        raise NotImplementedError
-    else:
-        raise ValueError('wrong measure name, want eucl or kl?')
-    # measure and done
-    maskzeros = np.where(mask==0)
-    return measfun( btchroma[maskzeros] , recon[maskzeros] )
-    """
 
 
