@@ -91,6 +91,7 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
       - average
       - codebook
       - knn_eucl
+      - knn_kl
       - lintrans
       - siplca
       - siplca2
@@ -125,6 +126,8 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
             recon,used_codes = IMPUTATION.codebook_cols(btchroma,mask,masked_cols,codebook)
         elif method == 'knn_eucl':
             recon,used_cols = IMPUTATION.knn_cols(btchroma,mask,masked_cols,win=win,measure='eucl')
+        elif method == 'knn_kl':
+            recon,used_cols = IMPUTATION.knn_cols(btchroma,mask,masked_cols,win=win,measure='kl')
         elif method == 'lintrans':
             recon,proj = IMPUTATION.lintransform_cols(btchroma,mask,masked_cols,win=win)
         elif method == 'siplca':
@@ -145,15 +148,18 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
         ########## ALGORITHM DEPENDENT END
         # measure recon
         err = recon_error(btchroma,mask,recon,measure='eucl')
+        if err > 100:
+            print 'huge EUCL error:',err,', method =',method,',file =',matfile
         errs_eucl.append( err )
         err = recon_error(btchroma,mask,recon,measure='kl')
+        if err > 100:
+            print 'huge KL error:',err,', method =',method,',file =',matfile
         errs_kl.append( err )
         total_cnt += 1
     # done
     print 'number of songs tested:',total_cnt
     print 'average sq euclidean dist:',np.mean(errs_eucl),'(',np.std(errs_eucl),')'
     print 'average kl divergence:',np.mean(errs_kl),'(',np.std(errs_kl),')'
-
 
 
 def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,codebook=None,**kwargs):
@@ -165,6 +171,7 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
       - average
       - codebook
       - knn_eucl
+      - knn_kl
       - lintrans
       - siplca
       - siplca2
@@ -199,6 +206,8 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
             recon,used_codes = IMPUTATION.codebook_patch(btchroma,mask,p1,p2,codebook)
         elif method == 'knn_eucl':
             recon,used_cols = IMPUTATION.knn_patch(btchroma,mask,p1,p2,win=win,measure='eucl')
+        elif method == 'knn_kl':
+            recon,used_cols = IMPUTATION.knn_patch(btchroma,mask,p1,p2,win=win,measure='kl')
         elif method == 'lintrans':
             recon,proj = IMPUTATION.lintransform_patch(btchroma,mask,p1,p2,win=win)
         elif method == 'siplca':
@@ -219,9 +228,13 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
         ########## ALGORITHM DEPENDENT END
         # measure recon
         err = recon_error(btchroma,mask,recon,measure='eucl')
+        if err > 100:
+            print 'huge EUCL error:',err,', method =',method,',file =',matfile
         errs_eucl.append( err )
         err = recon_error(btchroma,mask,recon,measure='kl')
         errs_kl.append( err )
+        if err > 100:
+            print 'huge KL error:',err,', method =',method,',file =',matfile
         total_cnt += 1
     # done
     print 'number of songs tested:',total_cnt
