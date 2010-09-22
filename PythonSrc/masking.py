@@ -75,10 +75,24 @@ def get_masked_cols(colmask):
     RETURN
       cols     - indices of masked columns, ascending order
     """
-    res = np.where(mask[0,:]==0)[0]
-    assert (mask[:,res]==0).all(),'not a column mask'
+    res = np.where(colmask[0,:]==0)[0]
+    assert (colmask[:,res]==0).all(),'not a column mask'
     return res
 
+def get_masked_patch(patchmask):
+    """
+    Infer the indices of the masked patch from the full mask
+    INPUT
+      patchmask  - binary patch mask, shape of a feature matrix
+    RETURN
+      p1         - masked patch between p1 and p2
+      p2           meaning patchmask[:,p1:p2] = 0
+    """
+    res = get_masked_cols(patchmask)
+    p1 = min(res)
+    p2 = max(res) + 1
+    assert (patchmask[:,p1:p2]==0).all(),'not a patch mask'
+    return p1,p2
 
 
 def euclidean_dist_sq(v1,v2):
@@ -100,6 +114,8 @@ def recon_error(btchroma,mask,recon,measure='eucl'):
     RETURN
        div        - divergence, or reconstruction error
     """
+    raise DeprecationWarning('use function in evaluation.py instead')
+    """
     # sanity checks
     assert btchroma.shape == mask.shape,'bad mask shape'
     assert btchroma.shape == recon.shape,'bad recon shape'
@@ -113,6 +129,6 @@ def recon_error(btchroma,mask,recon,measure='eucl'):
     # measure and done
     maskzeros = np.where(mask==0)
     return measfun( btchroma[maskzeros] , recon[maskzeros] )
-
+    """
 
 

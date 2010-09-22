@@ -38,7 +38,7 @@ def masked_eucl_dist_sq(f1,mask1,f2,mask2):
     return np.square(f1[maskones]-f2[maskones]).mean()
 
 
-def average_col(btchroma,mask,masked_cols,win=21):
+def average_col(btchroma,mask,masked_cols,win=3):
     """
     Fill in the mask based on the average column in the window
     around it.
@@ -69,6 +69,34 @@ def average_col(btchroma,mask,masked_cols,win=21):
     # done
     return full_recon
 
+def average_patch(btchroma,mask,p1,p2,win=1):
+    """
+    Infer the values of a patch as a constant function, made of the
+    average of the neighborhood beats.
+    INPUT
+      btchroma     - feature matrix
+      mask         - binary mask
+      p1           - beginning of the masked patch
+      p2           - end of the mask patch, mask[:,p1:p2] = 0
+      win          - window to consider on eahc side of the patch
+    RETURN
+      recon        - full reconstruction, same size as btchroma
+    If the patch is one column, average_patch with win = 1 works
+    the same way as average_col with win = 3
+    """
+    # sanity checks
+    assert btchroma.shape == mask.shape,'wrong mask shape'
+    assert win >= 1,'window of size 0 has no sense'
+    # some inits
+    full_recon = btchroma.copy()
+    # neighborhood beats
+    neigh_beats = np.concatenate( [btchroma[:,p1-win:p1],
+                                   btchroma[:,p2:p2+win]], axis=1)
+    meanbeat = neigh_beats.mean(axis=1).flatten()
+    for k in range(p1,p2):
+        full_recon[:,k] = meanbeat
+    # done
+    return full_recon
 
 
 def random_col(btchroma,mask,masked_cols):
@@ -90,7 +118,66 @@ def random_col(btchroma,mask,masked_cols):
         full_recon[:,col] = np.random.rand( btchroma.shape[0],1 ).flatten()
     # done
     return full_recon
-        
+
+def random_patch(btchroma,mask,p1,p2):
+    """ see random col """
+    return random_col(btchroma,mask,range(p1,p2))
+
+
+def random_col_from_song(btchroma,mask,masked_cols):
+    """
+    Fill in the mask by copying a random column from the song
+    INPUT
+      btchroma     - feature matrix
+      mask         - binary mask
+      masked_cols  - indices of the masked columns
+    RETURN
+      recon        - full reconstruction, same size as btchroma
+    """
+    # sanity checks
+    assert btchroma.shape == mask.shape,'wrong mask shape'
+    # some inits
+    full_recon = btchroma.copy()
+    # all columns in a set
+    allcols = set(range(btchroma.shape[1]))
+    # remove masked cols
+    map(lambda x: allcols.remove(x), masked_cols)
+    # iterate over masked columns
+    for colidx,col in enumerate(masked_cols):
+        rand_col = list(allcols)[np.random.randint(len(allcols))]
+        full_recon[:,col] = btchroma[:,rand_col].flatten()
+    # done
+    return full_recon
+
+def random_patch_from_song(btchroma,mask,p1,p2):
+    """
+    Fill in the mask by copying a random patch from the song
+    INPUT
+      btchroma     - feature matrix
+      mask         - binary mask
+      masked_cols  - indices of the masked columns
+    RETURN
+      recon        - full reconstruction, same size as btchroma
+    if patch ncols = 1, same as random_col_form_song
+    """
+     # sanity checks
+    assert btchroma.shape == mask.shape,'wrong mask shape'
+    # some inits
+    full_recon = btchroma.copy()
+    # check such patch exists
+    ncols = p2-p1
+    leftsidelen = p1
+    rightsidelen = btchroma.shape[1] - p2
+    assert leftsidelen >= ncols or rightsidelen >= ncols,'cant find large enough patch'
+    # choose one at random
+    possible_patches_start = range(0,leftsidelen-ncols)
+    possible_patches_start.extend( range(p2,btchroma.shape[1]-ncols) )
+    np.random.shuffle(possible_patches_start)
+    randstart = possible_patches_start[0]
+    recon[:,p1:p2] = btchroma[:,randstart:randstart+ncols].copy()
+    # done
+    return recon
+
 
 def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
     """
@@ -149,7 +236,13 @@ def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
     return full_recon, used_codes
 
 
-def eucldist_cols(btchroma,mask,masked_cols,win=21):
+def codebook_patch(btchroma,mask,p1,p2,codebook):
+    """ see codebook_col """
+    return codebook_col(btchroma,mask,range(p1,p2),codebook)
+
+
+
+def knn_cols(btchroma,mask,masked_cols,win=21,measure='eucl'):
     """
     Does imputation for columns by simple euclidean distance
     with the rest of the data.
@@ -158,6 +251,7 @@ def eucldist_cols(btchroma,mask,masked_cols,win=21):
       mask         - binary mask
       masked_cols  - indices of the masked columns
       win          - window around column to consider for correlation (odd)
+      measure      - 'eucl' or 'kl', for euclidean distance or KL-divergence
     RETURN
       recon        - full reconstruction, same size as btchroma
       used_cols    - columns used for reconstruction
@@ -168,6 +262,13 @@ def eucldist_cols(btchroma,mask,masked_cols,win=21):
     if win % 2 == 0:
         win += 1
     # some inits
+    if measure == 'eucl':
+        distfun=masked_eucl_dist_sq
+    elif measure == 'kl':
+        raise NotImpelmentedError
+    else:
+        print 'wrong measure:',measure
+        return None
     full_recon = btchroma.copy()
     half_win = int(np.floor(win/2))
     used_cols = np.zeros((1,len(masked_cols)))
@@ -183,7 +284,7 @@ def eucldist_cols(btchroma,mask,masked_cols,win=21):
         recon = np.zeros((btchroma.shape[0],1))
         # perform 'same' correlation
         for c in range(btchroma.shape[1]):
-            if len(np.where(masked_cols==c)[0]) > 0:
+            if len(np.where(np.array(masked_cols)==c)[0]) > 0:
                 continue # useless if we match a masked column
             reconwinstart =  max(0, c - half_win)
             reconwinstop = min(btchroma.shape[1], c+half_win+1)
@@ -192,8 +293,8 @@ def eucldist_cols(btchroma,mask,masked_cols,win=21):
             # if we use onlypart of the patch, for border issues
             p1 = half_win-c+reconwinstart # 0 if full patch used
             p2 = p1 + reconpatch.shape[1] # patch.shape[1] if full patch used
-            div = masked_eucl_dist_sq(patch[:,p1:p2],patch_mask[:,p1:p2],
-                                      reconpatch,reconpatch_mask)
+            div = distfun(patch[:,p1:p2],patch_mask[:,p1:p2],
+                          reconpatch,reconpatch_mask)
             # check if got better divergence
             if div < best_div:
                 best_div = div
@@ -212,9 +313,13 @@ def eucldist_cols(btchroma,mask,masked_cols,win=21):
     # done
     return full_recon, used_cols
 
+def knn_patch(btchroma,mask,p1,p2,win=21,measure='eucl'):
+    """ see knn_col """
+    return knn_cols(btchroma,mask,range(p1,p2),win=win,measure=measure)
 
 
-def lintransform_cols(btchroma,mask,masked_cols,win=1,niter=1000,lrate=.1):
+
+def lintransform_cols(btchroma,mask,masked_cols,win=1):#,niter=1000,lrate=.1):
     """
     Does imputation for columns by simple euclidean distance
     with the rest of the data.
@@ -236,52 +341,26 @@ def lintransform_cols(btchroma,mask,masked_cols,win=1,niter=1000,lrate=.1):
     full_recon = btchroma.copy()
     # cut btchroma in every possible patches of size win+1
     btchromamasked = btchroma.copy()
-    btchromamasked[np.where(btchromamasked==0)] = np.nan
-    allpatches = map(lambda x: btchromamasked[:,x-win:x+1], range(win,btchroma.shape[1]))
+    btchromamasked[np.where(mask==0)] = np.nan
+    allpatches = map(lambda x: btchromamasked[:,x-win:x+1].copy(), range(win,btchroma.shape[1]))
     # remove patches containing masked columns
+    prev_n_patches = len(allpatches)
     allpatches = filter(lambda x: not np.isnan(x).any(), allpatches)
     # cut into indata and outdata
     indata = map(lambda x: x[:,:win].flatten(), allpatches)
     outdata = map(lambda x: x[:,win:].flatten(), allpatches)
-
     # use linear regression
     indata = np.concatenate( [np.array(indata) , np.ones((len(indata),1))], axis=1)
     outdata = np.array(outdata)
     # learn linear projection
     proj = LINTRANS.solve_linear_equation(indata,outdata)
     for colidx, col in enumerate(masked_cols):
-        indata = np.concatenate([btchroma[:,col-win:col].flatten(),[1]])
+        #indata = np.concatenate([btchroma[:,col-win:col].flatten(),[1]])
+        indata = np.concatenate([full_recon[:,col-win:col].flatten(),[1]])
         recon = np.dot(indata.reshape(1,indata.size) , proj)
         full_recon[:,col] = recon
     return full_recon, proj
 
-        
-    # train
-    lintrans = LINTRANS.LinTrans(len(indata[0]),len(outdata[0]))
-    preverr = np.inf
-    besttransform = None
-    bestbias = None
-    while lrate > 1e-10:
-         lintrans.train(indata,outdata,niter=1,lrate=lrate)
-         err = np.average(lintrans.__computeerrors__(indata,outdata))
-         if np.isinf(preverr) or err < preverr:
-             preverr = err
-             besttransform = lintrans._transform.copy()
-             bestbias = lintrans._bias.copy()
-         else:
-             print 'err =',err,', preverr =',preverr,', new lrate =',lrate
-             lrate *= .1
-             lintrans._transform = besttransform.copy()
-             lintrans._bias = bestbias.copy()
-    #for it in xrange(niter):
-    #    lintrans.train(indata,outdata,niter=1,lrate=lrate)
-    #    # error
-    #    errs = lintrans.__computeerrors__(indata,outdata)
-    #    print 'average error:',np.average(errs)
-    # predict
-    for colidx, col in enumerate(masked_cols):
-        indata = btchroma[:,col-win:col].flatten()
-        recon = lintrans.predicts(indata).flatten()
-        full_recon[:,col] = recon
-    # done
-    return full_recon, lintrans
+def lintransform_patch(btchroma,mask,p1,p2,win=1):
+    """ see lintransform_cols """
+    return lintransform_cols(btchroma,mask,range(p1,p2),win=win)

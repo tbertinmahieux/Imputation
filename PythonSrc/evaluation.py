@@ -30,8 +30,14 @@ def symm_kl_div(v1,v2):
     """
     v1 = v1.copy() / v1.sum() + EPS
     v2 = v2.copy() / v2.sum() + EPS
-    div1 = (v1 * np.log(v1 / v2)).sum()
-    div2 = (v2 * np.log(v2 / v1)).sum()
+    assert not np.isnan(v1).any()
+    assert not np.isnan(v2).any()
+    res1 = (v1 * np.log(v1 / v2))
+    res2 = (v2 * np.log(v2 / v1))
+    res1[np.where(np.isnan(res1))] = 0.
+    res2[np.where(np.isnan(res2))] = 0.
+    div1 = res1.sum()
+    div2 = res2.sum()
     return (div1 + div2) / 2.
 
 
@@ -76,7 +82,7 @@ def get_all_matfiles(basedir) :
 
 
 
-def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,codebook=None):
+def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,codebook=None,**kwargs):
     """
     General method to test a method on a whole dataset for one masked column
     Methods are:
@@ -87,7 +93,9 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
       - knn_eucl
       - lintrans
       - siplca
-    Used arguments vary based on the method
+      - siplca2
+    Used arguments vary based on the method. For SIPLCA, we can use **kwargs
+    to set priors.
     """
     MINLENGTH = 50
     # get all matfiles
@@ -96,6 +104,10 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
     total_cnt = 0
     errs_eucl = []
     errs_kl = []
+    # some specific inits
+    if codebook != None and not type(codebook) == type([]):
+        codebook = [p.reshape(12,codebook.shape[1]/12) for p in codebook]
+        print 'codebook in ndarray format transformed to list'
     # iterate
     for matfile in matfiles:
         btchroma = sio.loadmat(matfile)['btchroma']
@@ -110,16 +122,22 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
         elif method == 'average':
             recon = IMPUTATION.average_col(btchroma,mask,masked_cols,win=win)
         elif method == 'codebook':
-            if not type(codebook) == type([]):
-                codebook = [p.reshape(12,codebook.shape[1]/12) for p in codebook]
             recon,used_codes = IMPUTATION.codebook_cols(btchroma,mask,masked_cols,codebook)
         elif method == 'knn_eucl':
-                recon,used_cols = IMPUTATION.eucldist_cols(btchroma,mask,masked_cols,win=win)
+            recon,used_cols = IMPUTATION.knn_cols(btchroma,mask,masked_cols,win=win,measure='eucl')
         elif method == 'lintrans':
             recon,proj = IMPUTATION.lintransform_cols(btchroma,mask,masked_cols,win=win)
         elif method == 'siplca':
             res = IMPUTATION_PLCA.SIPLCA_mask.analyze((btchroma*mask).copy(),
-                                                      rank,mask,win=win)
+                                                      rank,mask,win=win,
+                                                      convergence_thresh=1e-15,
+                                                      **kwargs)
+            W, Z, H, norm, recon, logprob = res
+        elif method == 'siplca2':
+            res = IMPUTATION_PLCA.SIPLCA2_mask.analyze((btchroma*mask).copy(),
+                                                       rank,mask,win=win,
+                                                       convergence_thresh=1e-15,
+                                                       **kwargs)
             W, Z, H, norm, recon, logprob = res
         else:
             print 'unknown method:',method
@@ -135,6 +153,81 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
     print 'number of songs tested:',total_cnt
     print 'average sq euclidean dist:',np.mean(errs_eucl),'(',np.std(errs_eucl),')'
     print 'average kl divergence:',np.mean(errs_kl),'(',np.std(errs_kl),')'
+
+
+
+def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,codebook=None,**kwargs):
+    """
+    General method to test a method on a whole dataset for one masked column
+    Methods are:
+      - random
+      - randomfromsong
+      - average
+      - codebook
+      - knn_eucl
+      - lintrans
+      - siplca
+      - siplca2
+    Used arguments vary based on the method. For SIPLCA, we can use **kwargs
+    to set priors.
+    """
+    MINLENGTH = 50
+    # get all matfiles
+    matfiles = get_all_matfiles(datasetdir)
+    # init
+    total_cnt = 0
+    errs_eucl = []
+    errs_kl = []
+    # some specific inits
+    if codebook != None and not type(codebook) == type([]):
+        codebook = [p.reshape(12,codebook.shape[1]/12) for p in codebook]
+        print 'codebook in ndarray format transformed to list'
+    # iterate
+    for matfile in matfiles:
+        btchroma = sio.loadmat(matfile)['btchroma']
+        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
+            continue
+        mask,p1,p2 = MASKING.random_patch_mask(btchroma,ncols=ncols,win=30)
+        ########## ALGORITHM DEPENDENT
+        if method == 'random':
+            recon = IMPUTATION.random_patch(btchroma,mask,p1,p2)
+        elif method == 'randomfromsong':
+            recon = IMPUTATION.random_patch_from_song(btchroma,mask,p1,p2)
+        elif method == 'average':
+            recon = IMPUTATION.average_patch(btchroma,mask,p1,p2,win=win)
+        elif method == 'codebook':
+            recon,used_codes = IMPUTATION.codebook_patch(btchroma,mask,p1,p2,codebook)
+        elif method == 'knn_eucl':
+            recon,used_cols = IMPUTATION.knn_patch(btchroma,mask,p1,p2,win=win,measure='eucl')
+        elif method == 'lintrans':
+            recon,proj = IMPUTATION.lintransform_patch(btchroma,mask,p1,p2,win=win)
+        elif method == 'siplca':
+            res = IMPUTATION_PLCA.SIPLCA_mask.analyze((btchroma*mask).copy(),
+                                                      rank,mask,win=win,
+                                                      convergence_thresh=1e-15,
+                                                      **kwargs)
+            W, Z, H, norm, recon, logprob = res
+        elif method == 'siplca2':
+            res = IMPUTATION_PLCA.SIPLCA2_mask.analyze((btchroma*mask).copy(),
+                                                       rank,mask,win=win,
+                                                       convergence_thresh=1e-15,
+                                                       **kwargs)
+            W, Z, H, norm, recon, logprob = res
+        else:
+            print 'unknown method:',method
+            return
+        ########## ALGORITHM DEPENDENT END
+        # measure recon
+        err = recon_error(btchroma,mask,recon,measure='eucl')
+        errs_eucl.append( err )
+        err = recon_error(btchroma,mask,recon,measure='kl')
+        errs_kl.append( err )
+        total_cnt += 1
+    # done
+    print 'number of songs tested:',total_cnt
+    print 'average sq euclidean dist:',np.mean(errs_eucl),'(',np.std(errs_eucl),')'
+    print 'average kl divergence:',np.mean(errs_kl),'(',np.std(errs_kl),')'
+
 
 
     
