@@ -12,11 +12,14 @@ import sys
 import numpy as np
 import scipy.io as sio
 import linear_transform as LINTRANS
+import evaluation as EVAL
+
+EPS = np.finfo(np.float).eps
 
 
 def masked_eucl_dist_sq(f1,mask1,f2,mask2):
     """
-    Computes covariance between two feature matrices,
+    Computes euclideand distance between two feature matrices,
     taking into accound the mask
     f1 and f2 same size. Not particularly fast.
     INPUT
@@ -36,6 +39,30 @@ def masked_eucl_dist_sq(f1,mask1,f2,mask2):
     # compute, and done
     maskones = np.where(mask1*mask2==1)
     return np.square(f1[maskones]-f2[maskones]).mean()
+
+
+def masked_kl_div(f1,mask1,f2,mask2):
+    """
+    Computes symmetric KL divergence between two feature matrices,
+    taking into accound the mask
+    f1 and f2 same size. Not particularly fast.
+    INPUT
+      f1      - feature matrix
+      mask1   - binary mask (same shape as f1)
+      f2      - feature matrix (same shape as f1)
+      mask2   - binary mask (same shape as f1)
+    RETURN
+      div     - average divergence measure
+    """
+    # sanity checks
+    if f1.shape != f2.shape:
+        print 'f1/f2 shapes:',f1.shape,f2.shape
+    assert f1.shape == f2.shape,'bad feature matrix shape'
+    assert f1.shape == mask1.shape,'bad mask 1 shape'
+    assert f1.shape == mask2.shape,'bad mask 2 shape'
+    # compute, and done
+    maskones = np.where(mask1*mask2==1)
+    return EVAL.symm_kl_div(f1[maskones],f2[maskones])
 
 
 def average_col(btchroma,mask,masked_cols,win=3):
@@ -200,7 +227,7 @@ def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
     if measure == 'eucl':
         measfun = masked_eucl_dist_sq
     elif measure == 'kl':
-        raise NotImplementedError
+        measfun = masked_kl_div
     else:
         raise ValueError('wrong measure name, want eucl or kl?')
     full_recon = btchroma.copy()
@@ -265,7 +292,7 @@ def knn_cols(btchroma,mask,masked_cols,win=21,measure='eucl'):
     if measure == 'eucl':
         distfun=masked_eucl_dist_sq
     elif measure == 'kl':
-        raise NotImpelmentedError
+        distfun=masked_kl_div
     else:
         print 'wrong measure:',measure
         return None
@@ -359,6 +386,10 @@ def lintransform_cols(btchroma,mask,masked_cols,win=1):#,niter=1000,lrate=.1):
         indata = np.concatenate([full_recon[:,col-win:col].flatten(),[1]])
         recon = np.dot(indata.reshape(1,indata.size) , proj)
         full_recon[:,col] = recon
+    # fix the too large and too small values
+    full_recon[np.where(full_recon)>1.] = 1.
+    full_recon[np.where(full_recon)<0.] = EPS
+    # done
     return full_recon, proj
 
 def lintransform_patch(btchroma,mask,p1,p2,win=1):
