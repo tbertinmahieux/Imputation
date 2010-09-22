@@ -174,9 +174,9 @@ def random_patch_from_song(btchroma,mask,p1,p2):
     possible_patches_start.extend( range(p2,btchroma.shape[1]-ncols) )
     np.random.shuffle(possible_patches_start)
     randstart = possible_patches_start[0]
-    recon[:,p1:p2] = btchroma[:,randstart:randstart+ncols].copy()
+    full_recon[:,p1:p2] = btchroma[:,randstart:randstart+ncols].copy()
     # done
-    return recon
+    return full_recon
 
 
 def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
@@ -231,14 +231,14 @@ def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
                 best_code_masked_col = masked_col_index[pidx]
         # done
         full_recon[:,col] = codebook[best_code_idx][:,best_code_masked_col].flatten()
-        used_codes[colidx] = best_code_idx
+        used_codes[0,colidx] = best_code_idx
     # done
     return full_recon, used_codes
 
 
 def codebook_patch(btchroma,mask,p1,p2,codebook):
-    """ see codebook_col """
-    return codebook_col(btchroma,mask,range(p1,p2),codebook)
+    """ see codebook_cols """
+    return codebook_cols(btchroma,mask,range(p1,p2),codebook)
 
 
 
