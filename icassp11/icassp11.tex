@@ -65,12 +65,19 @@ results.
 \section{RELATED WORK}
 \label{sec:relatedwork}
 
-Paris Smaragdis on speech data \cite{Smaragdis2009}.
+Paris Smaragdis on speech data \cite{Smaragdis2009} and
+before for supervised ASR \cite{Morris1998}.
+In other fields: \cite{Oba2003}.
 
-Similarity with work on automatic music composition such as \cite{Eck2002d,Mozer1994a} or music
+Similarity with work on automatic music composition such as \cite{Todd1989,Mozer1994a,Eck2002d} or music
 expectation \cite{Hazan2010}, but we do not further consider these tasks in this work.
 
 Learned patterns for music data recently includes: \cite{Bertin-Mahieux2010a,Casey2007,Weiss2010}.
+
+If the mask span enough beats (more than one ``segment''), links with music segmentation.
+Music segmentation based on chroma features include \cite{Weiss2010,Levy2008,Mauch2009}.
+
+HMM \cite{Rabiner1989} GHMM library\footnote{GHMM: \url{http://ghmm.org/}}.
 
 \section{TASK DEFINITION}
 \label{sec:task}
@@ -164,28 +171,58 @@ dataset made of $43,000$ songs \cite{Bertin-Mahieux2010a}.
 \begin{center}
 \includegraphics[width=.9\columnwidth]{imputation}
 \end{center}
-\caption{Basic example}
+\caption{Imputation from different methods.}
 \label{fig:imputation}
 \end{figure}
+
+\begin{table}[t]
+\begin{center}
+\begin{tabular}{l|c|c|c|c|c|}
+\# beats masked & 1 & 2 & 5 & 10 & 15 \\ \hline \hline
+random & $0.166$ & $0.166$ & $0.167$ & $0.167$ & $0.168$  \\
+rand. from song & $0.115$ & $0.114$ & $0.114$ & $0.115$ & $0.115$  \\
+average & $0.047$ & $0.053$ & $0.062$ & $0.065$ & $0.069$ \\
+knn eucl & $0.048$ & $0.049$ & $0.055$ & $0.064$ &  $0.070$ \\
+knn kl & $0.049$ & $0.050$ & $0.056$ & $0.066$ &  \\
+lin. trans. & $\mathbf{0.044}$ & $\mathbf{0.047}$ & $\mathbf{0.051}$ & $\mathbf{0.053}$ & $\mathbf{0.055}$ \\
+codebook & & & & &  \\
+SIPLCA & & & & &  \\ \hline
+\end{tabular}
+\caption{Results based on euclidead distance on $43K$ songs.
+Song has to be at least $70$ beats long. 
+For ``average'', window is $2$ beats each side of the masked patch.
+For ``knn eucl'' and ``knn kl'', window is $10$ beats each side of the masked patch.
+For ``lin. trans.'', window is the $2$ previous beats.}
+\label{tab:reseucl}
+\end{center}
+\end{table}
+
+\begin{table}[t]
+\begin{center}
+\begin{tabular}{l|c|c|c|c|c|}
+\# beats masked & 1 & 2 & 5 & 10 & 15 \\ \hline \hline
+random & $0.428$ & $0.450$ & $0.461$ & $0.461$ & $0.462$  \\
+rand. from song & $0.334$ & $0.351$ & $0.371$ & $0.377$ & $0.380$  \\
+average & $0.121$ & $0.154$ & $0.194$ & $0.212$ &  $0.223$ \\
+knn eucl & $\mathbf{0.116}$ & $0.136$ & $0.169$ & $0.212$ & $0.233$ \\
+knn kl & $\mathbf{0.116}$ & $\mathbf{0.135}$ & $\mathbf{0.167}$ & $0.209$ &  \\
+lin. trans. & $0.141$ & $0.157$ & $0.170$ & $\mathbf{0.180}$ & $0.184$ \\
+codebook & & & & &  \\
+SIPLCA & & & & &  \\ \hline
+\end{tabular}
+\caption{Results based on symmetric KL divergence on $43K$ songs.
+See Table \ref{tab:reseucl} for the exact parameters used.}
+\label{tab:reskl}
+\end{center}
+\end{table}
 
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=.9\columnwidth]{lintrans_curves}
 \end{center}
-\caption{Basic example}
+\caption{Linear transform results based on the window size.}
 \label{fig:lintrans}
 \end{figure}
-
-
-\section{ILLUSTRATIONS, GRAPHS, AND PHOTOGRAPHS}
-\label{sec:illust}
-
-Illustrations must appear within the designated margins.  They may span the two
-columns.  If possible, position illustrations at the top of columns, rather
-than in the middle or at the bottom.  Caption and number every illustration.
-All halftone illustrations must be clear black and white prints.  Colors may be
-used, but they should be selected so as to be readable when printed on a
-black-only printer.
 
 
 \section{CONCLUSION AND FUTURE WORK}
@@ -195,7 +232,11 @@ Way to unify different tasks.
 
 Many algorithms remain to be tried, for instance large scale or deep recurrent
 neural network, or using the nonlocal-means algorithm as has been done for
-images \cite{Buades2005}.
+images \cite{Buades2005}. We could boost all those things.
+
+Incorporation of different music-related priors, for instance from chord recognition.
+
+Different kind of masking, e.g. removing only one instrument from the mixture.
 
 Code available at \footnote{Code available at: \url{http://www.columbia.edu/~tb2332/something}}.
 
