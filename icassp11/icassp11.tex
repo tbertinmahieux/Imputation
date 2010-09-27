@@ -96,20 +96,29 @@ Section \ref{sec:conclusion} with many avenues of research for future work.
 
 \section{RELATED WORK}
 \label{sec:relatedwork}
+Imputation has been studied in many fields, for instance speech 
+\cite{Morris1998,Smaragdis2009} and bioinformatics \cite{Oba2003}.
+However, rarely a full slice of time is fully masked.
 
-Paris Smaragdis on speech data \cite{Smaragdis2009} and
-before for supervised ASR \cite{Morris1998}.
-In other fields: \cite{Oba2003}.
+The task of learning the next missing time frame is implicitely studied in recurrent
+neural networks has the model is usually learned this way. However, few work deal
+with learning more than one missing time frame in advance. Note that recurrent neural
+network has been used to learn time aligned beats of music for music composition
+\cite{Todd1989,Mozer1994a,Eck2002d}, thus this task has some similarities with our current
+work. Another implicitely linked task is modeling music expectation \cite{Hazan2010}, but it deals
+with characterizing the upcoming beats of music instead of predicting them.
+We will not mention these any further, since the state of the art is difficult to measure.
 
-Similarity with work on automatic music composition such as \cite{Todd1989,Mozer1994a,Eck2002d} or music
-expectation \cite{Hazan2010}, but we do not further consider these tasks in this work.
+Imputation should be used to measure the quality of learned patterns. Recent work in music
+using features dervied from audio include 
+\cite{Anglade2009,Bertin-Mahieux2010a,Casey2007,Weiss2010}.
 
-Learned patterns for music data recently includes: \cite{Bertin-Mahieux2010a,Casey2007,Weiss2010}.
+Finally, if the mask span enough beats (i.e. more than one ``music segment''), any good
+solution has to deal with music segmentation. Music segmentation based on similar features as
+the ones used in this work include \cite{Weiss2010,Levy2008,Mauch2009}.
 
-If the mask span enough beats (more than one ``segment''), links with music segmentation.
-Music segmentation based on chroma features include \cite{Weiss2010,Levy2008,Mauch2009}.
 
-HMM \cite{Rabiner1989} GHMM library\footnote{GHMM: \url{http://ghmm.org/}}.
+
 
 \section{TASK DEFINITION}
 \label{sec:task}
@@ -177,6 +186,8 @@ Linear predictor, codebook, SIPLCA.
 
 SIPLCA code available online \cite{Weiss2010}. Code to get Echo Nest features and perform
 online clustering available online \cite{Bertin-Mahieux2010a}.
+
+HMM \cite{Rabiner1989} GHMM library\footnote{GHMM: \url{http://ghmm.org/}}.
 
 \section{EXPERIMENTS}
 \label{sec:experiments}
