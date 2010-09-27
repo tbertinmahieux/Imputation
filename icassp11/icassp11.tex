@@ -44,7 +44,7 @@
 \maketitle
 %
 \begin{abstract}
-Imputation is cool. It is well-defined problem, as opposed to segmentation.
+Imputation is cool. It is a well-defined problem, as opposed to segmentation.
 Gives a reasonable benchmark to compare algorithms that claim learning meaningful
 patterns on music. Hard to beat benchmarks comparison, for instance linear
 prediction. We compare 6 methods on a large dataset.
@@ -56,11 +56,43 @@ Missing data, chroma features, imputation, SIPLCA, codebook learning
 %
 \section{Introduction}
 \label{sec:intro}
+Many signals show similarities and repetitions over time. Learning these repetitions
+in an unsupervised way remains a challenge. One reason is the lack of meaningful
+tasks to evaluate such learning. Encoding quality serves its purpose, to measure
+how faithful a saved or streamd media format is. But having a good encoding
+does not mean we understood much about the underlying signal. Denoising is more
+interesting as it assumes some knowledge of the media, even if it relies only on
+local constraints. Needless to say that denoising has been well studied for images 
+and speech, among others.
 
-See abstract.
+Signals remain where denoising bear little sense, and music is an obvious case.
+If the goal is to learn typical harmonic patterns, adding then removing gaussian
+noise does not measure the right thing. Imputation of some random frequencies
+for some given time $t$ is also oversimplified. Such missing info can usually
+be inferred by the restof the information available at time $t$, thus without
+using any information over time.
 
-In this paper: definition of the task, presentation of the algorithms, experimental
-results.
+To overcomb these problems, we study here the task of imputing missing information
+for full timesteps of music (measured in beats). This is a well-defined task
+as the goal is to recover some known masked data. It can easily be evaluated on a
+large-scale dataset as music is freely available and the mask can be chosen
+at random. It has practical applications, we can imagine the case of streamed music
+with some connection problem. Imputing reasonable audio for a few seconds would
+be a great alternative to simply stop the stream for a while. Finally, it is a
+task that can only be solved by learning meaningful patterns of music over time.
+
+This work should be seen as a first milestone towards solving that task.
+After defining it correctly, we try a range of methods to see which ones should
+be use as benchmarks in the future. We also look at which algorithms are more robust
+to an increasingly larger mask. The code for all the experiments is available
+online.
+
+This paper is organized follow: first we present related work, then we define the
+task, including error measures and features used. In Section \ref{sec:methods},
+we present the different methods used to tackle imputation, ranging from trivial
+to complex. We experiment with these on a common dataset, then conclude in
+Section \ref{sec:conclusion} with many avenues of research for future work.
+
 
 \section{RELATED WORK}
 \label{sec:relatedwork}
@@ -232,7 +264,8 @@ Way to unify different tasks.
 
 Many algorithms remain to be tried, for instance large scale or deep recurrent
 neural network, or using the nonlocal-means algorithm as has been done for
-images \cite{Buades2005}. We could boost all those things.
+images \cite{Buades2005} and compressive sensing \cite{Gemmeke2008}.
+We could boost all those things.
 
 Incorporation of different music-related priors, for instance from chord recognition.
 
