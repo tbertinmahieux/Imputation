@@ -13,6 +13,10 @@ import scipy.io as sio
 
 import imputation as IMPUTATION
 import imputation_plca as IMPUTATION_PLCA
+try:
+    import kalman_toolbox as KALMAN
+except ImportError:
+    print 'cant import KALMAN: no matlab maybe?'
 import masking as MASKING
 
 EPS = np.finfo(np.float).eps
@@ -162,7 +166,7 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
     print 'average kl divergence:',np.mean(errs_kl),'(',np.std(errs_kl),')'
 
 
-def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,codebook=None,**kwargs):
+def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,codebook=None,nstates=1,**kwargs):
     """
     General method to test a method on a whole dataset for one masked column
     Methods are:
@@ -173,6 +177,7 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
       - knn_eucl
       - knn_kl
       - lintrans
+      - kalman
       - siplca
       - siplca2
     Used arguments vary based on the method. For SIPLCA, we can use **kwargs
@@ -210,6 +215,9 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
             recon,used_cols = IMPUTATION.knn_patch(btchroma,mask,p1,p2,win=win,measure='kl')
         elif method == 'lintrans':
             recon,proj = IMPUTATION.lintransform_patch(btchroma,mask,p1,p2,win=win)
+        elif method == 'kalman':
+            recon = KALMAN.imputation(btchroma,p1,p2,
+                                      dimstates=nstates,**kwargs)
         elif method == 'siplca':
             res = IMPUTATION_PLCA.SIPLCA_mask.analyze((btchroma*mask).copy(),
                                                       rank,mask,win=win,
@@ -245,248 +253,4 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
 
     
 
-def test_average_col_on_dataset(datasetdir,ncols=1,win=3):
-    """
-    Test the method of imputation by similar patterns in the same
-    song on every mat file in a given dataset
-    INPUT
-      dataset    - dir we'll use every matfile in that dir and subdirs
-      ncols      - number of columns to randomly mask
-      win        - windows around columns to reconstruct
-    """
-    raise DeprecationWarning
-    MINLENGTH = 50
-    # get all matfiles
-    matfiles = get_all_matfiles(datasetdir)
-    # init
-    total_cnt = 0
-    errs_eucl = []
-    errs_kl = []
-    # iterate
-    for matfile in matfiles:
-        btchroma = sio.loadmat(matfile)['btchroma']
-        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
-            continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
-        # reconstruction
-        recon = IMPUTATION.average_col(btchroma,mask,masked_cols,win=win)
-        # measure recon
-        err = recon_error(btchroma,mask,recon,measure='eucl')
-        errs_eucl.append( err )
-        err = recon_error(btchroma,mask,recon,measure='kl')
-        errs_kl.append( err )
-        total_cnt += 1
-    # done
-    print 'number of songs tested:',total_cnt
-    print 'average sq euclidean dist:',np.mean(errs_eucl),'(',np.std(errs_eucl),')'
-    print 'average kl divergence:',np.mean(errs_kl),'(',np.std(errs_kl),')'
 
-
-def test_random_col_on_dataset(datasetdir,ncols=1):
-    """
-    Test the method of imputation by similar patterns in the same
-    song on every mat file in a given dataset
-    INPUT
-      dataset    - dir we'll use every matfile in that dir and subdirs
-      ncols      - number of columns to randomly mask
-      win        - windows around columns to reconstruct
-    """
-    raise DeprecationWarning
-    MINLENGTH=50
-    # get all matfiles
-    matfiles = get_all_matfiles(datasetdir)
-    # init
-    total_cnt = 0
-    errs_eucl = []
-    errs_kl = []
-    # iterate
-    for matfile in matfiles:
-        btchroma = sio.loadmat(matfile)['btchroma']
-        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
-            continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
-        # reconstruction
-        recon = IMPUTATION.random_col(btchroma,mask,masked_cols)
-        # measure recon
-        err = recon_error(btchroma,mask,recon,measure='eucl')
-        errs_eucl.append( err )
-        err = recon_error(btchroma,mask,recon,measure='kl')
-        errs_kl.append( err )
-        total_cnt += 1
-    # done
-    print 'number of songs tested:',total_cnt
-    print 'average sq euclidean dist:',np.mean(errs_eucl),'(',np.std(errs_eucl),')'
-    print 'average kl divergence:',np.mean(errs_kl),'(',np.std(errs_kl),')'
-
-
-def test_random_col_from_song_on_dataset(datasetdir,ncols=1):
-    """
-    Test the method of imputation by similar patterns in the same
-    song on every mat file in a given dataset
-    INPUT
-      dataset    - dir we'll use every matfile in that dir and subdirs
-      ncols      - number of columns to randomly mask
-      win        - windows around columns to reconstruct
-    """
-    raise DeprecationWarning
-    MINLENGTH=50
-    # get all matfiles
-    matfiles = get_all_matfiles(datasetdir)
-    # init
-    total_cnt = 0
-    errs = []
-    # iterate
-    for matfile in matfiles:
-        btchroma = sio.loadmat(matfile)['btchroma']
-        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
-            continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
-        # reconstruction
-        recon = IMPUTATION.random_col_from_song(btchroma,mask,masked_cols)
-        # measure recon
-        err = recon_error(btchroma,mask,recon,measure='eucl')
-        errs.append( err )
-        total_cnt += 1
-    # done
-    print 'number of songs tested:',total_cnt
-    print 'average sq euclidean dist:',np.mean(errs),'(',np.std(errs),')'
-    
-
-def test_codebook_cols_on_dataset(datasetdir,codebook,ncols=1):
-    """
-    Test the method of imputation by similar patterns in the same
-    song on every mat file in a given dataset
-    INPUT
-      dataset    - dir we'll use every matfile in that dir and subdirs
-      codebook   - array of patches 12xWIN
-      ncols      - number of columns to randomly mask
-      win        - windows around columns to reconstruct
-    """
-    raise DeprecationWarning
-    MINLENGTH = 50
-    # get all matfiles
-    matfiles = get_all_matfiles(datasetdir)
-    # init
-    win = codebook[0].shape[1]
-    total_cnt = 0
-    errs = []
-    # iterate
-    for matfile in matfiles:
-        btchroma = sio.loadmat(matfile)['btchroma']
-        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
-            continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
-        # reconstruction
-        recon,used_codes = IMPUTATION.codebook_cols(btchroma,mask,masked_cols,codebook)
-        # measure recon
-        err = recon_error(btchroma,mask,recon,measure='eucl')
-        errs.append( err )
-        total_cnt += 1
-    # done
-    print 'number of songs tested:',total_cnt
-    print 'average sq euclidean dist:',np.mean(errs),'(',np.std(errs),')'
-
-
-
-def test_eucldist_cols_on_dataset(datasetdir,ncols=1,win=3):
-    """
-    Test the method of imputation by similar patterns in the same
-    song on every mat file in a given dataset
-    INPUT
-      dataset    - dir we'll use every matfile in that dir and subdirs
-      ncols      - number of columns to randomly mask
-      win        - windows around columns to reconstruct
-    """
-    raise DeprecationWarning
-    MINLENGTH = 50
-    # get all matfiles
-    matfiles = get_all_matfiles(datasetdir)
-    # init
-    total_cnt = 0
-    errs = []
-    # iterate
-    for matfile in matfiles:
-        btchroma = sio.loadmat(matfile)['btchroma']
-        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
-            continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
-        # reconstruction
-        recon,used_cols = IMPUTATION.eucldist_cols(btchroma,mask,masked_cols,win=win)
-        # measure recon
-        err = recon_error(btchroma,mask,recon,measure='eucl')
-        errs.append( err )
-        total_cnt += 1
-    # done
-    print 'number of songs tested:',total_cnt
-    print 'average sq euclidean dist:',np.mean(errs),'(',np.std(errs),')'
-
-
-def test_lintransform_cols_on_dataset(datasetdir,ncols=1,win=1):
-    """
-    Test the method of imputation by similar patterns in the same
-    song on every mat file in a given dataset
-    INPUT
-      dataset    - dir we'll use every matfile in that dir and subdirs
-      ncols      - number of columns to randomly mask
-      win        - windows around columns to reconstruct
-    """
-    raise DeprecationWarning
-    MINLENGTH = 50
-    # get all matfiles
-    matfiles = get_all_matfiles(datasetdir)
-    # init
-    total_cnt = 0
-    errs = []
-    # iterate
-    for matfile in matfiles:
-        btchroma = sio.loadmat(matfile)['btchroma']
-        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
-            continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
-        # reconstruction
-        recon,proj = IMPUTATION.lintransform_cols(btchroma,mask,masked_cols,win=win)
-        # measure recon
-        err = recon_error(btchroma,mask,recon,measure='eucl')
-        errs.append( err )
-        total_cnt += 1
-    # done
-    print 'number of songs tested:',total_cnt
-    print 'average sq euclidean dist:',np.mean(errs),'(',np.std(errs),')'
-
-
-
-def test_siplca_cols_on_dataset(datasetdir,ncols=1,rank=4,win=5):
-    """
-    Test the method of imputation by similar patterns in the same
-    song on every mat file in a given dataset
-    INPUT
-      dataset    - dir we'll use every matfile in that dir and subdirs
-      ncols      - number of columns to randomly mask
-      win        - windows around columns to reconstruct
-    """
-    raise DeprecationWarning
-    MINLENGTH = 50
-    # get all matfiles
-    matfiles = get_all_matfiles(datasetdir)
-    # init
-    total_cnt = 0
-    errs = []
-    # iterate
-    for matfileidx, matfile in enumerate(matfiles):
-        btchroma = sio.loadmat(matfile)['btchroma']
-        if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
-            continue
-        mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=30)
-        # reconstruction
-        W, Z, H, norm, recon, logprob = IMPUTATION_PLCA.SIPLCA_mask.analyze((btchroma*mask).copy(),
-                                                                            rank,mask,win=win)
-        # measure recon
-        err = recon_error(btchroma,mask,recon,measure='eucl')
-        errs.append( err )
-        total_cnt += 1
-        # some info to pass time
-        if matfileidx % 10000 == 0 and matfileidx > 0:
-            print matfileidx,') average sq euclidean dist:',np.mean(errs),'(',np.std(errs),')'
-    # done
-    print 'number of songs tested:',total_cnt
-    print 'average sq euclidean dist:',np.mean(errs),'(',np.std(errs),')'

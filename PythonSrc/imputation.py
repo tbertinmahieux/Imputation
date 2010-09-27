@@ -38,7 +38,11 @@ def masked_eucl_dist_sq(f1,mask1,f2,mask2):
     assert f1.shape == mask2.shape,'bad mask 2 shape'
     # compute, and done
     maskones = np.where(mask1*mask2==1)
-    return np.square(f1[maskones]-f2[maskones]).mean()
+    if len(maskones[0]) == 0:
+        return np.nan # combination of masks mask everything'
+    res = np.square(f1[maskones]-f2[maskones]).mean()
+    assert not np.isnan(res),'euclidean distance computes NaN' 
+    return res
 
 
 def masked_kl_div(f1,mask1,f2,mask2):
@@ -62,6 +66,8 @@ def masked_kl_div(f1,mask1,f2,mask2):
     assert f1.shape == mask2.shape,'bad mask 2 shape'
     # compute, and done
     maskones = np.where(mask1*mask2==1)
+    if len(maskones[0]) == 0:
+        return np.nan # combination of masks mask everything'
     return EVAL.symm_kl_div(f1[maskones],f2[maskones])
 
 
@@ -187,7 +193,7 @@ def random_patch_from_song(btchroma,mask,p1,p2):
       recon        - full reconstruction, same size as btchroma
     if patch ncols = 1, same as random_col_form_song
     """
-     # sanity checks
+    # sanity checks
     assert btchroma.shape == mask.shape,'wrong mask shape'
     # some inits
     full_recon = btchroma.copy()
@@ -285,6 +291,7 @@ def knn_cols(btchroma,mask,masked_cols,win=21,measure='eucl'):
     """
     # sanity checks
     assert btchroma.shape == mask.shape,'wrong mask shape'
+    assert not np.isnan(btchroma).any(),'btchroma has NaN'
     assert win > 1,'window of size 1 has no sense'
     if win % 2 == 0:
         win += 1
@@ -305,11 +312,14 @@ def knn_cols(btchroma,mask,masked_cols,win=21,measure='eucl'):
         winstop = min(btchroma.shape[1], col + half_win + 1)
         patch = btchroma[:,winstart:winstop]
         patch_mask = mask[:,winstart:winstop]
+        if not (patch_mask==1).any():
+            print 'column impossible to fill: col =',col,' btchroma.shape =',btchroma.shape,' masked_cols =',masked_cols,' win=',win
+        assert (patch_mask==1).any(),'full mask! useless'
         # best correlation
         best_div = np.inf
         nunmask = -np.inf   # if same divergence, prefer the one that matches more pixels
         recon = np.zeros((btchroma.shape[0],1))
-        # perform 'same' correlation
+        # perform knn
         for c in range(btchroma.shape[1]):
             if len(np.where(np.array(masked_cols)==c)[0]) > 0:
                 continue # useless if we match a masked column
@@ -317,11 +327,15 @@ def knn_cols(btchroma,mask,masked_cols,win=21,measure='eucl'):
             reconwinstop = min(btchroma.shape[1], c+half_win+1)
             reconpatch = btchroma[:,reconwinstart:reconwinstop]
             reconpatch_mask = mask[:,reconwinstart:reconwinstop]
-            # if we use onlypart of the patch, for border issues
+            # if we use only part of the patch, for border issues
             p1 = half_win-c+reconwinstart # 0 if full patch used
             p2 = p1 + reconpatch.shape[1] # patch.shape[1] if full patch used
+            if not (patch_mask[:,p1:p2]==1).any(): #'patch_mask subset all masked, useless'
+                continue
             div = distfun(patch[:,p1:p2],patch_mask[:,p1:p2],
                           reconpatch,reconpatch_mask)
+            if np.isnan(div):
+                continue
             # check if got better divergence
             if div < best_div:
                 best_div = div
@@ -333,16 +347,16 @@ def knn_cols(btchroma,mask,masked_cols,win=21,measure='eucl'):
                 nunmask = len(np.where(reconpatch_mask==1)[0])
                 used_cols[0,colidx] = c
         # iteration done
-        assert not np.isinf(best_div),'iteration did not work? best_corr is inf'
-        assert not np.isnan(best_div),'computation went wrong, best_corr is NaN'
-        assert not np.isinf(nunmask),'computation went wrong, best_corr is NaN'
+        assert not np.isinf(best_div),'iteration did not work? best_div is inf'
+        assert not np.isnan(best_div),'computation went wrong, best_div is NaN'
+        assert not np.isinf(nunmask),'computation went wrong, nunmask is NaN'
         full_recon[:,col] = recon
     # done
     return full_recon, used_cols
 
 def knn_patch(btchroma,mask,p1,p2,win=21,measure='eucl'):
-    """ see knn_col """
-    return knn_cols(btchroma,mask,range(p1,p2),win=win,measure=measure)
+    """ see knn_col, win is now window on each side """
+    return knn_cols(btchroma,mask,range(p1,p2),win=win*2+1,measure=measure)
 
 
 
@@ -385,10 +399,9 @@ def lintransform_cols(btchroma,mask,masked_cols,win=1):#,niter=1000,lrate=.1):
         #indata = np.concatenate([btchroma[:,col-win:col].flatten(),[1]])
         indata = np.concatenate([full_recon[:,col-win:col].flatten(),[1]])
         recon = np.dot(indata.reshape(1,indata.size) , proj)
+        recon[np.where(recon>1.)] = 1.
+        recon[np.where(recon<EPS)] = EPS
         full_recon[:,col] = recon
-    # fix the too large and too small values
-    full_recon[np.where(full_recon)>1.] = 1.
-    full_recon[np.where(full_recon)<0.] = EPS
     # done
     return full_recon, proj
 
