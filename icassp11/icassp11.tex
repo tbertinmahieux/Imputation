@@ -29,7 +29,7 @@
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
 \twoauthors
-  {Thierry Bertin-Mahieux\sthanks{NSERC}, Ron J. Weiss\sthanks{Thanks something}}
+  {Thierry Bertin-Mahieux\sthanks{TBM is supported in part by a NSERC PG scholarship.}, Ron J. Weiss\sthanks{Thanks something}}
 	{Columbia University / New York University\\
           LabROSA / MARL\\
 	New York, USA}
@@ -47,7 +47,8 @@
 Imputation is cool. It is a well-defined problem, as opposed to segmentation.
 Gives a reasonable benchmark to compare algorithms that claim learning meaningful
 patterns on music. Hard to beat benchmarks comparison, for instance linear
-prediction. We compare 6 methods on a large dataset.
+prediction. We compare some methods on a large dataset. We'll track you down
+if you don't accept this paper.
 \end{abstract}
 %
 \begin{keywords}
@@ -61,9 +62,9 @@ in an unsupervised way remains a challenge. One reason is the lack of meaningful
 tasks to evaluate such learning. Encoding quality serves its purpose, to measure
 how faithful a saved or streamd media format is. But having a good encoding
 does not mean we understood much about the underlying signal. Denoising is more
-interesting as it assumes some knowledge of the media, even if it relies only on
-local constraints. Needless to say that denoising has been well studied for images 
-and speech, among others.
+interesting as it assumes some knowledge of the media, even if sometimes it relies
+solely on local constraints. Needless to say that denoising has been well studied 
+for images and speech, among others.
 
 Signals remain where denoising bear little sense, and music is an obvious case.
 If the goal is to learn typical harmonic patterns, adding then removing gaussian
@@ -87,21 +88,24 @@ be use as benchmarks in the future. We also look at which algorithms are more ro
 to an increasingly larger mask. The code for all the experiments is available
 online.
 
-This paper is organized follow: first we present related work, then we define the
+This paper is organized as follow: first we present related work, then we define the
 task, including error measures and features used. In Section \ref{sec:methods},
 we present the different methods used to tackle imputation, ranging from trivial
 to complex. We experiment with these on a common dataset, then conclude in
 Section \ref{sec:conclusion} with many avenues of research for future work.
 
+Two writing conventions, we use the terms ``missing'' and ``masked'' interchangeably.
+A ``pixel'' is defined as one point of a feature matrix, analoguous to an image.
 
 \section{RELATED WORK}
 \label{sec:relatedwork}
 Imputation has been studied in many fields, for instance speech 
 \cite{Morris1998,Smaragdis2009} and bioinformatics \cite{Oba2003}.
-However, rarely a full slice of time is fully masked.
+However, rarely a full slice of time is fully masked (cases $2$ and $3$
+in Figure \ref{fig:typeimputation}).
 
 The task of learning the next missing time frame is implicitely studied in recurrent
-neural networks has the model is usually learned this way. However, few work deal
+neural networks as the model is usually trained this way. However, few work deal
 with learning more than one missing time frame in advance. Note that recurrent neural
 network has been used to learn time aligned beats of music for music composition
 \cite{Todd1989,Mozer1994a,Eck2002d}, thus this task has some similarities with our current
@@ -109,14 +113,13 @@ work. Another implicitely linked task is modeling music expectation \cite{Hazan2
 with characterizing the upcoming beats of music instead of predicting them.
 We will not mention these any further, since the state of the art is difficult to measure.
 
-Imputation should be used to measure the quality of learned patterns. Recent work in music
-using features dervied from audio include 
+Imputation should be used to measure the quality of learned patterns. Recent work in 
+learning music patterns using features derived from audio include 
 \cite{Anglade2009,Bertin-Mahieux2010a,Casey2007,Weiss2010}.
 
 Finally, if the mask span enough beats (i.e. more than one ``music segment''), any good
 solution has to deal with music segmentation. Music segmentation based on similar features as
 the ones used in this work include \cite{Weiss2010,Levy2008,Mauch2009}.
-
 
 
 
@@ -131,30 +134,61 @@ the ones used in this work include \cite{Weiss2010,Levy2008,Mauch2009}.
 \label{fig:code}
 \end{figure}
 
-Beat-chroma features used in \cite{Ellis2007a}.
-Note that they are extracted from actual audio signals unlike work on automatic composition
-\cite{Eck2002d}. That makes them noisier and more complex, but more realistic and usefull
-in practice.
+In this work, imputation is defined as recovering a set of adjacent missing beats.
+The number of missing beats can vary from $1$ to most of the song. The algorithm
+is allowed to use the unmasked part of the song and / or any information learned
+on a larger set of songs not including the masked part. This would correspond
+to the middle case in Figure \ref{fig:typeimputation}.
 
-The most general definition is that we remove some pixels from a beat-chroma matrix and
-we try to recover them. However, in does not make much sense to miss only some frequencies
-at a given beat, for instance all the `G' notes. Therefore, we will only remove full
-beats.
+In our case, we try to recover chroma features and we never mask the beginning
+nor the end of the song, but this is not a absolute constraint of the task.
+The long term goal is what we call ``extreme imputation'' where the number of
+beats to impute is greatly larger than the known data (bottom case in
+Figure \ref{fig:typeimputation}). Trivial methods like taking the average beat
+should fail on such a task, and method that succeed:
+\begin{enumerate}
+\item will learn typical patterns from a large set of songs;
+\item will know how to reorganize these patterns so that they are coherent together;
+\item will know how to reorganize these patterns so that they match the known
+data.
+\end{enumerate}
+Extreme beat imputation measures the full task of learning and using meaningful
+audio patterns.
 
-The final definition is, given a song and a window of missing beats (one or more),
-try to impute the missing beats as close to the original ones as possible.
+We use beat-aligned chroma features \cite{Ellis2007a}. 
+% DAN, can I steal this from your paper?
+Chroma features record the intensity associated with each of
+the 12 semitones (e.g. piano keys) within one octave, but all octaves
+are folded together.
+% **************************************
+One can see them as a very coarse and noisy music transcription.
+They have been used for segmentation \cite{Weiss2010}, 
+chord recognition \cite{Mauch2009} and cover recognition \cite{Ellis2007a}
+among others. The specific implementation we use is the one returned
+by the Echo Nest API \cite{EchoNest} which uses a constant-Q spectrogram
+and where the chroma for each time stamp is normalized so the max is $1$.
 
 The reconstruction error (or divergence) measure is not obvious. In this work,
 we report the euclidean distance and the symmetric Kullback-Leibler divergence.
-A discussion on this choice follows in section \ref{sec:experiments}.
+In \cite{Sajda2003}, author discuss the two for
+a NMF method and show that they depend on the noise model that is assumed.
+A poisson noise model (versus a gaussian one) seems to better fit audio perception, 
+which result in the use of KL. See also \cite{Fevotte2009} for a comparison on an
+audio excerpt of piano.
 
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{type_imputation}
+\end{center}
+\caption{Types of imputation.}
+\label{fig:typeimputation}
+\end{figure}
 
 \section{METHODS}
 \label{sec:methods}
-In this section we present the different methods we use for imputing the missing data.
-The ``trivial methods'' that do not require any learning, and simply use the available
-data from the rest of the song to make an educated guess. We will later see that this
-eudcated guess is remarkably good.
+We present the different methods we use for imputing the missing data.
+The ``trivial methods'' do not require any learning, and simply use the available
+data from the rest of the song to make an educated guess.
 
 The learned models are of more interest for future research, even though they do not
 necessarily perform better at the moment. Learning a model that predicts subsequent
@@ -187,22 +221,16 @@ Linear predictor, codebook, SIPLCA.
 SIPLCA code available online \cite{Weiss2010}. Code to get Echo Nest features and perform
 online clustering available online \cite{Bertin-Mahieux2010a}.
 
-HMM \cite{Rabiner1989} GHMM library\footnote{GHMM: \url{http://ghmm.org/}}.
+HMM \cite{Rabiner1989}.
+
+Imputation is implemented the same way for SIPLCA, Kalman filtering and HMM? Each iteration,
+we replace the missing data by the most probable observation according to the model.
+For SIPLCA, it is the current reconstruction. For Kalman filtering, it is the most likely
+observation based on the current state. This technique has been explored in \cite{Zhang2006}.
+
 
 \section{EXPERIMENTS}
 \label{sec:experiments}
-
-\subsection{ERROR MEASURES}
-\label{ssec:errmeasures}
-We measure squared euclidean distance or symmetric Kullback-Leibler (KL) divergence,
-both averaged over missing pixels. It is unclear which measure is the beat for features
-as the ones we use. In \cite{Sajda2003}, author discuss the two for
-a NMF method and show that they depend on the noise model that is assumed.
-A poisson noise model (versus a gaussian one) seems to better fit audio perception, 
-which result in the use of KL. See also \cite{Fevotte2009} for a comparison on a piano
-excerpt.
-
-Note that in the following experiments, the two measures seem to agree.
 
 \subsection{DATA}
 \label{ssec:data}
@@ -219,12 +247,14 @@ dataset made of $43,000$ songs \cite{Bertin-Mahieux2010a}.
 \end{figure}
 
 \begin{table}[t]
+\begin{small}
 \begin{center}
 \begin{tabular}{l|c|c|c|c|c|}
-\# beats masked & 1 & 2 & 5 & 10 & 15 \\ \hline \hline
+\# beats  & 1 & 2 & 5 & 10 & 15 \\ \hline \hline
 random & $0.166$ & $0.166$ & $0.167$ & $0.167$ & $0.168$  \\
-rand. from song & $0.115$ & $0.114$ & $0.114$ & $0.115$ & $0.115$  \\
-average & $0.047$ & $0.053$ & $0.062$ & $0.065$ & $\mathbf{0.069}$ \\
+rand. song & $0.115$ & $0.114$ & $0.114$ & $0.115$ & $0.115$  \\
+average all & $0.057$ & $0.057$ & $0.057$ & $0.057$ & $0.058$ \\
+average & $0.047$ & $0.053$ & $0.062$ & $0.065$ & $0.069$ \\ \hline
 knn eucl & $0.048$ & $0.049$ & $0.055$ & $0.064$ &  $0.070$ \\
 knn kl & $0.049$ & $0.050$ & $0.056$ & $0.066$ &  $0.071$ \\
 lin. trans. & $\mathbf{0.044}$ & $\mathbf{0.047}$ & $\mathbf{0.051}$ & $\mathbf{0.053}$ & $\mathbf{0.055}$ \\
@@ -238,15 +268,18 @@ For ``knn eucl'' and ``knn kl'', window is $10$ beats each side of the masked pa
 For ``lin. trans.'', window is the $2$ previous beats.}
 \label{tab:reseucl}
 \end{center}
+\end{small}
 \end{table}
 
 \begin{table}[t]
+\begin{small}
 \begin{center}
 \begin{tabular}{l|c|c|c|c|c|}
-\# beats masked & 1 & 2 & 5 & 10 & 15 \\ \hline \hline
+\# beats & 1 & 2 & 5 & 10 & 15 \\ \hline \hline
 random & $0.428$ & $0.450$ & $0.461$ & $0.461$ & $0.462$  \\
-rand. from song & $0.334$ & $0.351$ & $0.371$ & $0.377$ & $0.380$  \\
-average & $0.121$ & $0.154$ & $0.194$ & $0.212$ &  $0.223$ \\
+rand. song & $0.334$ & $0.351$ & $0.371$ & $0.377$ & $0.380$  \\
+average all & $0.164$ & $0.175$ & $0.183$ & $0.187$ & $0.189$ \\ 
+average & $0.121$ & $0.154$ & $0.194$ & $0.212$ &  $0.223$ \\ \hline
 knn eucl & $\mathbf{0.116}$ & $0.136$ & $0.169$ & $0.212$ & $0.233$ \\
 knn kl & $\mathbf{0.116}$ & $\mathbf{0.135}$ & $\mathbf{0.167}$ & $0.209$ & $0.229$ \\
 lin. trans. & $0.141$ & $0.157$ & $0.170$ & $\mathbf{0.180}$ & $\mathbf{0.184}$ \\
@@ -257,6 +290,7 @@ SIPLCA & & & & &  \\ \hline
 See Table \ref{tab:reseucl} for the exact parameters used.}
 \label{tab:reskl}
 \end{center}
+\end{small}
 \end{table}
 
 \begin{figure}[t]
