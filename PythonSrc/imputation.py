@@ -131,6 +131,34 @@ def average_patch(btchroma,mask,p1,p2,win=1):
     # done
     return full_recon
 
+def average_patch_all(btchroma,mask,p1,p2,win=1):
+    """
+    Infer the values of a patch as a constant function, made of the
+    average of all the visible beats of the song.
+    INPUT
+      btchroma     - feature matrix
+      mask         - binary mask
+      p1           - beginning of the masked patch
+      p2           - end of the mask patch, mask[:,p1:p2] = 0
+      win          - window to consider on eahc side of the patch
+    RETURN
+      recon        - full reconstruction, same size as btchroma
+    If the patch is one column, average_patch with win = 1 works
+    the same way as average_col with win = 3
+    """
+     # sanity checks
+    assert btchroma.shape == mask.shape,'wrong mask shape'
+    assert win >= 1,'window of size 0 has no sense'
+    # some inits
+    full_recon = btchroma.copy()
+    avg_beat = np.concatenate([btchroma[:,:p1],btchroma[:,p2:]],
+                              axis=1).mean(axis=1).flatten()
+    # iter over missing columns
+    for k in range(p1,p2):
+        full_recon[:,k] = avg_beat
+    # done
+    return full_recon
+
 
 def random_col(btchroma,mask,masked_cols):
     """
@@ -212,7 +240,7 @@ def random_patch_from_song(btchroma,mask,p1,p2):
     return full_recon
 
 
-def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
+def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl',userecon=False):
     """
     Fill in the missing columns using patches from a codebook.
     Patches are all the same size (12xWIN)
@@ -222,6 +250,9 @@ def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
       masked_cols  - indices of the masked columns
       measure      - 'eucl' (euclidean distance, default)
                    - 'kl' (symmetric KL-divergence)
+                   - 'cos' (cosine distance)
+      userecon     - if True, as soon as a col is added, it can be used
+                     necessary if codes smaller than gap
     RETURN
       recon        - full reconstruction, same size as btchroma
       used_codes   - code index used for reconstruction 
@@ -239,16 +270,19 @@ def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
     full_recon = btchroma.copy()
     used_codes = np.zeros((1,len(masked_cols)))
     # iterate over masked columns
-    for colidx,col in enumerate(masked_cols):
+    for colidx,col in enumerate(np.array(masked_cols).copy()): # copy important if userecon
         # create subpatches with hidden column at each position
         # keep the 'full ones', avoid border effects
         patches = map(lambda x: btchroma[:,col-win+1+x:col+1+x],range(win))
         patches_masks = map(lambda x: mask[:,col-win+1+x:col+1+x],range(win))
-        masked_col_index = range(win-1,0,-1)
-        full_sized = filter(lambda i: patches[i].shape[1] == win, range(len(patches)))
+        # where is the hidden col in those patches
+        masked_col_index = range(win-1,-1,-1)
+        assert len(masked_col_index) == len(patches)
+        # keep the full ones, no border effect
+        full_sized = filter(lambda i: patches[i].shape[1] == win, range(len(patches))) # indeces
         patches = map(lambda i: patches[i], full_sized)
         patches_masks = map(lambda i: patches_masks[i], full_sized)
-        masked_col_index = filter(lambda i: masked_col_index, full_sized)
+        masked_col_index = filter(lambda i: masked_col_index[i], full_sized)
         assert len(patches) == len(patches_masks),'wrong creation of subpatches'
         # compare with every codeword
         best_div = np.inf
@@ -262,16 +296,22 @@ def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl'):
                 best_div = divs[codeidx]
                 best_code_idx = codeidx
                 best_code_masked_col = masked_col_index[pidx]
+        assert best_code_idx >= 0,'no proper code found/use, window prob?'
         # done
         full_recon[:,col] = codebook[best_code_idx][:,best_code_masked_col].flatten()
         used_codes[0,colidx] = best_code_idx
+        # use recon?
+        if userecon:
+            btchroma = full_recon.copy()
+            mask = mask.copy()
+            mask[:,col] = 1
     # done
     return full_recon, used_codes
 
 
 def codebook_patch(btchroma,mask,p1,p2,codebook):
     """ see codebook_cols """
-    return codebook_cols(btchroma,mask,range(p1,p2),codebook)
+    return codebook_cols(btchroma,mask,range(p1,p2),codebook,userecon=True)
 
 
 
