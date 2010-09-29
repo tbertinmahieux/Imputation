@@ -10,9 +10,11 @@ import sys
 import glob
 import numpy as np
 import scipy.io as sio
+import scipy.spatial.distance as DIST
 
 import imputation as IMPUTATION
 import imputation_plca as IMPUTATION_PLCA
+import hmm_imputation as IMPUTATION_HMM
 try:
     import kalman_toolbox as KALMAN
 except ImportError:
@@ -27,6 +29,12 @@ def euclidean_dist_sq(v1,v2):
     Trivial averaged squared euclidean distance from too flatten vectors
     """
     return np.square(v1.flatten()-v2.flatten()).mean()
+
+def cosine_dist(v1,v2):
+    """
+    Consine distance between too flatten vector
+    """
+    return DIST.cosine(v1.flatten(),v2.flatten())
 
 def symm_kl_div(v1,v2):
     """
@@ -54,6 +62,7 @@ def recon_error(btchroma,mask,recon,measure='eucl'):
        recon      - reconstruction, same shape as btchroma
        measure    - 'eucl' (euclidean distance, default)
                   - 'kl' (symmetric KL-divergence)
+                  - 'cos' (cosine distance)
     RETURN
        div        - divergence, or reconstruction error
     """
@@ -65,6 +74,8 @@ def recon_error(btchroma,mask,recon,measure='eucl'):
         measfun = euclidean_dist_sq
     elif measure == 'kl':
         measfun = symm_kl_div
+    elif measure == 'cos':
+        measfun = cosine_dist
     else:
         raise ValueError('wrong measure name, want eucl or kl?')
     # measure and done
@@ -173,11 +184,13 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
       - random
       - randomfromsong
       - average
+      - averageall
       - codebook
       - knn_eucl
       - knn_kl
       - lintrans
       - kalman
+      - hmm
       - siplca
       - siplca2
     Used arguments vary based on the method. For SIPLCA, we can use **kwargs
@@ -207,6 +220,8 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
             recon = IMPUTATION.random_patch_from_song(btchroma,mask,p1,p2)
         elif method == 'average':
             recon = IMPUTATION.average_patch(btchroma,mask,p1,p2,win=win)
+        elif method == 'averageall':
+            recon = IMPUTATION.average_patch_all(btchroma,mask,p1,p2)
         elif method == 'codebook':
             recon,used_codes = IMPUTATION.codebook_patch(btchroma,mask,p1,p2,codebook)
         elif method == 'knn_eucl':
@@ -218,6 +233,10 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
         elif method == 'kalman':
             recon = KALMAN.imputation(btchroma,p1,p2,
                                       dimstates=nstates,**kwargs)
+        elif method == 'hmm':
+            recon,recon2,hmm = IMPUTATION_HMM.imputation(btchroma*mask,p1,p2,
+                                                         nstates=nstates,
+                                                         **kwargs)
         elif method == 'siplca':
             res = IMPUTATION_PLCA.SIPLCA_mask.analyze((btchroma*mask).copy(),
                                                       rank,mask,win=win,
@@ -252,5 +271,31 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
 
 
     
-
+def cut_train_test_by_numbers(datasetdir,nums=[5000,5000],seed=666999):
+    """
+    Get all songs from datasetdir.
+    Order them by name, then shuffle (we know the seed!)
+    Return two list of files, for train and for test, according to numbers
+    in nums.
+    Of course, files are not overlapping.
+    If we change one number, the same files remained used for the other set
+    (after shuffling, train is taken from the beggining of the list,
+    test is taken from the end).
+    """
+    # sanity check
+    assert len(nums)==2,'we need a list of two numbers'
+    # get all matfiles
+    matfiles = map(lambda x: os.path.abspath(x),get_all_matfiles(datasetdir))
+    # check if we have enough files
+    assert len(matfiles)>=nums[0] + nums[1],'not enough files for number requested'
+    # order by name
+    matfiles = np.sort(matfiles)
+    # shuffle
+    np.random.seed(seed)
+    np.random.shuffle(matfiles)
+    # cut
+    train = list( matfiles[:nums[0]] )
+    test = list( matfiles[-nums[1]:] )
+    # done
+    return train, test
 
