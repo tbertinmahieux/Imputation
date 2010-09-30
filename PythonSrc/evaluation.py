@@ -10,7 +10,9 @@ import sys
 import glob
 import numpy as np
 import scipy.io as sio
+from scipy import histogram
 import scipy.spatial.distance as DIST
+import scipy.stats.distributions as DISTRIBS
 
 import imputation as IMPUTATION
 import imputation_plca as IMPUTATION_PLCA
@@ -53,7 +55,32 @@ def symm_kl_div(v1,v2):
     return (div1 + div2) / 2.
 
 
-def recon_error(btchroma,mask,recon,measure='eucl'):
+def entropy(v1):
+    """
+    Computes entropy, sum -p_i * log(p_i)
+    """
+    return DISTRIBS.entropy(v1.flatten())
+
+def abs_n_ent_diff(v1,v2,nbins=10):
+    """
+    Absolute normalized entropy difference, between v1 and v2
+    (not symmetric!)
+    Quantized the values in 100 bins, measure entropy
+    of each of those bins, look at the difference of
+    entropy between the two distributions for each of
+    those bins.
+    nbins  - quantization level between 0 and 1
+    """
+    assert v1.size == v2.size,'v1 and v2 different sizes'
+    edges = np.array(range(0,nbins+1),'float') / nbins
+    h1 = histogram(v1.flatten(),edges)[0] + 2
+    h2 = histogram(v2.flatten(),edges)[0] + 2
+    ents1 = -np.log2(h1*1./h1.sum())
+    ents2 = -np.log2(h2*1./h2.sum())
+    return np.abs(((ents1 - ents2)/ents1)).mean()
+
+
+def recon_error(btchroma,mask,recon,measure='all'):
     """
 
     INPUT
@@ -63,6 +90,8 @@ def recon_error(btchroma,mask,recon,measure='eucl'):
        measure    - 'eucl' (euclidean distance, default)
                   - 'kl' (symmetric KL-divergence)
                   - 'cos' (cosine distance)
+                  - 'dent' (absolute normalized difference of entropy)
+                  - 'all' returns a dictionary with all the above
     RETURN
        div        - divergence, or reconstruction error
     """
@@ -76,11 +105,21 @@ def recon_error(btchroma,mask,recon,measure='eucl'):
         measfun = symm_kl_div
     elif measure == 'cos':
         measfun = cosine_dist
+    elif measure == 'dent':
+        measfun = abs_n_ent_diff
+    elif measure == 'all':
+        pass
     else:
         raise ValueError('wrong measure name, want eucl or kl?')
-    # measure and done
-    maskzeros = np.where(mask==0)
-    return measfun( btchroma[maskzeros] , recon[maskzeros] )
+    if measure is not 'all':
+        # measure and done
+        maskzeros = np.where(mask==0)
+        return measfun( btchroma[maskzeros] , recon[maskzeros] )
+    else:
+        meas = ('eucl','kl','cos','dent')
+        ds = map(lambda m: recon_error(btchroma,mask,recon,m), meas)
+        return dict( zip(meas, ds) )
+            
 
 
 def get_all_matfiles(basedir) :
@@ -177,8 +216,9 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
     print 'average kl divergence:',np.mean(errs_kl),'(',np.std(errs_kl),')'
 
 
-def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,codebook=None,nstates=1,**kwargs):
+def test_maskedpatch_on_dataset(dataset,method='random',ncols=2,win=1,rank=4,codebook=None,nstates=1,verbose=1,**kwargs):
     """
+    Dataset is either dir, or list of files
     General method to test a method on a whole dataset for one masked column
     Methods are:
       - random
@@ -198,11 +238,13 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
     """
     MINLENGTH = 70
     # get all matfiles
-    matfiles = get_all_matfiles(datasetdir)
+    if type(dataset).__name__ == 'str':
+        matfiles = get_all_matfiles(dataset)
+    else:
+        matfiles = dataset
     # init
     total_cnt = 0
-    errs_eucl = []
-    errs_kl = []
+    all_errs = []
     # some specific inits
     if codebook != None and not type(codebook) == type([]):
         codebook = [p.reshape(12,codebook.shape[1]/12) for p in codebook]
@@ -254,19 +296,16 @@ def test_maskedpatch_on_dataset(datasetdir,method='random',ncols=2,win=1,rank=4,
             return
         ########## ALGORITHM DEPENDENT END
         # measure recon
-        err = recon_error(btchroma,mask,recon,measure='eucl')
-        if err > 100:
-            print 'huge EUCL error:',err,', method =',method,',file =',matfile
-        errs_eucl.append( err )
-        err = recon_error(btchroma,mask,recon,measure='kl')
-        errs_kl.append( err )
-        if err > 100:
-            print 'huge KL error:',err,', method =',method,',file =',matfile
+        errs = recon_error(btchroma,mask,recon,measure='all')
+        all_errs.append( errs )
         total_cnt += 1
     # done
-    print 'number of songs tested:',total_cnt
-    print 'average sq euclidean dist:',np.mean(errs_eucl),'(',np.std(errs_eucl),')'
-    print 'average kl divergence:',np.mean(errs_kl),'(',np.std(errs_kl),')'
+    if verbose > 0:
+        print 'number of songs tested:',total_cnt
+        for meas in np.sort(all_errs[0].keys()):
+            errs = map(lambda d: d[meas], all_errs)
+            print 'average',meas,'=',np.mean(errs),'(',np.std(errs),')'
+    return all_errs
 
 
 
@@ -298,4 +337,72 @@ def cut_train_test_by_numbers(datasetdir,nums=[5000,5000],seed=666999):
     test = list( matfiles[-nums[1]:] )
     # done
     return train, test
+
+
+def measure_nice_name(measure):
+    """
+    Receives a measure code: 'eucl','cos','kl','dent'
+    and returns a reasonable string
+    """
+    if measure == 'eucl':
+        return 'euclidean distance'
+    if measure == 'cos':
+        return 'cosine distance'
+    if measure == 'kl':
+        return 'KL symm. divergence'
+    if measure == 'dent':
+        return 'absolute entropy difference'
+    print 'unknown measure:',measure
+    return 'unknown'
+
+
+def plot_2_measures_dataset(dataset,methods=(),methods_args=(),measures=(),ncols=(),verbose=1):
+    """
+    Plot 2 measures and display algorithms (methods) in it
+    INPUT
+       dataset      - directory path, or list of files
+       methods      - list of method names
+       methods_args - list of dictionaries, to be passed as params
+    """
+    # sanity checks
+    for meas in measures:
+        assert meas in ('eucl','kl','cos','dent'),'unknown measure: '+meas
+    assert len(measures) == 2,'this function need exactly 2 measures!'
+    # inits
+    nmethods = len(methods)
+    if len(methods_args) == 0:
+        methods_args = [{}] * nmethods
+    err_measure1 = np.zeros((nmethods,len(ncols)))
+    err_measure2 = np.zeros((nmethods,len(ncols)))
+    # iterate on methods
+    for imethod,method in enumerate(methods):
+        if verbose>0: print 'doing method:',method
+        for incol,ncol in enumerate(ncols):
+            if verbose>0: print 'doing ncol:',ncol
+            res = test_maskedpatch_on_dataset(dataset,method=method,ncols=ncol,
+                                              verbose=verbose,
+                                              **methods_args[imethod])
+            err_measure1[imethod,incol] = np.mean(map(lambda d:d[measures[0]],
+                                                      res))
+            err_measure2[imethod,incol] = np.mean(map(lambda d:d[measures[1]],
+                                                      res))
+    # iterations done, let's plot
+    if verbose>0: print "let's plot!"
+    import pylab as P
+    colors = ('b','r','g','c','m','y')
+    lines = ('-','--','-.',':')
+    P.figure()
+    for imethod,method in enumerate(methods):
+        errs1 = err_measure1[imethod,:]
+        errs2 = err_measure2[imethod,:]
+        P.plot(errs1,errs2,colors[imethod]+lines[imethod]+'o',label=method)
+    # titles
+    P.title('imputation of '+str(ncols)+' columns on ',len(res),' songs.')
+    P.xlabel( measure_nice_name(measures[0]) )
+    P.ylabel( measure_nice_name(measures[1]) )
+    P.legend()
+    P.show()
+
+
+
 
