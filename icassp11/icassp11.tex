@@ -13,7 +13,7 @@
 
 % Title.
 % ------
-\title{IMPUTATION OF BEAT-ALIGNED FEATURES FOR MUSIC PATTERN LEARNING}
+\title{IMPUTATION OF BEAT-ALIGNED FEATURES AND MUSIC PATTERN LEARNING}
 %
 % Single address.
 % ---------------
@@ -52,7 +52,7 @@ if you don't accept this paper.
 \end{abstract}
 %
 \begin{keywords}
-Missing data, chroma features, imputation, SIPLCA, codebook learning
+Missing data, chroma features, beat imputation, codebook learning
 \end{keywords}
 %
 \section{Introduction}
@@ -100,7 +100,8 @@ A ``pixel'' is defined as one point of a feature matrix, analoguous to an image.
 \section{RELATED WORK}
 \label{sec:relatedwork}
 Imputation has been studied in many fields, for instance speech 
-\cite{Morris1998,Smaragdis2009} and bioinformatics \cite{Oba2003}.
+\cite{Morris1998,Reyes-Gomez2005,Smaragdis2009}, music \cite{Hoffman2010} 
+and bioinformatics \cite{Oba2003}.
 However, rarely a full slice of time is fully masked (cases $2$ and $3$
 in Figure \ref{fig:typeimputation}).
 
@@ -176,6 +177,17 @@ A poisson noise model (versus a gaussian one) seems to better fit audio percepti
 which result in the use of KL. See also \cite{Fevotte2009} for a comparison on an
 audio excerpt of piano.
 
+We also use absolute normalize difference entropy (ANDE) because it makes us look good, 
+we took it from \cite{Mentzelopoulos2004}.
+ANDE between two vectors is computed as follow. First, compute the normalized histogram 
+of values, in our case we discretize $(0,1)$ in $\mbox{\# bins} = 10$. 
+Then, we compute the entropy
+$e_b = - log_2 b_b$ of each of the bins $b_{bi}$for each vector $i$. Finally:
+\[
+\mbox{ANDE} = \left( \Sigma_b \frac{e_{b1} - e_{b2}}{e_{b1}} \right) / (\mbox{\# bins})
+\]
+Note that ANDE is not symmetric. In our experiment, the first vector is the original one.
+
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=.9\columnwidth]{type_imputation}
@@ -231,12 +243,43 @@ observation based on the current state. This technique has been explored in \cit
 
 \section{EXPERIMENTS}
 \label{sec:experiments}
-
-\subsection{DATA}
-\label{ssec:data}
 We build beat-align chromagrams using the beat tracking and chroma features as
 returned by the Echo Nest API \cite{EchoNest}. Our results are on the Cowbell
-dataset made of $43,000$ songs \cite{Bertin-Mahieux2010a}.
+dataset (or subset of it) made of $43,000$ songs \cite{Bertin-Mahieux2010a}.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{recon_per_dent}
+\end{center}
+\caption{Reconstruction of $15$ beats of song by $4$ methods, ordered by
+ANDE of the reconstruction. Here ``codebook'' is done with patches of 
+size $8$ taken from the visible part of the song. ``dent'' means ANDE,
+to be fixed.}
+\label{fig:dent}
+\end{figure}
+
+Figure \ref{fig:dent} illustrate the use of the ANDE measure. Even if some
+reconstruction are worse according to euclidean distance, ANDE gives a feel
+of how musical the result looks. An ANDE of $0$ signifies that we have the 
+same entropy in the original and the reconstruction segment.
+
+Until we reach perfect reconstruction, we look for reconstruction that do
+well on the two measures. Furthermore, it is important to keep similar
+performance when the number of masked beat increases. Methods that do
+well by learning an average have a rapidly increasing ANDE, as seen in
+Figure \ref{fig:2dscore}. We look for methods that stay in the lower left
+corner when the number of data to impute increases.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{recon_score_in_2d}
+\end{center}
+\caption{Reconstruction error for $4$ methods and different
+number of masked beats. Errors are ANDE and euclidean
+distance. In all cases, the larger the number of masked beats,
+the higher the euclidean distance.}
+\label{fig:2dscore}
+\end{figure}
 
 \begin{figure}[t]
 \begin{center}
@@ -292,15 +335,6 @@ See Table \ref{tab:reseucl} for the exact parameters used.}
 \end{center}
 \end{small}
 \end{table}
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.9\columnwidth]{lintrans_curves}
-\end{center}
-\caption{Linear transform results based on the window size.}
-\label{fig:lintrans}
-\end{figure}
-
 
 \section{CONCLUSION AND FUTURE WORK}
 \label{sec:conclusion}
