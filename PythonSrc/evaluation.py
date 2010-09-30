@@ -397,12 +397,109 @@ def plot_2_measures_dataset(dataset,methods=(),methods_args=(),measures=(),ncols
         errs2 = err_measure2[imethod,:]
         P.plot(errs1,errs2,colors[imethod]+lines[imethod]+'o',label=method)
     # titles
-    P.title('imputation of '+str(ncols)+' columns on '+str(len(res))+' songs.')
+    P.title('imputation of '+str(ncols)+' beats on '+str(len(res))+' songs.')
     P.xlabel( measure_nice_name(measures[0]) )
     P.ylabel( measure_nice_name(measures[1]) )
     P.legend()
     P.show()
 
 
-
-
+def plot_oneexample(btchroma,mask,p1,p2,methods=(),methods_args=None,
+                    measures=(),subplot=None,plotrange=None,**kwargs):
+    """
+    Utility function to plot the result of many methods on one example.
+    Methods and arguments are the same as when we test on a whole dataset.
+    First two plots are always original then original*mask.
+    INPUT
+      btchroma     - btchroma
+      mask         - binary mask, 0 = hidden
+      p1           - first masked column
+      p2           - last masekdcolumn + 1
+      methods      - list of methods (lintrans,random,....)
+      bethods_args - list of dictionary containing arguments
+      measures     - list of measures, put in title (we sort according to first)
+      subplot      - if None, images in one column
+      plotrange    - if we dont want to plot everything set to (pos1,pos2)
+      kwargs       - extra arguments passed to plotall
+    """
+    from plottools import plotall
+    # inits and sanity checks
+    for meas in measures:
+        assert meas in ('eucl','kl','cos','dent'),'unknown measure: '+meas
+    nmethods = len(methods)
+    assert nmethods > 0,'we need at least one method...!'
+    if methods_args is None:
+        methods_args = [{}]*len(methods)
+    if subplot is None:
+        subplot = (nmethods+2,1)
+    assert np.zeros(subplot).size == len(methods)+2,'wrong subplot, forgot original and masked original?'
+    if plotrange is None:
+        plotrange = (0,btchroma.shape[1])
+    # impute
+    errs = []
+    recons = []
+    ########## ALGORITHM DEPENDENT
+    for im,method in enumerate(methods):
+        if method == 'random':
+            recon = IMPUTATION.random_patch(btchroma,mask,p1,p2,**methods_args[im])
+        elif method == 'randomfromsong':
+            recon = IMPUTATION.random_patch_from_song(btchroma,mask,p1,p2,**methods_args[im])
+        elif method == 'average':
+            recon = IMPUTATION.average_patch(btchroma,mask,p1,p2,**methods_args[im])
+        elif method == 'averageall':
+            recon = IMPUTATION.average_patch_all(btchroma,mask,p1,p2,**methods_args[im])
+        elif method == 'codebook':
+            recon,used_codes = IMPUTATION.codebook_patch(btchroma,mask,p1,p2,**methods_args[im])
+        elif method == 'knn_eucl':
+            recon,used_cols = IMPUTATION.knn_patch(btchroma,mask,p1,p2,measure='eucl',**methods_args[im])
+        elif method == 'knn_kl':
+            recon,used_cols = IMPUTATION.knn_patch(btchroma,mask,p1,p2,measure='kl',**methods_args[im])
+        elif method == 'lintrans':
+            recon,proj = IMPUTATION.lintransform_patch(btchroma,mask,p1,p2,**methods_args[im])
+        elif method == 'kalman':
+            recon = KALMAN.imputation(btchroma,p1,p2,**methods_args[im])
+        elif method == 'hmm':
+            recon,recon2,hmm = IMPUTATION_HMM.imputation(btchroma*mask,p1,p2,
+                                                         **methods_args[im])
+        elif method == 'siplca':
+            rank = methods_args[im]['rank']
+            res = IMPUTATION_PLCA.SIPLCA_mask.analyze((btchroma*mask).copy(),
+                                                      rank,mask,
+                                                      convergence_thresh=1e-15,
+                                                      **methods_args[im])
+            W, Z, H, norm, recon, logprob = res
+        elif method == 'siplca2':
+            rank = methods_args[im]['rank']
+            res = IMPUTATION_PLCA.SIPLCA2_mask.analyze((btchroma*mask).copy(),
+                                                       rank,mask,
+                                                       convergence_thresh=1e-15,
+                                                       **methods_args[im])
+            W, Z, H, norm, recon, logprob = res
+        else:
+            print 'unknown method:',method
+            return
+        # compute errors
+        recons.append( recon.copy() )
+        errs.append( recon_error(btchroma,mask,recon,'all') )
+    # all methods computed
+    # now we sort the results according to first measure
+    main_errs = map(lambda x: x[measures[0]], errs)
+    order = np.array(np.argsort(main_errs))
+    methods = map(lambda i: methods[i], order)
+    errs = map(lambda i: errs[i], order)
+    recons = map(lambda i: recons[i], order)
+    # plot
+    import pylab as P
+    P.figure()
+    pos1 = plotrange[0]
+    pos2 = plotrange[1]
+    ims = [btchroma[:,pos1:pos2],(btchroma*mask)[:,pos1:pos2]]
+    ims.extend( map(lambda r: r[:,pos1:pos2], recons) )
+    titles = ['original', 'original masked']
+    for imethod,method in enumerate(methods):
+        t = method + ':'
+        for m in measures:
+            t += ' ' + m + '=' + str(errs[imethod][m])
+        titles.append(t)
+    plotall(ims,subplot=subplot,title=titles,cmap='gray_r',colorbar=False)
+    P.show()
