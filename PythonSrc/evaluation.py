@@ -397,7 +397,7 @@ def plot_2_measures_dataset(dataset,methods=(),methods_args=(),measures=(),ncols
         errs2 = err_measure2[imethod,:]
         P.plot(errs1,errs2,colors[imethod]+lines[imethod]+'o',label=method)
     # titles
-    P.title('imputation of '+str(ncols)+' columns on ',len(res),' songs.')
+    P.title('imputation of '+str(ncols)+' columns on '+str(len(res))+' songs.')
     P.xlabel( measure_nice_name(measures[0]) )
     P.ylabel( measure_nice_name(measures[1]) )
     P.legend()
