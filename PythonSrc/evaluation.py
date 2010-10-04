@@ -168,6 +168,8 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
     # iterate
     for matfile in matfiles:
         btchroma = sio.loadmat(matfile)['btchroma']
+        if len(btchroma.shape) < 2:
+            continue
         if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
             continue
         mask,masked_cols = MASKING.random_col_mask(btchroma,ncols=ncols,win=25)
