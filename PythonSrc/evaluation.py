@@ -82,18 +82,19 @@ def abs_n_ent_diff(v1,v2,nbins=10):
     return np.abs(((ents1 - ents2)/ents1)).mean()
 
 
-def recon_error(btchroma,mask,recon,measure='all'):
+def recon_error(btchroma,mask,recon,measure='all',delta=False):
     """
 
     INPUT
        btchroma   - original feature matrix
        mask       - binary mask, same shape as btchroma
        recon      - reconstruction, same shape as btchroma
-       measure    - 'eucl' (euclidean distance, default)
+       measure    - 'eucl' (euclidean distance)
                   - 'kl' (symmetric KL-divergence)
                   - 'cos' (cosine distance)
                   - 'dent' (absolute normalized difference of entropy)
-                  - 'all' returns a dictionary with all the above
+                  - 'all' returns a dictionary with all the above (default)
+       delta      - if True, use delta features (rowwise diff on btchroma)
     RETURN
        div        - divergence, or reconstruction error
     """
@@ -115,11 +116,19 @@ def recon_error(btchroma,mask,recon,measure='all'):
         raise ValueError('wrong measure name, want eucl or kl?')
     if measure is not 'all':
         # measure and done
+        if delta:
+            btchroma = np.concatenate([np.zeros((12,1)),np.diff(btchroma)],
+                                      axis=1)
         maskzeros = np.where(mask==0)
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
-        meas = ('eucl','kl','cos','dent')
-        ds = map(lambda m: recon_error(btchroma,mask,recon,m), meas)
+        meas = ['eucl','kl','cos','dent']
+        ds = map(lambda m: recon_error(btchroma,mask,recon,m),
+                 meas)
+        meas_delta = ['eucl','cos'] # others cant handle negatives
+        ds.extend(map(lambda m: recon_error(btchroma,mask,recon,m,delta=True),
+                      meas_delta))
+        meas.extend( map(lambda m: m+'_delta',meas_delta) )
         return dict( zip(meas, ds) )
             
 
