@@ -11,16 +11,13 @@ import glob
 import numpy as np
 import scipy.io as sio
 from scipy import histogram
-import scipy.spatial.distance as DIST
+#import scipy.spatial.distance as DIST
 import scipy.stats.distributions as DISTRIBS
 
 import imputation as IMPUTATION
 import imputation_plca as IMPUTATION_PLCA
 import hmm_imputation as IMPUTATION_HMM
-try:
-    import kalman_toolbox as KALMAN
-except ImportError:
-    print 'cant import KALMAN: no matlab maybe?'
+
 import masking as MASKING
 
 EPS = np.finfo(np.float).eps
@@ -32,11 +29,16 @@ def euclidean_dist_sq(v1,v2):
     """
     return np.square(v1.flatten()-v2.flatten()).mean()
 
-def cosine_dist(v1,v2):
+def cosine_dist(u,v):
     """
-    Consine distance between too flatten vector
+    Cosine distance between too flatten vector
+    Copied from scipy.spatial.distance
     """
-    return DIST.cosine(v1.flatten(),v2.flatten())
+    #return DIST.cosine(u.flatten(),v.flatten())
+    u = np.asarray(u, order='c')
+    v = np.asarray(v, order='c')
+    return (1.0 - (np.dot(u, v.T) / \
+                   (np.sqrt(np.dot(u, u.T)) * np.sqrt(np.dot(v, v.T)))))
 
 def symm_kl_div(v1,v2):
     """
@@ -235,6 +237,8 @@ def test_maskedpatch_on_dataset(dataset,method='random',ncols=2,win=1,rank=4,cod
       - siplca2
     Used arguments vary based on the method. For SIPLCA, we can use **kwargs
     to set priors.
+    RETURN
+      - all errors, as a list of dict
     """
     MINLENGTH = 70
     # get all matfiles
@@ -273,6 +277,7 @@ def test_maskedpatch_on_dataset(dataset,method='random',ncols=2,win=1,rank=4,cod
         elif method == 'lintrans':
             recon,proj = IMPUTATION.lintransform_patch(btchroma,mask,p1,p2,win=win)
         elif method == 'kalman':
+            import kalman_toolbox as KALMAN
             recon = KALMAN.imputation(btchroma,p1,p2,
                                       dimstates=nstates,**kwargs)
         elif method == 'hmm':
@@ -354,6 +359,12 @@ def measure_nice_name(measure):
         return 'absolute entropy difference'
     print 'unknown measure:',measure
     return 'unknown'
+
+def nice_nums(num):
+    """
+    Returns the float number with 4 decimals
+    """
+    return '%.4f' % num
 
 
 def plot_2_measures_dataset(dataset,methods=(),methods_args=(),measures=(),ncols=(),verbose=1):
@@ -457,6 +468,7 @@ def plot_oneexample(btchroma,mask,p1,p2,methods=(),methods_args=None,
         elif method == 'lintrans':
             recon,proj = IMPUTATION.lintransform_patch(btchroma,mask,p1,p2,**methods_args[im])
         elif method == 'kalman':
+            import kalman_toolbox as KALMAN
             recon = KALMAN.imputation(btchroma,p1,p2,**methods_args[im])
         elif method == 'hmm':
             recon,recon2,hmm = IMPUTATION_HMM.imputation(btchroma*mask,p1,p2,
@@ -499,7 +511,7 @@ def plot_oneexample(btchroma,mask,p1,p2,methods=(),methods_args=None,
     for imethod,method in enumerate(methods):
         t = method + ':'
         for m in measures:
-            t += ' ' + m + '=' + str(errs[imethod][m])
+            t += ' ' + m + '=' + nice_nums(errs[imethod][m])
         titles.append(t)
     plotall(ims,subplot=subplot,title=titles,cmap='gray_r',colorbar=False)
     P.show()
