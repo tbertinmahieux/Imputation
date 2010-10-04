@@ -18,7 +18,7 @@ try:
     import plca as PLCA
 except ImportError:
     from ronwsiplca_cover import plca as PLCA
-from plca import shift
+shift = PLCA.shift
 logger = PLCA.logger
 
 
