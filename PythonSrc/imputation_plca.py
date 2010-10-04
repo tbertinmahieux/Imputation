@@ -14,7 +14,11 @@ import numpy as np
 
 # Ron's SIPLCA
 #sys.path.append( os.path.expanduser('~/Columbia/ronwsiplca_cover') )
-import plca as PLCA
+try:
+    import plca as PLCA
+except ImportError:
+    from ronwsiplca_cover import plca as PLCA
+from plca import shift
 logger = PLCA.logger
 
 
@@ -24,7 +28,7 @@ class SIPLCA_mask(PLCA.SIPLCA):
     binary mask during analysis
     """
     @classmethod
-    def analyze(cls, V, rank, mask, niter=100, convergence_thresh=1e-9,
+    def analyze(cls, V, rank, mask, niter=300, convergence_thresh=1e-9,
                 printiter=50, plotiter=None, plotfilename=None,
                 initW=None, initZ=None, initH=None,
                 updateW=True, updateZ=True, updateH=True,**kwargs):
@@ -75,12 +79,15 @@ class SIPLCA_mask(PLCA.SIPLCA):
         maskzeros = np.where(mask==0)
         maskones = np.where(mask==1)
         norm_justones = V[maskones].sum()
+        p1 = np.where(mask[0,:]==0)[0][0]
+        p2 = np.where(mask[0,:]==0)[0][-1] + 1
         # approximate sum of missing data
         V = V.copy()
         norm = norm_justones * V.size / len(maskones[0])
         V /= norm
         # init with noise
-        V[maskzeros] = np.random.rand(len(maskzeros[0])) / V[maskones].max()
+        #V[maskzeros] = np.random.rand(len(maskzeros[0])) / V[maskones].max()
+        V[maskzeros] = 0.
         # *****************
     
         params = cls(V, rank, **kwargs)
@@ -94,9 +101,17 @@ class SIPLCA_mask(PLCA.SIPLCA):
         params.Z = Z
         params.H = H
 
+        # second layer
+        doH = True
+        rankH = 2
+        winH = 10
+        modelH = PLCA.SIPLCA.analyze(H,rankH,niter=1,win=winH)
+        #************************
+
         oldlogprob = -np.inf
         for n in xrange(niter):
             # ADDED FOR MASKING
+            #WZH = cls.reconstruct_mask(W, Z, H, p1, p2)
             WZH = cls.reconstruct(W, Z, H)
             V[maskzeros] = WZH[maskzeros]
             params.V = V
@@ -122,23 +137,56 @@ class SIPLCA_mask(PLCA.SIPLCA):
             if updateW:  W = nW
             if updateZ:  Z = nZ
             if updateH:  H = nH
-    
+
+            # second level on H!
+            if doH:
+                modelH = PLCA.SIPLCA.analyze(H,rankH,initW=modelH[0],
+                                             initZ=modelH[1],initH=modelH[2],
+                                             niter=1,win=winH)
+                H = modelH[4]
+            # **********************
+            
             params.W = W
             params.Z = Z
             params.H = H
 
         if plotiter:
-            params.plot(V, W, Z, H, n)
+            params.plot(V, W, Z, H, n) 
             if not plotfilename is None:
                 plt.savefig('%s_%04d.png' % (plotfilename, n))
-        logger.info('Iteration %d: final logprob = %f', n, logprob)
+        if niter > 0:
+            logger.info('Iteration %d: final logprob = %f', n, logprob)
         # ADDED FOR MASKING
         # norm can be slightly wrong from missing data
-        norm = norm_justones / params.V[maskones].sum()
+        #norm = norm_justones / params.V[maskones].sum() # empirically not good
         # *****************
         reconall = norm * WZH
         recon[maskzeros] = reconall[maskzeros]
+        # fix zeroz and ones
+        recon[np.where(recon>1.)] = 1.
         return W, Z, H, norm, recon, logprob
+
+    @staticmethod
+    def reconstruct_mask(W, Z, H, p1,p2, norm=1.0, circular=False):
+        if W.ndim == 2:
+            W = W[:,np.newaxis,:]
+        if H.ndim == 1:
+            H = H[np.newaxis,:]
+        F, rank, win = W.shape
+        rank, T = H.shape
+        # lets work on H
+        #H = H.copy() # shape 4x218 if rank=4,length=218
+        max_per_rank = np.concatenate([H[:,:p1],H[:,p2:]],axis=1).max(1)
+        for p in xrange(p1,p2):
+            for r in xrange(rank):
+                H[r,p] = min(H[r,p],max_per_rank[r])
+        #***************
+        WZHs = np.zeros((F, T, win))
+        for tau in xrange(win):
+            WZHs[:,:,tau] = np.dot(W[:,:,tau] * Z, shift(H, tau, 1, circular))
+        # take the sum, except missing part where we take the max
+        WZH = WZHs.sum(axis=2) # or not
+        return norm * WZH
 
 
 class SIPLCA2_mask(PLCA.SIPLCA2):
