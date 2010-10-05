@@ -282,8 +282,9 @@ def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl',userecon=Fal
         full_sized = filter(lambda i: patches[i].shape[1] == win, range(len(patches))) # indeces
         patches = map(lambda i: patches[i], full_sized)
         patches_masks = map(lambda i: patches_masks[i], full_sized)
-        masked_col_index = filter(lambda i: masked_col_index[i], full_sized)
+        masked_col_index = map(lambda i: masked_col_index[i], full_sized)
         assert len(patches) == len(patches_masks),'wrong creation of subpatches'
+        assert len(patches) == len(masked_col_index),'wrong creation of subpatches'
         # compare with every codeword
         best_div = np.inf
         best_code_idx = -1
@@ -309,8 +310,9 @@ def codebook_cols(btchroma,mask,masked_cols,codebook,measure='eucl',userecon=Fal
     return full_recon, used_codes
 
 
-def codebook_patch(btchroma,mask,p1,p2,codebook):
+def codebook_patch(btchroma,mask,p1,p2,codebook=None):
     """ see codebook_cols """
+    assert codebook is not None,'we need a codebook!'
     return codebook_cols(btchroma,mask,range(p1,p2),codebook,userecon=True)
 
 
@@ -398,7 +400,25 @@ def knn_patch(btchroma,mask,p1,p2,win=21,measure='eucl'):
     """ see knn_col, win is now window on each side """
     return knn_cols(btchroma,mask,range(p1,p2),win=win*2+1,measure=measure)
 
-
+def knn_patch_delta(btchroma,mask,p1,p2,win=21,measure='eucl'):
+    """
+    see knn_col, win is now window on each side
+    Works on delta features!!! rowwise diff of the original
+    """
+    V = (btchroma*mask).copy()
+    Vdiff = np.concatenate([np.zeros((12,1)),np.diff(V)],axis=1)
+    assert Vdiff.shape == V.shape,'bad creation of btchroma delta'
+    # do NN
+    recon,used_cols = knn_cols(V,mask,range(p1,p2),win=win*2+1,measure=measure)
+    # build result
+    for col in range(p1,p2):
+        V[:,col] = V[:,col-1] + recon[:,col]
+    V[np.where(V>1.)] = 1.
+    V[np.where(V<0.)] = 0.
+    assert V.max() <= 1.
+    assert V.min() >= 0.
+    return V, used_cols
+    
 
 def lintransform_cols(btchroma,mask,masked_cols,win=1):#,niter=1000,lrate=.1):
     """
