@@ -241,6 +241,7 @@ def test_maskedpatch_on_dataset(dataset,method='random',ncols=2,win=1,rank=4,cod
       - codebook
       - knn_eucl
       - knn_kl
+      - knn_eucl_delta
       - lintrans
       - kalman
       - hmm
@@ -267,6 +268,8 @@ def test_maskedpatch_on_dataset(dataset,method='random',ncols=2,win=1,rank=4,cod
     # iterate
     for matfile in matfiles:
         btchroma = sio.loadmat(matfile)['btchroma']
+        if len(btchroma.shape) < 2:
+            continue
         if btchroma.shape[1] < MINLENGTH or np.isnan(btchroma).any():
             continue
         mask,p1,p2 = MASKING.random_patch_mask(btchroma,ncols=ncols,win=25)
@@ -285,6 +288,8 @@ def test_maskedpatch_on_dataset(dataset,method='random',ncols=2,win=1,rank=4,cod
             recon,used_cols = IMPUTATION.knn_patch(btchroma,mask,p1,p2,win=win,measure='eucl')
         elif method == 'knn_kl':
             recon,used_cols = IMPUTATION.knn_patch(btchroma,mask,p1,p2,win=win,measure='kl')
+        elif method == 'knn_eucl_delta':
+            recon,used_cols = IMPUTATION.knn_patch_delta(btchroma,mask,p1,p2,win=win,measure='eucl')
         elif method == 'lintrans':
             recon,proj = IMPUTATION.lintransform_patch(btchroma,mask,p1,p2,win=win)
         elif method == 'kalman':
