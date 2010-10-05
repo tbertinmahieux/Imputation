@@ -37,6 +37,9 @@ def cosine_dist(u,v):
     #return DIST.cosine(u.flatten(),v.flatten())
     u = np.asarray(u, order='c')
     v = np.asarray(v, order='c')
+    # special case with null vector
+    if np.abs(u).sum() == 0 or np.abs(v).sum() == 0:
+        return 1.
     return (1.0 - (np.dot(u, v.T) / \
                    (np.sqrt(np.dot(u, u.T)) * np.sqrt(np.dot(v, v.T)))))
 
