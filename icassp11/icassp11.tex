@@ -47,8 +47,8 @@
 Imputation is cool. It is a well-defined problem, as opposed to segmentation.
 Gives a reasonable benchmark to compare algorithms that claim learning meaningful
 patterns on music. Hard to beat benchmarks comparison, for instance linear
-prediction. We compare some methods on a large dataset. We'll track you down
-if you don't accept this paper.
+prediction. We compare some methods and discuss contradicting error measures. 
+We'll track you down if you don't accept this paper.
 \end{abstract}
 %
 \begin{keywords}
@@ -58,217 +58,57 @@ Missing data, chroma features, beat imputation, codebook learning
 \section{Introduction}
 \label{sec:intro}
 Many signals show similarities and repetitions over time. Learning these repetitions
-in an unsupervised way remains a challenge. One reason is the lack of meaningful
-tasks to evaluate such learning. Encoding quality serves its purpose, to measure
-how faithful a saved or streamd media format is. But having a good encoding
-does not mean we understood much about the underlying signal. Denoising is more
-interesting as it assumes some knowledge of the media, even if sometimes it relies
-solely on local constraints. Needless to say that denoising has been well studied 
-for images and speech, among others.
+in an unsupervised way remains a challenge. Finding robust patterns should prove usefull in
+many tasks like song similarity (songs with similar patterns), song segmentation
+(song segments with different patterns) or cover song recognition (songs with exactly
+the same patterns).
+Therefore, we are looking for patterns that not only explain the signal (in an encoding
+framework), but also contain musical caracteristics. 
 
-Signals remain where denoising bear little sense, and music is an obvious case.
-If the goal is to learn typical harmonic patterns, adding then removing gaussian
-noise does not measure the right thing. Imputation of some random frequencies
-for some given time $t$ is also oversimplified. Such missing info can usually
-be inferred by the restof the information available at time $t$, thus without
-using any information over time.
-
-To overcomb these problems, we study here the task of imputing missing information
-for full timesteps of music (measured in beats). This is a well-defined task
-as the goal is to recover some known masked data. It can easily be evaluated on a
-large-scale dataset as music is freely available and the mask can be chosen
-at random. It has practical applications, we can imagine the case of streamed music
-with some connection problem. Imputing reasonable audio for a few seconds would
-be a great alternative to simply stop the stream for a while. Finally, it is a
-task that can only be solved by learning meaningful patterns of music over time.
-
-This work should be seen as a first milestone towards solving that task.
-After defining it correctly, we try a range of methods to see which ones should
-be use as benchmarks in the future. We also look at which algorithms are more robust
-to an increasingly larger mask. The code for all the experiments is available
-online.
-
-This paper is organized as follow: first we present related work, then we define the
-task, including error measures and features used. In Section \ref{sec:methods},
-we present the different methods used to tackle imputation, ranging from trivial
-to complex. We experiment with these on a common dataset, then conclude in
-Section \ref{sec:conclusion} with many avenues of research for future work.
-
-Two writing conventions, we use the terms ``missing'' and ``masked'' interchangeably.
-A ``pixel'' is defined as one point of a feature matrix, analoguous to an image.
-
-\section{RELATED WORK}
-\label{sec:relatedwork}
-Imputation has been studied in many fields, for instance speech 
-\cite{Morris1998,Reyes-Gomez2005,Smaragdis2009}, music \cite{Hoffman2010} 
-and bioinformatics \cite{Oba2003}.
-However, rarely a full slice of time is fully masked (cases $2$ and $3$
-in Figure \ref{fig:typeimputation}).
-
-The task of learning the next missing time frame is implicitely studied in recurrent
-neural networks as the model is usually trained this way. However, few work deal
-with learning more than one missing time frame in advance. Note that recurrent neural
-network has been used to learn time aligned beats of music for music composition
-\cite{Todd1989,Mozer1994a,Eck2002d}, thus this task has some similarities with our current
-work. Another implicitely linked task is modeling music expectation \cite{Hazan2010}, but it deals
-with characterizing the upcoming beats of music instead of predicting them.
-We will not mention these any further, since the state of the art is difficult to measure.
-
-Imputation should be used to measure the quality of learned patterns. Recent work in 
-learning music patterns using features derived from audio include 
-\cite{Anglade2009,Bertin-Mahieux2010a,Casey2007,Weiss2010}.
-
-Finally, if the mask span enough beats (i.e. more than one ``music segment''), any good
-solution has to deal with music segmentation. Music segmentation based on similar features as
-the ones used in this work include \cite{Weiss2010,Levy2008,Mauch2009}.
-
-
-
-\section{TASK DEFINITION}
-\label{sec:task}
+We devise a task that let us measure
+the quality of such patterns in an attempt at unifying this research field.
+Imputation is a well-studied problem for audio to show that some model can generalize.
+However, it has not been pushed as far as it could, and fully masking consecutive beats
+of music have not been considered. A real-life analoguous problem would be a music stream
+signal that is lost for a few seconds. The goal here would be to infer a reasonable
+stream to replace the original one. Thus we do not only want a signal close to the original
+in a reconstruction sense, but also a signal that has similar ``musical properties'' to
+the user ear.
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=.9\columnwidth]{basic_example}
+\includegraphics[width=.7\columnwidth]{type_imputation}
 \end{center}
-\caption{Basic example}
-\label{fig:code}
+\caption{Imputation types.
+\label{fig:types}}
 \end{figure}
 
-In this work, imputation is defined as recovering a set of adjacent missing beats.
-The number of missing beats can vary from $1$ to most of the song. The algorithm
-is allowed to use the unmasked part of the song and / or any information learned
-on a larger set of songs not including the masked part. This would correspond
-to the middle case in Figure \ref{fig:typeimputation}.
+Figure \ref{fig:types} summarizes the difference between different sorts of imputation.
+Usually \cite{Smaragdis2009}, a few frequency bins are hidden and can be recovered from
+their neighborhood, both in time and frequency. Masking one full beat is a natural extension,
+and the solution is easy as music notes are often sustained over many beats. Two or three
+missing beats remain solvable as music bare many repetitions. One can usually find a similar
+section from an unmasked part of the song (think about a repeated chorus for instance).
+The real challenge arises from masking many consecutive beats.
 
-In our case, we try to recover chroma features and we never mask the beginning
-nor the end of the song, but this is not a absolute constraint of the task.
-The long term goal is what we call ``extreme imputation'' where the number of
-beats to impute is greatly larger than the known data (bottom case in
-Figure \ref{fig:typeimputation}). Trivial methods like taking the average beat
-should fail on such a task, and method that succeed:
-\begin{enumerate}
-\item will learn typical patterns from a large set of songs;
-\item will know how to reorganize these patterns so that they are coherent together;
-\item will know how to reorganize these patterns so that they match the known
-data.
-\end{enumerate}
-Extreme beat imputation measures the full task of learning and using meaningful
-audio patterns.
-
-We use beat-aligned chroma features \cite{Ellis2007a}. 
-% DAN, can I steal this from your paper?
-Chroma features record the intensity associated with each of
-the 12 semitones (e.g. piano keys) within one octave, but all octaves
-are folded together.
-% **************************************
-One can see them as a very coarse and noisy music transcription.
-They have been used for segmentation \cite{Weiss2010}, 
-chord recognition \cite{Mauch2009} and cover recognition \cite{Ellis2007a}
-among others. The specific implementation we use is the one returned
-by the Echo Nest API \cite{EchoNest} which uses a constant-Q spectrogram
-and where the chroma for each time stamp is normalized so the max is $1$.
-
-The reconstruction error (or divergence) measure is not obvious. In this work,
-we report the euclidean distance and the symmetric Kullback-Leibler divergence.
-In \cite{Sajda2003}, author discuss the two for
-a NMF method and show that they depend on the noise model that is assumed.
-A poisson noise model (versus a gaussian one) seems to better fit audio perception, 
-which result in the use of KL. See also \cite{Fevotte2009} for a comparison on an
-audio excerpt of piano.
-
-We also use absolute normalize difference entropy (ANDE) because it makes us look good, 
-we took it from \cite{Mentzelopoulos2004}.
-ANDE between two vectors is computed as follow. First, compute the normalized histogram 
-of values, in our case we discretize $(0,1)$ in $\mbox{\# bins} = 10$. 
-Then, we compute the entropy
-$e_b = - log_2 b_b$ of each of the bins $b_{bi}$for each vector $i$. Finally:
-\[
-\mbox{ANDE} = \left( \Sigma_b \frac{e_{b1} - e_{b2}}{e_{b1}} \right) / (\mbox{\# bins})
-\]
-Note that ANDE is not symmetric. In our experiment, the first vector is the original one.
+Figure \ref{fig:basic} shows an example of the imputation of $15$ beats on chroma features
+(see Section ???). The solution in that figure, although intuitively wrong, is very
+accurate according to euclidean distance. As we mentioned above, reconstruction error and
+music properties do not agree. Understanding this conflict is essential to the task
+definition.
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=.9\columnwidth]{type_imputation}
+\includegraphics[width=.95\columnwidth]{basic}
 \end{center}
-\caption{Types of imputation.}
-\label{fig:typeimputation}
+\caption{$15$ beats imputation example, rows are 1) original 2) original masked
+3) recontruction using a linear transform of one previous beat.
+\label{fig:basic}}
 \end{figure}
 
-\section{METHODS}
-\label{sec:methods}
-We present the different methods we use for imputing the missing data.
-The ``trivial methods'' do not require any learning, and simply use the available
-data from the rest of the song to make an educated guess.
 
-The learned models are of more interest for future research, even though they do not
-necessarily perform better at the moment. Learning a model that predicts subsequent
-notes or harmonic patterns can be applied to other tasks such as cover recognition,
-segmentation, similarity and compression.
+Prev work by me: \cite{Bertin-Mahieux2010a}.
 
-\subsection{TRIVIAL METHODS}
-\label{ssec:trivialmethods}
-Below are four of the methods we evaluate, starting by the name we use in the experiments
-to refer to them.
-\begin{enumerate}
-\item \textbf{Random}: each missing pixel is filled with a pseudo-random number drawn from
-a constant $[0,1)$ distribution.
-\item \textbf{Random-song}: each missing beat is filled with another beat from the song,
-chosen at random.
-\item \textbf{Average}: each missing beat is filled with the average of the nearby beats,
-the window size of nearby beats being a parameter. Note that we look at both previous and
-later beats.
-\item \textbf{Knn-song}: we compare a window of beats around the missing one with
-all possible windows of the same size in the song. We use the closest one (based on euclidean
-distance or KL-divergence) to fill in the missing beat. Note that we look at both
-previous and later beats.
-\end{enumerate}
-
-\subsection{LEARNED MODELS}
-\label{ssec:learnedmodels}
-
-Linear predictor, codebook, SIPLCA.
-
-SIPLCA code available online \cite{Weiss2010}. Code to get Echo Nest features and perform
-online clustering available online \cite{Bertin-Mahieux2010a}.
-
-HMM \cite{Rabiner1989}.
-
-Imputation is implemented the same way for SIPLCA, Kalman filtering and HMM? Each iteration,
-we replace the missing data by the most probable observation according to the model.
-For SIPLCA, it is the current reconstruction. For Kalman filtering, it is the most likely
-observation based on the current state. This technique has been explored in \cite{Zhang2006}.
-
-
-\section{EXPERIMENTS}
-\label{sec:experiments}
-We build beat-align chromagrams using the beat tracking and chroma features as
-returned by the Echo Nest API \cite{EchoNest}. Our results are on the Cowbell
-dataset (or subset of it) made of $43,000$ songs \cite{Bertin-Mahieux2010a}.
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.9\columnwidth]{recon_per_dent}
-\end{center}
-\caption{Reconstruction of $15$ beats of song by $4$ methods, ordered by
-ANDE of the reconstruction. Here ``codebook'' is done with patches of 
-size $8$ taken from the visible part of the song. ``dent'' means ANDE,
-to be fixed.}
-\label{fig:dent}
-\end{figure}
-
-Figure \ref{fig:dent} illustrate the use of the ANDE measure. Even if some
-reconstruction are worse according to euclidean distance, ANDE gives a feel
-of how musical the result looks. An ANDE of $0$ signifies that we have the 
-same entropy in the original and the reconstruction segment.
-
-Until we reach perfect reconstruction, we look for reconstruction that do
-well on the two measures. Furthermore, it is important to keep similar
-performance when the number of masked beat increases. Methods that do
-well by learning an average have a rapidly increasing ANDE, as seen in
-Figure \ref{fig:2dscore}. We look for methods that stay in the lower left
-corner when the number of data to impute increases.
 
 \begin{figure}[t]
 \begin{center}
@@ -277,18 +117,12 @@ corner when the number of data to impute increases.
 \caption{Reconstruction error for $4$ methods and different
 number of masked beats. Errors are ANDE and euclidean
 distance. In all cases, the larger the number of masked beats,
-the higher the euclidean distance.}
-\label{fig:2dscore}
+the higher the euclidean distance. Lower left is better.
+\label{fig:2dscore}}
 \end{figure}
 
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.9\columnwidth]{imputation}
-\end{center}
-\caption{Imputation from different methods.}
-\label{fig:imputation}
-\end{figure}
 
+\iffalse
 \begin{table}[t]
 \begin{small}
 \begin{center}
@@ -335,20 +169,15 @@ See Table \ref{tab:reseucl} for the exact parameters used.}
 \end{center}
 \end{small}
 \end{table}
+\fi
+
+
+\section{EXPERIMENTS}
+\label{sec:exp}
 
 \section{CONCLUSION AND FUTURE WORK}
 \label{sec:conclusion}
-Push the task as an evaluation for different learning method on such feature.
-Way to unify different tasks.
 
-Many algorithms remain to be tried, for instance large scale or deep recurrent
-neural network, or using the nonlocal-means algorithm as has been done for
-images \cite{Buades2005} and compressive sensing \cite{Gemmeke2008}.
-We could boost all those things.
-
-Incorporation of different music-related priors, for instance from chord recognition.
-
-Different kind of masking, e.g. removing only one instrument from the mixture.
 
 Code available at \footnote{Code available at: \url{http://www.columbia.edu/~tb2332/something}}.
 
