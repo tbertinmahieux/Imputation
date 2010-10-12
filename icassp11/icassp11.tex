@@ -132,18 +132,18 @@ the cowbell dataset \cite{Bertin-Mahieux2010a} in our experiments.
 
 \subsection{MEASURES}
 \label{ssec:measures}
-The choice of measure function is closely related to the properties
+The choice of a measure function is closely related to the properties
 we expect to preserve in learned patterns. As we saw in Figure
 \ref{fig:basic}, reconstruction error does not tell the whole story.
 We present different error measures and look at what imputation they
 favor.
 
-We consider Mahalanobis distances of the form $d_p = (x_1-x_2)^p$, especially
-with $p < 2$. Figure \ref{fig:measures} offers a reminder of the effect
+We consider Mahalanobis distances of the form $d_p = |x_1-x_2|^p$, especially
+with $p \leq 2$. Figure \ref{fig:measures} offers a reminder of the effect
 of these measures on the absolute difference between a pixel and
 its reconstruction. The middle square represents the case where a
 reconstruction is considered valid if it is between some $\delta$ of
-the original and false otherwise. Mahalanobis distance approximate
+the original and wrong otherwise. Mahalanobis distance approximate
 this case with an increasingly smaller $\delta$ as $p \rightarrow 0$.
 The consequence can be seen on the toy example of 
 Figure \ref{fig:square}. We approximate a square wave of period $1$
@@ -156,9 +156,30 @@ with $d_1$, the errors are both equal to $0.5$. With $d_{1/2}$,
 errors are now $0.5$ and $0.71$. Hence, if the translated square wave
 should be a better approximation, euclidean distance is misleading.
 
+The phenomena above explain why reconstruction such as
+in Figure \ref{fig:basic} ($3$rd row) or in Figure \ref{fig:avgnnrand}
+($3$rd row) often result from powerful algorithms. An intuitive
+conclusion is that we must penalize sustained beat solutions.
+An idea is to measure the difference in the delta-features, i.e.
+the discrete difference in time of the original features.
+Another possibility is to use entropy-based measures, as in
+\cite{Mentzelopoulos2004}.
+Absolute normalize difference entropy (D-ENT)
+between two vectors is computed as follow. First, compute the normalized histogram 
+of values, in our case we discretize $(0,1)$ in $\mbox{\# bins} = 10$. 
+Then, we compute the entropy
+$e_b = - log_2 b_b$ of each of the bins $b_{bi}$ for each of the two vectors $i$. Finally:
+\[
+\mbox{D-ENT} = \left( \Sigma_b \frac{e_{b1} - e_{b2}}{e_{b1}} \right) / (\mbox{\# bins})
+\]
+Note that D-ENT is not symmetric. In our experiment, the first vector is the original one.
+If we look at Figure \ref{fig:avgnnrand}, the reconstruction with the lowest D-ENT is using
+nearest neighbor and not averaging as with euclidean distance.
 
-Euclidean, entropy, delta, L1, L1/2, Mahalanobis, your mama.
-
+We have explained why euclidean distance justifies disappointing reconstructions. At the same
+time, we do not argue that we should ignore or replace it. Euclidean distance measures
+reconstruction in a fundamental way. We believe we need a set of measures to quantify the
+quality of music patterns, euclidean distance being one of them.
 
 \begin{figure}[t]
 \begin{center}
@@ -186,19 +207,49 @@ and its reconstruction.
 \end{center}
 \caption{Reconstruction error between a square wave and two approximation,
 a square wave translated by a quarter of the period, and the average
-function.
+function. Average error between original and translated wave is always $0.5$
+for any Mahalanobis measure $d_p$ on $[0,1]$. 
+For the average function, the errors are
+$0.25$, $0.5$ and $0.71$ for $d_2$, $d_1$ and $d_{1/2}$ respectively.
 \label{fig:square}}
 \end{figure}
 
 \section{EXPERIMENTS}
 \label{sec:exp}
-We present results from different algorithms for imputing $1$ to
-$15$ beats.
+We present results from different algorithms for imputing masked beats.
+Features are beat-aligned chromas and the dataset is made of $5000$ songs
+from the Cowbell dataset. Songs has to be of length at least $100$ beats.
+The masked part is chosen at random, excluding the first and last $30$ beats.
 
 \subsection{ALGORITHMS}
 \label{ssec:algo}
-Random, average, nearest-neighbor, linear prediction, SIPLCA, HMM,
-your mama.
+Algorithms named in bold are the ones used in the experiments.
+
+Simple methods include \textbf{random} where each pixel is drawn from a uniform $[0,1)$
+distribution (Figure \ref{fig:avgnnrand}, $5$th row). 
+We can also pick a beat at random from the song, or take the average
+of all visible beats. A more efficient way is to take the \textbf{average} of the beats
+within a certain range of the missing patch, for example within $3$ beats on each
+side (Figure \ref{fig:avgnnrand}, $3$rd row).
+A significant improvement is to predict the next missing beat based on the
+previous $N$ ones. We train a \textbf{linear transform} by minimizing the euclidean distance
+on the visible parts of the song. This methods is shown in Figure \ref{fig:basic}.
+
+Nearest neighbor ($\mathbf{k}$\textbf{NN}) is a powerful technique. 
+As we mentioned in the introduction, many segments
+of a song are repeated at least once. Thus, we can infer the missing beats by looking at
+the neighbor ones and finding another section that has similar adjacent beats. Note
+that we can use a \textbf{codebook} made of other songs instead of the current one. Also, future
+work include working with $k > 1$.
+
+We experimented with algorithms with greater representational power, e.g. \textbf{HMM} and
+shift invariant principal latent component analysis (\textbf{SIPLCA}) \cite{Weiss2010}.
+ADD SOME DETAILS, DIAGONAL/SEQUENCE STATE TRANSITION MATRIX FOR THE HMM, 
+RANK AND WIN SIZE FOR SIPLCA.
+Due to lack of space and the numerous parameters to tune, we present results without
+much details. We refer the reader to our code and mention that this is part of our
+ongoing research.
+
 
 \subsection{RESULTS}
 \label{ssec:results}
