@@ -138,7 +138,27 @@ we expect to preserve in learned patterns. As we saw in Figure
 We present different error measures and look at what imputation they
 favor.
 
+We consider Mahalanobis distances of the form $d_p = (x_1-x_2)^p$, especially
+with $p < 2$. Figure \ref{fig:measures} offers a reminder of the effect
+of these measures on the absolute difference between a pixel and
+its reconstruction. The middle square represents the case where a
+reconstruction is considered valid if it is between some $\delta$ of
+the original and false otherwise. Mahalanobis distance approximate
+this case with an increasingly smaller $\delta$ as $p \rightarrow 0$.
+The consequence can be seen on the toy example of 
+Figure \ref{fig:square}. We approximate a square wave of period $1$
+by two signals: the same square wave translated by $0.25$ and the
+average function (constant at $0.5$). The average reconstruction 
+errors on $[0,1]$ for the translated wave, with any $d_p$, is $0.5$.
+For the average and $d_2$, this error is $0.25$.
+Hence, the average function seems the most accurate. However,
+with $d_1$, the errors are both equal to $0.5$. With $d_{1/2}$,
+errors are now $0.5$ and $0.71$. Hence, if the translated square wave
+should be a better approximation, euclidean distance is misleading.
+
+
 Euclidean, entropy, delta, L1, L1/2, Mahalanobis, your mama.
+
 
 \begin{figure}[t]
 \begin{center}
