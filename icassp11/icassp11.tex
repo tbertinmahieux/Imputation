@@ -138,7 +138,7 @@ we expect to preserve in learned patterns. As we saw in Figure
 We present different error measures and look at what imputation they
 favor.
 
-Euclidean, entropy, delta, L1, L1/2, your mama.
+Euclidean, entropy, delta, L1, L1/2, Mahalanobis, your mama.
 
 \begin{figure}[t]
 \begin{center}
@@ -151,6 +151,24 @@ nearest neighbor 5) using random.
 \label{fig:avgnnrand}}
 \end{figure}
 
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.95\columnwidth]{measures}
+\end{center}
+\caption{Effect of different measures on the difference between a pixel
+and its reconstruction.
+\label{fig:measures}}
+\end{figure}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.90\columnwidth]{square}
+\end{center}
+\caption{Reconstruction error between a square wave and two approximation,
+a square wave translated by a quarter of the period, and the average
+function.
+\label{fig:square}}
+\end{figure}
 
 \section{EXPERIMENTS}
 \label{sec:exp}
