@@ -18,7 +18,8 @@ import scipy.cluster.vq as VQ
 
 
 
-def do_kmeans(data,nclusters=2,niters=2,centroids=None):
+def do_kmeans(data,nclusters=2,niters=2,centroids=None,
+              savefile=None):
     """
     Wrapper around scipy.cluster.vq.kmeans2
 
@@ -27,6 +28,7 @@ def do_kmeans(data,nclusters=2,niters=2,centroids=None):
       nclusters  - k of kmeans
       niters     - how long kmeans will run
       centroids  - result of a previous run, to continue training
+      svaefile   - if not None, save result to said file in matlab format
 
     RETURN
       centroids  - the 'nclusters' means, as one array, order by frequency
@@ -47,7 +49,15 @@ def do_kmeans(data,nclusters=2,niters=2,centroids=None):
         cb,labels =  VQ.kmeans2(data,centroids,iter=niters,
                                 minit='matrix',missing='warn')
     # reorder so most frequent code comes first
-    return order_codebook_by_freq(cb,labels)
+    cb, labels =  order_codebook_by_freq(cb,labels)
+    # save to file
+    if savefile is not None:
+        try:
+            sio.savemat(savefile,{'centroids':cb,'labels':labels})
+        except IOError:
+            print 'cannot save centroids and labels to file:',savefile
+    # done
+    return cb, labels
 
 
 def crop_and_split(btchroma,nbeats,flatten=True):

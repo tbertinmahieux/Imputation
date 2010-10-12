@@ -86,7 +86,7 @@ def compare_all(btchroma,mask,masked_cols,codebook=None):
     im7_err = EVAL.recon_error(btchroma,mask,recon,measure='eucl')
     im7 = recon[:,pos1:pos2].copy()
     allimages.append(im7)
-    titles.append('SIPLCA,rank=4,win=5')
+    titles.append('SIPLCA, rank=4, win=5')
     xlabels.append('err='+str(im7_err))
     # 7) SIPLCA 2
     res = IMPUTATION_PLCA.SIPLCA_mask.analyze((btchroma*mask).copy(),
@@ -95,7 +95,7 @@ def compare_all(btchroma,mask,masked_cols,codebook=None):
     im7_err_bis = EVAL.recon_error(btchroma,mask,recon,measure='eucl')
     im7_bis = recon[:,pos1:pos2].copy()
     allimages.append(im7_bis)
-    titles.append('SIPLCA,rank=25,win=10')
+    titles.append('SIPLCA, rank=25, win=10')
     xlabels.append('err='+str(im7_err_bis))
     # 8) codebook
     if codebook != None:
