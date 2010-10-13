@@ -253,19 +253,59 @@ ongoing research.
 
 \subsection{RESULTS}
 \label{ssec:results}
+It is impossible results for every algorithm, measure and number of masked columns.
+We selected the most meaningful ones; the reader is referred to our 
+website\footnote{Code available at: \url{http://www.columbia.edu/~tb2332/something}}
+for data and code to reproduce the results.
 
+Figure \ref{fig:2dscore} shows the performance of $3$ methods for different numbers
+of missing beats. We report euclidean distance and D-ENT. One can see the result
+of contradicting measures. Nearest neighbor method ($k=1$) creates a reconstruction
+with an entropy similar to the origin for all mask sizes. It is a direct consequence
+of the fact that entropy is approximitely constant troughout a song. The linear
+transform learns to minimize the euclidean distance and does it successfuly. But as it
+can be seen from its entropy measure and Figure \ref{fig:basic} $3$rd row, it is
+done by a large amount of smoothing. The average reconstruction has the same entropy
+results than the linear transform, but due to less smoothing (or a less intelligent
+one), it does not do as well with the euclidean distance.
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=.9\columnwidth]{recon_score_in_2d}
+\includegraphics[width=.9\columnwidth]{recon_score_in_2d_5k}
 \end{center}
-\caption{Reconstruction error for $4$ methods and different
-number of masked beats. Errors are ANDE and euclidean
+\caption{Reconstruction error for $3$ methods and different
+number of masked beats. Errors are D-ENT and euclidean
 distance. In all cases, the larger the number of masked beats,
 the higher the euclidean distance. Lower left is better.
 \label{fig:2dscore}}
 \end{figure}
 
+
+COVARIANCE ACCROSS MEASURES
+
+
+TABLE OF RESULTS
+
+\begin{table}[t]
+\begin{small}
+\begin{center}
+\begin{tabular}{|l|c|c|} \hline
+method & euclidean & D-ENT \\ \hline
+random & & \\
+average & & \\ \hline
+1NN & & \\
+codebook & & \\ \hline
+lin. trans. & & \\
+SIPLCA & & \\
+HMM & & \\ \hline
+\end{tabular}
+\caption{Results on $15$ missing beats by different methods
+on $5000$ songs and measured using euclidean distance and
+D-ENT.
+\label{tab:res}}
+\end{center}
+\end{small}
+\end{table}
 
 \iffalse
 \begin{table}[t]
@@ -319,8 +359,8 @@ See Table \ref{tab:reseucl} for the exact parameters used.}
 \section{CONCLUSION AND FUTURE WORK}
 \label{sec:conclusion}
 
+Code available.
 
-Code available at \footnote{Code available at: \url{http://www.columbia.edu/~tb2332/something}}.
 
 \section{ACKNOWLEDGEMENTS}
 Your mama.
