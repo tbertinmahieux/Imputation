@@ -399,6 +399,7 @@ def plot_2_measures_dataset(dataset,methods=(),methods_args=(),measures=(),ncols
        dataset      - directory path, or list of files
        methods      - list of method names
        methods_args - list of dictionaries, to be passed as params
+       ncols        - list of number of missing columns to try
     """
     # sanity checks
     for meas in measures:
@@ -541,3 +542,71 @@ def plot_oneexample(btchroma,mask,p1,p2,methods=(),methods_args=None,
         titles.append(t)
     plotall(ims,subplot=subplot,title=titles,cmap='gray_r',colorbar=False)
     P.show()
+
+
+
+def pearson_corr(v1,v2):
+    """ Compute pearson correlation of two vectors """
+    assert v1.size == v2.size,'v1 and v2 must be same size'
+    cov = np.cov(v1.flatten(),v2.flatten())
+    assert cov.shape == (2,2),'something went wrong'
+    cov = cov[0,1]
+    # assume both variance are not 0
+    return cov / (np.std(v1.flatten()) * np.std(v2.flatten()) + EPS)
+    
+
+def compute_dist_correlation(dataset,methods=(),methods_args=(),ncols=(),
+                             verbose=1):
+    """
+    Computes the correlation between different measures.
+    Done by building reconstruction on a dataset with many methods,
+    for one or many number of missing columns.
+    INPUT
+       dataset      - directory path, or list of files
+       methods      - list of method names
+       methods_args - list of dictionaries, to be passed as params
+       ncols        - list of number of missing columns to try
+    RETURN
+       corrs        - matrix of correlations
+       measures     - list of measure names, same order as corrs
+
+    in ipython, for icassp, do:
+       corrs,measures = evaluation.compute_dist_correlation(test,methods=['random','average','knn_eucl','lintrans'],methods_args=({},{'win':3},{'win':6},{'win':1}),ncols=[1,10])
+    """
+    # inits
+    nmethods = len(methods)
+    if len(methods_args) == 0:
+        methods_args = [{}] * nmethods
+    measures = ()
+    # iterate on methods
+    for imethod,method in enumerate(methods):
+        if verbose>0: print 'doing method:',method
+        for incol,ncol in enumerate(ncols):
+            if verbose>0: print 'doing ncol:',ncol
+            res = test_maskedpatch_on_dataset(dataset,method=method,ncols=ncol,
+                                              verbose=verbose,
+                                              **methods_args[imethod])
+            sys.stdout.flush()
+            # first set of results?
+            if len(measures) == 0:
+                measures = np.array(res[0].keys())
+                np.sort(measures) # alphabetical order
+                assert len(measures)>1,'need at least 2 measures'
+                print 'measures=',measures
+                res_per_measure = []
+                for k in range(len(measures)):
+                    res_per_measure.append([]) 
+            # add
+            for measidx,meas in enumerate(measures):
+                res_per_measure[measidx].extend( map(lambda d:d[meas],res) )
+    # done with recons
+    if verbose > 0: print 'computing correlation'; sys.stdout.flush()
+    for k in range(len(measures)):
+        res_per_measure[k] = np.array(res_per_measure[k])
+    corrs = np.ones((len(measures),len(measures)))
+    for m1 in range(len(measures)-1):
+        for m2 in range(m1+1,len(measures)):
+            corrs[m1,m2] = pearson_corr(res_per_measure[m1],res_per_measure[m2])
+            corrs[m2,m1] = corrs[m1,m2]
+    # done, return
+    return corrs, measures
