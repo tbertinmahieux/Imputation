@@ -418,6 +418,7 @@ def plot_2_measures_dataset(dataset,methods=(),methods_args=(),measures=(),ncols
             res = test_maskedpatch_on_dataset(dataset,method=method,ncols=ncol,
                                               verbose=verbose,
                                               **methods_args[imethod])
+            sys.stdout.flush()
             err_measure1[imethod,incol] = np.mean(map(lambda d:d[measures[0]],
                                                       res))
             err_measure2[imethod,incol] = np.mean(map(lambda d:d[measures[1]],
