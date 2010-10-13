@@ -15,8 +15,14 @@ from scipy import histogram
 import scipy.stats.distributions as DISTRIBS
 
 import imputation as IMPUTATION
-import imputation_plca as IMPUTATION_PLCA
-import hmm_imputation as IMPUTATION_HMM
+try:
+    import imputation_plca as IMPUTATION_PLCA
+except ImportError:
+    print 'dont seem to have Ron W. SIPLCA stuff, cant use it'
+try:
+    import hmm_imputation as IMPUTATION_HMM
+except ImportError:
+    print 'dont seem you have HMM stuff, cant use it'
 
 import masking as MASKING
 
