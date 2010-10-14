@@ -71,6 +71,14 @@ def symm_kl_div(v1,v2):
     div2 = res2.sum()
     return (div1 + div2) / 2.
 
+def diff_sum_abs(v1,v2):
+    """
+    Measure that sums all absolute values and returns
+    the absolute difference divided by the vector size.
+    Usefull for deltas.
+    """
+    assert v1.size == v2.size,'v1 and v2 must have same size'
+    return np.abs( np.abs(v1).sum() - np.abs(v2).sum() ) / v1.size
 
 def entropy(v1):
     """
@@ -108,7 +116,8 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
                   - 'kl' (symmetric KL-divergence)
                   - 'cos' (cosine distance)
                   - 'dent' (absolute normalized difference of entropy)
-                  - 'lhalf' l1/2
+                  - 'lhalf' (l1/2)
+                  - 'ddiff' (delta difference, delta set to 1 automatically)
                   - 'all' returns a dictionary with all the above (default)
        delta      - if True, use delta features (rowwise diff on btchroma)
     RETURN
@@ -128,6 +137,9 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         measfun = abs_n_ent_diff
     elif measure == 'lhalf':
         measfun = l_half
+    elif measure == 'ddif':
+        delta = True
+        measfun = diff_sum_abs
     elif measure == 'all':
         pass
     else:
@@ -140,7 +152,7 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         maskzeros = np.where(mask==0)
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
-        meas = ['eucl','kl','cos','dent','lhalf']
+        meas = ['eucl','kl','cos','dent','lhalf','ddif']
         ds = map(lambda m: recon_error(btchroma,mask,recon,m),
                  meas)
         meas_delta = ['eucl','cos','lhalf'] # others cant handle negatives

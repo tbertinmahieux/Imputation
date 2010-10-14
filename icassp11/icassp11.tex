@@ -75,14 +75,6 @@ stream to replace the original one. Thus we do not only want a signal close to t
 in a reconstruction sense, but also a signal that has similar ``musical properties'' to
 the user ear.
 
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.7\columnwidth]{type_imputation}
-\end{center}
-\caption{Imputation types.
-\label{fig:types}}
-\end{figure}
-
 Figure \ref{fig:types} summarizes the difference between different sorts of imputation.
 Usually \cite{Smaragdis2009}, a few frequency bins are hidden and can be recovered from
 their neighborhood, both in time and frequency. Masking one full beat is a natural extension,
@@ -92,19 +84,10 @@ section from an unmasked part of the song (think about a repeated chorus for ins
 The real challenge arises from masking many consecutive beats.
 
 Figure \ref{fig:basic} shows an example of the imputation of $15$ beats on chroma features
-(see Section ???). The solution in that figure, although intuitively wrong, is very
+(c.f. Subsection \ref{ssec:feats}). The solution in that figure, although intuitively wrong, is very
 accurate according to euclidean distance. As we mentioned above, reconstruction error and
 music properties do not agree. Understanding this conflict is essential to the task
 definition.
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.95\columnwidth]{basic}
-\end{center}
-\caption{$15$ beats imputation example, rows are 1) original 2) original masked
-3) reconstruction using a linear transform of one previous beat.
-\label{fig:basic}}
-\end{figure}
 
 
 \subsection{RELATED WORK} 
@@ -129,6 +112,23 @@ returned by the Echo Nest API \cite{EchoNest} which uses a constant-
 Q spectrogram and where the chroma for each time stamp is
 normalized so the max is 1. We use a random subset of $5K$ songs of
 the cowbell dataset \cite{Bertin-Mahieux2010a} in our experiments.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.7\columnwidth]{type_imputation}
+\end{center}
+\caption{Imputation types.
+\label{fig:types}}
+\end{figure}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.95\columnwidth]{basic}
+\end{center}
+\caption{$15$ beats imputation example, rows are 1) original 2) original masked
+3) reconstruction using a linear transform of one previous beat.
+\label{fig:basic}}
+\end{figure}
 
 \subsection{MEASURES}
 \label{ssec:measures}
@@ -155,6 +155,8 @@ Hence, the average function seems the most accurate. However,
 with $d_1$, the errors are both equal to $0.5$. With $d_{1/2}$,
 errors are now $0.5$ and $0.71$. Hence, if the translated square wave
 should be a better approximation, euclidean distance is misleading.
+
+Vasicek estimator \cite{Learned-Miller2003}.
 
 The phenomena above explain why reconstruction such as
 in Figure \ref{fig:basic} ($3$rd row) or in Figure \ref{fig:avgnnrand}
@@ -262,8 +264,8 @@ Figure \ref{fig:2dscore} shows the performance of $3$ methods for different numb
 of missing beats. We report euclidean distance and D-ENT. One can see the result
 of contradicting measures. Nearest neighbor method ($k=1$) creates a reconstruction
 with an entropy similar to the origin for all mask sizes. It is a direct consequence
-of the fact that entropy is approximitely constant troughout a song. The linear
-transform learns to minimize the euclidean distance and does it successfuly. But as it
+of the fact that entropy is approximately constant throughout a song. The linear
+transform learns to minimize the euclidean distance and does it successfully. But as it
 can be seen from its entropy measure and Figure \ref{fig:basic} $3$rd row, it is
 done by a large amount of smoothing. The average reconstruction has the same entropy
 results than the linear transform, but due to less smoothing (or a less intelligent
@@ -280,24 +282,64 @@ the higher the euclidean distance. Lower left is better.
 \label{fig:2dscore}}
 \end{figure}
 
-
-COVARIANCE ACCROSS MEASURES
-
-
-TABLE OF RESULTS
+In Subsection \ref{ssec:measures} we mentioned many different measures.
+We also showed how they could favor different kinds of reconstruction
+(with heavy smoothing or not, for instance). To make some sense of
+these, we investigate over large set of experiments which measures tend
+to agree with each other.
+Pearson's correlation is defined as
+\[
+\rho_{X,Y}=\mathrm{corr}(X,Y)={\mathrm{cov}(X,Y) \over \sigma_X \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
+\]
+with $\sigma_X$ standard deviation of $X$. We have $-1 \leq \rho_{X,Y} \leq 1$, an absolute
+value close to $1$ meaning high correlation.
+$\rho_{X,Y}$ is computed for many error measures and results are presented in
+Table \ref{tab:corrs}. It appears that measures tend to form two groups.
+The ``euclidean-like'' measures favor smoothing to minimize divergence on
+average. The ``entropy-like'' measures look at the texture of the reconstruction
+compared to the original.
 
 \begin{table}[t]
 \begin{small}
 \begin{center}
-\begin{tabular}{|l|c|c|} \hline
-method & euclidean & D-ENT \\ \hline
-random & & \\
-average & & \\ \hline
-1NN & & \\
-codebook & & \\ \hline
-lin. trans. & & \\
-SIPLCA & & \\
-HMM & & \\ \hline
+\begin{tabular}{|l|c|c|c|c|c|} \hline
+ & eucl. & cos & KL & D-ENT & $d_{1/2}$ \\ \hline
+eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ \\
+cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ \\
+KL &  &  & $1$ & $0.17$ & $0.64$\\
+D-ENT &  & $$ & $$ & $1$ & $0.27$ \\
+$d_{1/2}$ & & & & & $1$\\ \hline
+\end{tabular}
+\caption{Pearson correlation between measures. Based on all results
+from random, average, $1$NN and linear transform on $5000$K songs
+with $1$ and $10$ missing beats. $1$ or $-1$ means high
+correlation, $0$ means none.
+Results form a symmetric matrix, we only show the upper triangle.
+\label{tab:corrs}}
+\end{center}
+\end{small}
+\end{table}
+
+We know report results of a $15$ beat imputation on $5000$ songs in
+Table \ref{tab:res}. The linear transform is a clear winner based
+on euclidean distance. As before, nearest neighbor's strength
+is to preserve the texture of the original patch as can be seen
+from his D-ENT score. We can not report all results, but they
+are no serious surprises with other measures 
+as can be expected from Table \ref{tab:corrs}.
+
+\begin{table}[t]
+\begin{small}
+\begin{center}
+\begin{tabular}{|l||c|c|c|} \hline
+method & euclidean & KL & D-ENT \\ \hline
+random & $0.168$ & $0.461$ & $0.252$ \\
+average & $0.079$ & $0.249$ & $0.430$ \\ \hline
+1NN & $0.072$ & $0.237$ & $\mathbf{0.123}$ \\
+codebook & & & \\ \hline
+lin. trans. & $\mathbf{0.056}$ & $0.183$ & $0.479$ \\
+SIPLCA & & & \\
+HMM & & & \\ \hline
 \end{tabular}
 \caption{Results on $15$ missing beats by different methods
 on $5000$ songs and measured using euclidean distance and
