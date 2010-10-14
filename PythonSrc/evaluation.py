@@ -35,6 +35,12 @@ def euclidean_dist_sq(v1,v2):
     """
     return np.square(v1.flatten()-v2.flatten()).mean()
 
+def l_half(v1,v2):
+    """
+    l1/2 distance
+    """
+    return np.power(np.abs(v1.flatten()-v2.flatten()),.5).mean()
+
 def cosine_dist(u,v):
     """
     Cosine distance between too flatten vector
@@ -102,6 +108,7 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
                   - 'kl' (symmetric KL-divergence)
                   - 'cos' (cosine distance)
                   - 'dent' (absolute normalized difference of entropy)
+                  - 'lhalf' l1/2
                   - 'all' returns a dictionary with all the above (default)
        delta      - if True, use delta features (rowwise diff on btchroma)
     RETURN
@@ -119,6 +126,8 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         measfun = cosine_dist
     elif measure == 'dent':
         measfun = abs_n_ent_diff
+    elif measure == 'lhalf':
+        measfun = l_half
     elif measure == 'all':
         pass
     else:
@@ -131,10 +140,10 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         maskzeros = np.where(mask==0)
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
-        meas = ['eucl','kl','cos','dent']
+        meas = ['eucl','kl','cos','dent','lhalf']
         ds = map(lambda m: recon_error(btchroma,mask,recon,m),
                  meas)
-        meas_delta = ['eucl','cos'] # others cant handle negatives
+        meas_delta = ['eucl','cos','lhalf'] # others cant handle negatives
         ds.extend(map(lambda m: recon_error(btchroma,mask,recon,m,delta=True),
                       meas_delta))
         meas.extend( map(lambda m: m+'_delta',meas_delta) )
