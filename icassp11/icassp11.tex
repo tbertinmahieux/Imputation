@@ -328,6 +328,13 @@ from his D-ENT score. We can not report all results, but they
 are no serious surprises with other measures 
 as can be expected from Table \ref{tab:corrs}.
 
+It is a disappointment that powerful methods such as SIPLCA
+and HMM did not perform better in our experiments. It
+probably only means that more research is needed. HMM should
+be extended to model more than one beat at a time. For SIPLCA,
+the activation matrix (that tells when each patch is used in time)
+should be better constrained via priors for instance.
+
 \begin{table}[t]
 \begin{small}
 \begin{center}
@@ -400,8 +407,13 @@ See Table \ref{tab:reseucl} for the exact parameters used.}
 
 \section{CONCLUSION AND FUTURE WORK}
 \label{sec:conclusion}
-
-Code available.
+As mentioned, modifications of HMM and SIPLCA are ongoing
+research. There is great hope that algorithms pretrained
+on large additional data (another set of songs) will break
+the curse of boring smoothed patterns.
+A unified set of measures should also be selected
+by the community. Our code and test data is available to 
+reproduce and improve these results.
 
 
 \section{ACKNOWLEDGEMENTS}
