@@ -80,6 +80,15 @@ def diff_sum_abs(v1,v2):
     assert v1.size == v2.size,'v1 and v2 must have same size'
     return np.abs( np.abs(v1).sum() - np.abs(v2).sum() ) / v1.size
 
+def jensen_diff(v1,v2):
+    """
+    Computes Jensen difference using Shannon entropy
+    """
+    p = v1 / v1.sum()
+    q = v2 / v2.sum()
+    return entropy((p+1)/2.) - (entropy(p) + entropy(q))/2.
+
+
 def entropy(v1):
     """
     Computes entropy, sum -p_i * log(p_i)
@@ -118,6 +127,7 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
                   - 'dent' (absolute normalized difference of entropy)
                   - 'lhalf' (l1/2)
                   - 'ddiff' (delta difference, delta set to 1 automatically)
+                  - 'jdiff' (jensen difference of entropy)
                   - 'all' returns a dictionary with all the above (default)
        delta      - if True, use delta features (rowwise diff on btchroma)
     RETURN
@@ -137,6 +147,8 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         measfun = abs_n_ent_diff
     elif measure == 'lhalf':
         measfun = l_half
+    elif measure == 'jdiff':
+        measfun = jensen_diff
     elif measure == 'ddif':
         delta = True
         measfun = diff_sum_abs
@@ -152,7 +164,7 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         maskzeros = np.where(mask==0)
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
-        meas = ['eucl','kl','cos','dent','lhalf','ddif']
+        meas = ['eucl','kl','cos','dent','lhalf','ddif','jdiff']
         ds = map(lambda m: recon_error(btchroma,mask,recon,m),
                  meas)
         meas_delta = ['eucl','cos','lhalf'] # others cant handle negatives
