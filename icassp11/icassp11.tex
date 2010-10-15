@@ -182,6 +182,10 @@ Note that D-ENT is not symmetric. In our experiment, the first vector is the ori
 If we look at Figure \ref{fig:avgnnrand}, the reconstruction with the lowest D-ENT is using
 nearest neighbor and not averaging as with euclidean distance.
 
+Surprisingly, Kullback-Leibler divergence (KL) that is entropy related does not seem
+to measures things that differently from euclidean distance in our case. See Table
+\ref{tab:corrs}. Similar disappointment for $d_{1/2}$.
+
 We have explained why euclidean distance justifies disappointing reconstructions. At the same
 time, we do not argue that we should ignore or replace it. Euclidean distance measures
 reconstruction in a fundamental way. We believe we need a set of measures to quantify the
@@ -249,7 +253,7 @@ that we can use a \textbf{codebook} made of other songs instead of the current o
 work include working with $k > 1$.
 
 We experimented with algorithms with greater representational power, e.g. \textbf{HMM} and
-shift invariant principal latent component analysis (\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}.
+shift invariant probabilistic latent component analysis (\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}.
 ADD SOME DETAILS, DIAGONAL/SEQUENCE STATE TRANSITION MATRIX FOR THE HMM, 
 RANK AND WIN SIZE FOR SIPLCA.
 Due to lack of space and the numerous parameters to tune, we present results without
