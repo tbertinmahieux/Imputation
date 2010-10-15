@@ -29,13 +29,13 @@
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
 \twoauthors
-  {Thierry Bertin-Mahieux\sthanks{TBM is supported in part by a NSERC PG scholarship.}, Ron J. Weiss\sthanks{Thanks something}}
-	{Columbia University / New York University\\
-          LabROSA / MARL\\
-	New York, USA}
-  {Graham Grindlay and Daniel P.W. Ellis}
+  {Thierry Bertin-Mahieux\sthanks{TBM is supported in part by a NSERC PG scholarship.}, Graham Grindlay,}
 	{Columbia University\\
           LabROSA\\
+	New York, USA}
+  {Ron J. Weiss\sthanks{Thanks something} and Daniel P.W. Ellis}
+	{New York University / Columbia University\\
+          MARL / LabROSA\\
 	New York, USA}
 
 \begin{document}
@@ -264,7 +264,7 @@ for data and code to reproduce the results.
 Figure \ref{fig:2dscore} shows the performance of $3$ methods for different numbers
 of missing beats. We report euclidean distance and D-ENT. One can see the result
 of contradicting measures. Nearest neighbor method ($k=1$) creates a reconstruction
-with an entropy similar to the origin for all mask sizes. It is a direct consequence
+with an entropy similar to the original for all mask sizes. It is a direct consequence
 of the fact that entropy is approximately constant throughout a song. The linear
 transform learns to minimize the euclidean distance and does it successfully. But as it
 can be seen from its entropy measure and Figure \ref{fig:basic} $3$rd row, it is
@@ -303,13 +303,14 @@ compared to the original.
 \begin{table}[t]
 \begin{small}
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|} \hline
- & eucl. & cos & KL & D-ENT & $d_{1/2}$ \\ \hline
-eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ \\
-cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ \\
-KL &  &  & $1$ & $0.17$ & $0.64$\\
-D-ENT &  & $$ & $$ & $1$ & $0.27$ \\
-$d_{1/2}$ & & & & & $1$\\ \hline
+\begin{tabular}{|l|c|c|c|c|c|c|} \hline
+ & eucl. & cos & KL & D-ENT & $d_{1/2}$ & Jensen \\ \hline
+eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $$\\
+cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $$ \\
+KL &  &  & $1$ & $0.17$ & $0.64$ & $$ \\
+D-ENT &  & $$ & $$ & $1$ & $0.27$ & $$ \\
+$d_{1/2}$ & & & & & $1$ & $$ \\ 
+Jensen & & & & & & $1$ \\ \hline
 \end{tabular}
 \caption{Pearson correlation between measures. Based on all results
 from random, average, $1$NN and linear transform on $5000$K songs
