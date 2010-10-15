@@ -73,7 +73,10 @@ of music have not been considered. A real-life analogous problem would be a musi
 signal that is lost for a few seconds. The goal here would be to infer a reasonable
 stream to replace the original one. Thus we do not only want a signal close to the original
 in a reconstruction sense, but also a signal that has similar ``musical properties'' to
-the user ear.
+the user ear. These proporties are difficult to define, but we refer to higher order
+dependancies present in the signal. For instance, the rate of note onsets, the number
+of notes activated at the same time, and other texture-like elements. We will argue
+that entropy is a good approximation of these characteristics.
 
 Figure \ref{fig:types} summarizes the difference between different sorts of imputation.
 Usually \cite{Smaragdis2009}, a few frequency bins are hidden and can be recovered from
@@ -165,8 +168,8 @@ in Figure \ref{fig:basic} ($3$rd row) or in Figure \ref{fig:avgnnrand}
 conclusion is that we must penalize sustained beat solutions.
 An idea is to measure the difference in the delta-features, i.e.
 the discrete difference in time of the original features.
-Another possibility is to use entropy-based measures, as in
-\cite{Mentzelopoulos2004}.
+Another possibility is to use entropy-based measures as introduced
+in \cite{Mentzelopoulos2004}.
 Absolute normalize difference entropy (D-ENT)
 between two vectors is computed as follow. First, compute the normalized histogram 
 of values, in our case we discretize $(0,1)$ in $\mbox{\# bins} = 10$. 
@@ -197,7 +200,7 @@ nearest neighbor 5) using random.
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=.95\columnwidth]{measures}
+\includegraphics[width=.85\columnwidth]{measures}
 \end{center}
 \caption{Effect of different measures on the difference between a pixel
 and its reconstruction.
@@ -206,7 +209,7 @@ and its reconstruction.
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=.90\columnwidth]{square}
+\includegraphics[width=.8\columnwidth]{square}
 \end{center}
 \caption{Reconstruction error between a square wave and two approximation,
 a square wave translated by a quarter of the period, and the average
@@ -246,7 +249,7 @@ that we can use a \textbf{codebook} made of other songs instead of the current o
 work include working with $k > 1$.
 
 We experimented with algorithms with greater representational power, e.g. \textbf{HMM} and
-shift invariant principal latent component analysis (\textbf{SIPLCA}) \cite{Weiss2010}.
+shift invariant principal latent component analysis (\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}.
 ADD SOME DETAILS, DIAGONAL/SEQUENCE STATE TRANSITION MATRIX FOR THE HMM, 
 RANK AND WIN SIZE FOR SIPLCA.
 Due to lack of space and the numerous parameters to tune, we present results without
@@ -287,12 +290,10 @@ In Subsection \ref{ssec:measures} we mentioned many different measures.
 We also showed how they could favor different kinds of reconstruction
 (with heavy smoothing or not, for instance). To make some sense of
 these, we investigate over large set of experiments which measures tend
-to agree with each other.
-Pearson's correlation is defined as
-\[
-\rho_{X,Y}=\mathrm{corr}(X,Y)={\mathrm{cov}(X,Y) \over \sigma_X \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
-\]
-with $\sigma_X$ standard deviation of $X$. We have $-1 \leq \rho_{X,Y} \leq 1$, an absolute
+to agree with each other. We use Pearson's 
+correlation\footnote{
+$\rho_{X,Y}=\mathrm{corr}(X,Y)={\mathrm{cov}(X,Y) \over \sigma_X \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}$
+} $\rho_{X,Y}$. We have $-1 \leq \rho_{X,Y} \leq 1$, an absolute
 value close to $1$ meaning high correlation.
 $\rho_{X,Y}$ is computed for many error measures and results are presented in
 Table \ref{tab:corrs}. It appears that measures tend to form two groups.
