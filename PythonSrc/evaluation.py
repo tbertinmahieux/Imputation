@@ -86,7 +86,7 @@ def jensen_diff(v1,v2):
     """
     p = v1 / v1.sum()
     q = v2 / v2.sum()
-    return entropy((p+1)/2.) - (entropy(p) + entropy(q))/2.
+    return entropy((p+q)/2.) - (entropy(p) + entropy(q))/2.
 
 
 def entropy(v1):

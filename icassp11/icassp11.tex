@@ -133,6 +133,10 @@ the cowbell dataset \cite{Bertin-Mahieux2010a} in our experiments.
 \label{fig:basic}}
 \end{figure}
 
+% IPYTHON COMMAND TO RECREATE ABOVE FIGURE
+%btchroma2 = sio.loadmat('/home/thierry/Columbia/covers80/coversongs/covers32kENmats/john_lennon+Double_Fantasy+05-I_m_Losing_You.mp3.mat')['btchroma']
+%p1=185;p2=p1+15;mask=np.ones(btchroma2.shape);mask[:,p1:p2]=0.
+
 \subsection{MEASURES}
 \label{ssec:measures}
 The choice of a measure function is closely related to the properties
@@ -303,18 +307,18 @@ $\rho_{X,Y}$ is computed for many error measures and results are presented in
 Table \ref{tab:corrs}. It appears that measures tend to form two groups.
 The ``euclidean-like'' measures favor smoothing to minimize divergence on
 average. The ``entropy-like'' measures look at the texture of the reconstruction
-compared to the original.
+compared to the original (ONLY D-ENT IN THAT CATEGORY?????).
 
 \begin{table}[t]
 \begin{small}
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|} \hline
  & eucl. & cos & KL & D-ENT & $d_{1/2}$ & Jensen \\ \hline
-eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $$\\
-cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $$ \\
-KL &  &  & $1$ & $0.17$ & $0.64$ & $$ \\
-D-ENT &  & $$ & $$ & $1$ & $0.27$ & $$ \\
-$d_{1/2}$ & & & & & $1$ & $$ \\ 
+eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $0.84$\\
+cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $0.97$ \\
+KL &  &  & $1$ & $0.17$ & $0.64$ & $0.95$ \\
+D-ENT &  & $$ & $$ & $1$ & $0.27$ & $0.20$ \\
+$d_{1/2}$ & & & & & $1$ & $0.71$ \\ 
 Jensen & & & & & & $1$ \\ \hline
 \end{tabular}
 \caption{Pearson correlation between measures. Based on all results
