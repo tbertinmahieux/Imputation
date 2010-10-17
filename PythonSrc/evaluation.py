@@ -80,6 +80,27 @@ def diff_sum_abs(v1,v2):
     assert v1.size == v2.size,'v1 and v2 must have same size'
     return np.abs( np.abs(v1).sum() - np.abs(v2).sum() ) / v1.size
 
+def diffthresh(v1,v2,thresh=.1):
+    """
+    Average of v2 pixels that are within thresh from the
+    pixels in v1
+    """
+    d = np.abs(v1.flatten()-v2.flatten())
+    return len(np.where(d<thresh)[0]) * 1. / v1.size
+
+def levenshtein(v1,v2,alpha=.2):
+    try:
+        import Levenstein
+    except ImportError:
+        return 0.
+    v1discrete = map(lambda val: int(val/alpha),v1)
+    v2discrete = map(lambda val: int(val/alpha),v2)
+    s1 = ''
+    s2 = ''
+    for k1 in v1discrete: s1+=str(k1)
+    for k2 in v2discrete: s2+=str(k2)
+    return Levenshtein.distance(s1,s2) * 1. / v1.size
+
 def jensen_diff(v1,v2):
     """
     Computes Jensen difference using Shannon entropy
@@ -128,6 +149,8 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
                   - 'lhalf' (l1/2)
                   - 'ddiff' (delta difference, delta set to 1 automatically)
                   - 'jdiff' (jensen difference of entropy)
+                  - 'thresh' (number of pixels within .1 of original)
+                  - 'leven' (levenstein, weird idea...)
                   - 'all' returns a dictionary with all the above (default)
        delta      - if True, use delta features (rowwise diff on btchroma)
     RETURN
@@ -149,6 +172,10 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         measfun = l_half
     elif measure == 'jdiff':
         measfun = jensen_diff
+    elif measure == 'thresh':
+        measfun = diffthresh
+    elif measure == 'leven':
+        measfun = levenshtein
     elif measure == 'ddif':
         delta = True
         measfun = diff_sum_abs
@@ -164,10 +191,10 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         maskzeros = np.where(mask==0)
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
-        meas = ['eucl','kl','cos','dent','lhalf','ddif','jdiff']
+        meas = ['eucl','kl','cos','dent','lhalf','ddif','jdiff','thresh','leven']
         ds = map(lambda m: recon_error(btchroma,mask,recon,m),
                  meas)
-        meas_delta = ['eucl','cos','lhalf'] # others cant handle negatives
+        meas_delta = ['eucl','cos','lhalf','thresh'] # others cant handle negatives
         ds.extend(map(lambda m: recon_error(btchroma,mask,recon,m,delta=True),
                       meas_delta))
         meas.extend( map(lambda m: m+'_delta',meas_delta) )
