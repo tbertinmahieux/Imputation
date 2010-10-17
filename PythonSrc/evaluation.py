@@ -90,7 +90,7 @@ def diffthresh(v1,v2,thresh=.1):
 
 def levenshtein(v1,v2,alpha=.2):
     try:
-        import Levenstein
+        import Levenshtein
     except ImportError:
         return 0.
     v1discrete = map(lambda val: int(val/alpha),v1)
