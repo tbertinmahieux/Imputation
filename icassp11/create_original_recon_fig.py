@@ -29,21 +29,32 @@ def nice_nums(val):
 
 
 # EASY RECONSTRUCTION
-#bt = 
+bt = sio.loadmat('/home/thierry/Columbia/covers80/coversongs/covers32kENmats/beatles+Revolver+14-Tomorrow_Never_Knows.mp3.mat')['btchroma']
+mask,p1,p2 = masking.random_patch_mask(bt,ncols=15,win=25)
+recon,tmp = IMPUTATION.lintransform_patch(bt,mask,p1,p2,win=1)
+errs = evaluation.recon_error(bt,mask,recon)
+s = 'method: linear transform\n'
+s += 'eucl = ' + nice_nums(errs['eucl']) + '\n'
+s += 'D-ENT = ' + nice_nums(errs['dent']) + '\n'
+s += 'Jensen diff. = ' + nice_nums(errs['jdiff']) + '\n'
+s += 'Levenshtein. = ' + nice_nums(errs['leven']) + '\n'
+originals.append( bt[:,p1:p2].copy() )
+recons.append( recon.copy() )
+texts.append(s)
 
 
 # SMOOTH RECONSTRUCTION
 bt = sio.loadmat('/home/thierry/Columbia/covers80/coversongs/covers32kENmats/metallica+Live_Shit_Binge_And_Purge_Disc_3_+09-Stone_Cold_Crazy.mp3.mat')['btchroma']
 mask,p1,p2 = masking.random_patch_mask(bt,ncols=15,win=25)
 recon,tmp = IMPUTATION.knn_patch(bt,mask,p1,p2,measure='eucl',win=8)
-originals.append( bt[:,p1:p2].copy() )
-recons.append( recon.copy() )
 errs = evaluation.recon_error(bt,mask,recon)
 s = 'method: NN\n'
 s += 'eucl = ' + nice_nums(errs['eucl']) + '\n'
 s += 'D-ENT = ' + nice_nums(errs['dent']) + '\n'
 s += 'Jensen diff. = ' + nice_nums(errs['jdiff']) + '\n'
 s += 'Levenshtein. = ' + nice_nums(errs['leven']) + '\n'
+originals.append( bt[:,p1:p2].copy() )
+recons.append( recon.copy() )
 texts.append(s)
 
 # done, plot
