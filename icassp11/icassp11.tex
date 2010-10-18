@@ -57,26 +57,38 @@ Missing data, chroma features, beat imputation, codebook learning
 %
 \section{Introduction}
 \label{sec:intro}
-Many signals show similarities and repetitions over time. Learning these repetitions
-in an unsupervised way remains a challenge. Finding robust patterns should prove useful in
-many tasks like song similarity (songs with similar patterns), song segmentation
-(song segments with different patterns) or cover song recognition (songs with exactly
-the same patterns).
-Therefore, we are looking for patterns that not only explain the signal (in an encoding
-framework), but also contain musical characteristics. 
+Many signals show similarities and repetitions over time.  
+%Learning these repetitions in an unsupervised way remains a challenge. 
+Finding robust patterns may prove useful for tasks such as song
+similarity (recognizing songs with similar patterns), song
+segmentation (labeling chorus/verse structure), and cover song
+recognition (identifying songs with similar high-level patterns).
+Therefore, we are looking for patterns that not only explain the
+low-level signal, but also contain musical characteristics.  However,
+it is unclear how to evaluate the quality of these patterns.  In this
+paper, we propose a task based on missing data imputation and discuss
+various performance metrics which are sensitive to musically
+meaningful aspects of the data.  
 
-We devise a task that let us measure
-the quality of such patterns in an attempt at unifying this research field.
-Imputation is a well-studied problem for audio to show that some model can generalize.
-However, it has not been pushed as far as it could, and fully masking consecutive beats
-of music have not been considered. A real-life analogous problem would be a music stream
-signal that is lost for a few seconds. The goal here would be to infer a reasonable
-stream to replace the original one. Thus we do not only want a signal close to the original
-in a reconstruction sense, but also a signal that has similar ``musical properties'' to
-the user ear. These proporties are difficult to define, but we refer to higher order
-dependancies present in the signal. For instance, the rate of note onsets, the number
-of notes activated at the same time, and other texture-like elements. We will argue
-that entropy is a good approximation of these characteristics.
+Imputation refers to a family of techniques used to fill in missing
+data entries.  Previous work on audio-related applications has
+included speech denoising~\cite{} and model
+evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, to the best of
+our knowledge, previous research has only considered a few missing
+time-frequency bins.  In contrast, we define an imputation task where
+there are many consecutive time frames missing.  
+
+and fully masking consecutive beats of music have not been
+considered. A real-life analogous problem would be a music stream
+signal that is lost for a few seconds. The goal here would be to infer
+a reasonable stream to replace the original one. Thus we do not only
+want a signal close to the original in a reconstruction sense, but
+also a signal that has similar ``musical properties'' to the user
+ear. These proporties are difficult to define, but we refer to higher
+order dependancies present in the signal. For instance, the rate of
+note onsets, the number of notes activated at the same time, and other
+texture-like elements. We will argue that entropy is a good
+approximation of these characteristics.
 
 Figure \ref{fig:types} summarizes the difference between different sorts of imputation.
 Usually \cite{Smaragdis2009}, a few frequency bins are hidden and can be recovered from
