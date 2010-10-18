@@ -34,7 +34,7 @@
 	{Columbia University\\
           LabROSA\\
 	New York, USA}
-  {Ron J. Weiss\sthanks{Thanks something} and Daniel P.W. Ellis}
+  {Ron J. Weiss\sthanks{Thanks something} and Daniel P.W. Ellis\sthanks{NSF}}
 	{New York University / Columbia University\\
           MARL / LabROSA\\
 	New York, USA}
@@ -140,17 +140,25 @@ proper evaluation.
 
 \subsection{DATA AND FEATURES}
 \label{ssec:feats}
-We use beat-aligned chroma features \cite{Ellis2007a}. Chroma features
+We represent music using chroma features \cite{Ellis2007a}. They
 record the intensity associated with each of the 12 semitones
-(e.g. piano keys) within one octave, but all octaves
-are folded together. One can see them as a very coarse and
-noisy music transcription. They have been used for segmentation, 
-chord recognition and cover recognition
-among others. The specific implementation we use is the one
-returned by the Echo Nest API \cite{EchoNest} which uses a constant-
-Q spectrogram and where the chroma for each time stamp is
-normalized so the max is 1. We use a random subset of $5K$ songs of
-the cowbell dataset \cite{Bertin-Mahieux2010a} in our experiments.
+(e.g. piano keys) within one octave, but all octaves are folded
+together. One can see them as a very coarse and noisy music
+transcription. We use an online API \cite{EchoNest} that implements
+chromas over a constant-Q spectrogram.  Also, music has a natural time
+metric expressed in beats. Therefore, missing frames are equivalent to
+missing all features for the length of one beat. Accordingly, we
+resample the features so that each chroma vector spans one beat. Note
+that audio beat tracking algorithms perform relatively well CITE?????
+even if the task is not considered solved.
+
+Beat-aligned chroma features have been used for cover song recognition
+\cite{Ellis2007a} and segmentation \cite{Weiss2010}. In our previous work
+\cite{Bertin-Mahieux2010a}, we attempt to learn music patterns in that
+representation. Results on multi-beat imputation are done on a random
+subset of $5K$ songs of the cowbell dataset
+\cite{Bertin-Mahieux2010a}.
+
 
 \begin{figure}[t]
 \begin{center}
@@ -177,29 +185,33 @@ the cowbell dataset \cite{Bertin-Mahieux2010a} in our experiments.
 
 \subsection{MEASURES}
 \label{ssec:measures}
-The choice of a measure function is closely related to the properties
-we expect to preserve in learned patterns. As we saw in Figure
-\ref{fig:basic}, reconstruction error does not tell the whole story.
-We present different error measures and look at what imputation they
-favor.
+Euclidean distance is a natural choice for reconstruction and encoding
+tasks. However, we saw from Figure \ref{fig:basic} that it can favor
+unsatisfying results for multi-beats imputation. We devote a great
+part of this work to exploring metrics that measure other aspects of
+the reconstruction: for instance, a metric that would reward
+preserving the level of granularity of the original data in Figure
+\ref{fig:basic}.
 
-We consider Mahalanobis distances of the form $d_p = |x_1-x_2|^p$, especially
-with $p \leq 2$. Figure \ref{fig:measures} offers a reminder of the effect
-of these measures on the absolute difference between a pixel and
-its reconstruction. The middle square represents the case where a
-reconstruction is considered valid if it is between some $\delta$ of
-the original and wrong otherwise. Mahalanobis distance approximate
-this case with an increasingly smaller $\delta$ as $p \rightarrow 0$.
-The consequence can be seen on the toy example of 
-Figure \ref{fig:square}. We approximate a square wave of period $1$
-by two signals: the same square wave translated by $0.25$ and the
-average function (constant at $0.5$). The average reconstruction 
-errors on $[0,1]$ for the translated wave, with any $d_p$, is $0.5$.
-For the average and $d_2$, this error is $0.25$.
-Hence, the average function seems the most accurate. However,
-with $d_1$, the errors are both equal to $0.5$. With $d_{1/2}$,
-errors are now $0.5$ and $0.71$. Hence, if the translated square wave
-should be a better approximation, euclidean distance is misleading.
+We first consider Mahalanobis distances of the form $d_p =
+|x_1-x_2|^p$, especially with $p \leq 2$. Figure \ref{fig:measures}
+illustrates the effect of these measures on one dimensional data.  The
+grayed rectangle represents the case where a reconstruction is
+considered valid if it is between some $\delta$ of the original and
+wrong otherwise.  Mahalanobis distance approximate this case with an
+increasingly smaller $\delta$ as $p \rightarrow 0$.
+
+Let's consider these cases on the toy example of Figure
+\ref{fig:square}.  The square wave of period $1$ could be one row of
+our missing data for instance.  We approximate it by two signals: the
+same square wave translated by a quarter of its period and the average
+function (constant at $0.5$). The average reconstruction errors on
+$[0,1]$ for the translated wave, with any $d_p$, is $0.5$.  For the
+average and $d_2$, this error is $0.25$.  Hence, the average function
+seems the most accurate. However, with $d_1$, the errors are both
+equal to $0.5$. With $d_{1/2}$, errors are now $0.5$ and
+$0.71$. Hence, if the translated square wave should be a better
+approximation, euclidean distance is misleading.
 
 Vasicek estimator \cite{Learned-Miller2003}.
 Jensen difference \cite{Michel1994}.
@@ -248,8 +260,7 @@ nearest neighbor 5) using random.
 \begin{center}
 \includegraphics[width=.85\columnwidth]{measures}
 \end{center}
-\caption{Effect of different measures on the difference between a pixel
-and its reconstruction.
+\caption{Effect of different measures on one-dimensional data.
 \label{fig:measures}}
 \end{figure}
 
@@ -483,9 +494,8 @@ by the community. Our code and test data is available to
 reproduce and improve these results.
 
 
-\section{ACKNOWLEDGEMENTS}
-Your mama.
-NSERC PG grant for Thierry, something for Ron, NSF from Dan.
+%\section{ACKNOWLEDGEMENTS}
+%NSERC PG grant for Thierry, something for Ron, NSF from Dan.
 
 
 % References should be produced using the bibtex program from suitable
