@@ -216,19 +216,29 @@ approximation, Euclidean distance is misleading.
 Vasicek estimator \cite{Learned-Miller2003}.
 Jensen difference \cite{Michel1994}.
 
-The phenomena above explain why reconstruction such as
-in Figure \ref{fig:basic} ($3$rd row) or in Figure \ref{fig:avgnnrand}
-($3$rd row) often result from powerful algorithms. An intuitive
-conclusion is that we must penalize sustained beat solutions.
-An idea is to measure the difference in the delta-features, i.e.
-the discrete difference in time of the original features.
-Another possibility is to use entropy-based measures as introduced
-in \cite{Mentzelopoulos2004}.
-Absolute normalize difference entropy (D-ENT)
-between two vectors is computed as follow. First, compute the normalized histogram 
-of values, in our case we discretize $(0,1)$ in $\mbox{\# bins} = 10$. 
-Then, we compute the entropy
-$e_b = - log_2 b_b$ of each of the bins $b_{bi}$ for each of the two vectors $i$. Finally:
+The phenomena above explain why reconstruction such as in Figure
+\ref{fig:basic} ($3$rd row) or in Figure \ref{fig:avgnnrand} ($3$rd
+row) often result from powerful algorithms. Learning an overly
+smoothed solution and avoiding extreme values is rewarded by some
+metrics. $d_{1/2}$ seems to be a solution from the toy example in
+Figure \ref{fig:square}, but we will see in Section \ref{sec:exp} that
+it is not really the case in practice. We look into other measures
+that would differ from $d_2$. Upon visual inspection, they should
+reward granularity which is missing in Figure \ref{fig:basic} for
+instance. Delta chromas are the finite difference along the time axis
+of the chromas. Deltas of over-smoothed solution are closed to $0$
+whereas typical songs have more varying deltas. \textbf{ddiff}
+measures the absolute difference between the sum of absolute values of
+the deltas for the original data and its reconstruction.
+
+Another idea is to look at the histogram of values and compute its
+entropy. Once again, sustained solutions should measure differently
+than the original.  Absolute normalize difference entropy
+(\textbf{D-ENT}) \cite{Mentzelopoulos2004} between two vectors is
+computed as follow: we discretize $(0,1)$ in $10$ bins and create the
+normalized histogram of values.  The entropy of each of the bins
+$b_{bi}$ is $e_b = - log_2 b_b$ for each of the two vectors
+$i$. Finally:
 \[
 \mbox{D-ENT} = \left( \Sigma_b \frac{e_{b1} - e_{b2}}{e_{b1}} \right) / (\mbox{\# bins})
 \]
