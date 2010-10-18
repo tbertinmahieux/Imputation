@@ -239,7 +239,7 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
         meas = ['eucl','kl','cos','dent','lhalf','ddiff','jdiff','thresh',
-                'leven','condent']
+                'leven','condent','binary']
         ds = map(lambda m: recon_error(btchroma,mask,recon,m),
                  meas)
         meas_delta = ['eucl','cos','lhalf','thresh'] # others cant handle negatives
