@@ -8,6 +8,7 @@ tb2332@columbia.edu
 import os
 import sys
 import glob
+import warnings
 import numpy as np
 import scipy.io as sio
 from scipy import histogram
@@ -23,11 +24,30 @@ try:
     import hmm_imputation as IMPUTATION_HMM
 except ImportError:
     print 'dont seem you have HMM stuff, cant use it'
+try:
+    # for MI Matlab package
+    warnings.filterwarnings('ignore',category=DeprecationWarning)
+    from mlabwrap import mlab
+    warnings.filterwarnings('default',category=DeprecationWarning)    
+    mipath = os.path.join(os.path.split(__file__)[0],'mi')
+    mlab.addpath(mipath)
+    HASMLAB = True
+except ImportError:
+    print 'no Matlab wrapper'
+    HASMLAB = False
 
 import masking as MASKING
 
 EPS = np.finfo(np.float).eps
+MINLENGTH = 70
 
+def cond_entropy(v1,v2):
+    """
+    Approximates conditional entropy of v2 given v1 using Matlab
+    """
+    if not HASMLAB:
+        return 0
+    return mlab.condentropy(v2.flatten(),v1.flatten(),nout=1)
 
 def euclidean_dist_sq(v1,v2):
     """
@@ -86,20 +106,41 @@ def diffthresh(v1,v2,thresh=.1):
     pixels in v1
     """
     d = np.abs(v1.flatten()-v2.flatten())
-    return len(np.where(d<thresh)[0]) * 1. / v1.size
+    return len(np.where(d>thresh)[0]) * 1. / v1.size
+
+def binarize_diff(v1,v2,thresh=.8):
+    """
+    Binarize v1 and v2 at thresh, returns the average number of
+    different values.
+    """
+    v1bin = np.zeros(v1.size)
+    v1bin[np.where(v1.flatten()>thresh)] = .1;
+    v2bin = np.zeros(v2.size)
+    v2bin[np.where(v2.flatten()>thresh)] = .1;
+    return len(np.where(v1bin+v2bin==1.)[0]) * 1. / v1.size
 
 def levenshtein(v1,v2,alpha=.2):
+    """
+    Editing measure, row-wise
+    """
     try:
         import Levenshtein
     except ImportError:
         return 0.
-    v1discrete = map(lambda val: int(val/alpha),v1)
-    v2discrete = map(lambda val: int(val/alpha),v2)
-    s1 = ''
-    s2 = ''
-    for k1 in v1discrete: s1+=str(k1)
-    for k2 in v2discrete: s2+=str(k2)
-    return Levenshtein.distance(s1,s2) * 1. / v1.size
+    v1discrete = np.array(map(lambda val: int(val/alpha),v1))
+    v2discrete = np.array(map(lambda val: int(val/alpha),v2))
+    if len(v1discrete.shape)<2:
+        v1discrete = v1discrete.reshape(12,v1.size/12)
+    if len(v2discrete.shape)<2:
+        v2discrete = v2discrete.reshape(12,v2.size/12)
+    dists = []
+    for row in range(12):
+        s1 = ''
+        s2 = ''
+        for k1 in v1discrete[row,:]: s1+=str(k1)
+        for k2 in v2discrete[row,:]: s2+=str(k2)
+        dists.append( Levenshtein.distance(s1,s2) * 1. / v1discrete.shape[1] )
+    return np.average(dists)
 
 def jensen_diff(v1,v2):
     """
@@ -151,6 +192,8 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
                   - 'jdiff' (jensen difference of entropy)
                   - 'thresh' (number of pixels within .1 of original)
                   - 'leven' (levenstein, weird idea...)
+                  - 'condent' (conditional entropy, requires MATLAB)
+                  - 'binary' (binarize at .8 and count errors)
                   - 'all' returns a dictionary with all the above (default)
        delta      - if True, use delta features (rowwise diff on btchroma)
     RETURN
@@ -176,6 +219,10 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         measfun = diffthresh
     elif measure == 'leven':
         measfun = levenshtein
+    elif measure == 'condent':
+        measfun = cond_entropy
+    elif measure == 'binary':
+        measfun = binarize_diff
     elif measure == 'ddif':
         delta = True
         measfun = diff_sum_abs
@@ -191,7 +238,8 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         maskzeros = np.where(mask==0)
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
-        meas = ['eucl','kl','cos','dent','lhalf','ddif','jdiff','thresh','leven']
+        meas = ['eucl','kl','cos','dent','lhalf','ddif','jdiff','thresh',
+                'leven','condent']
         ds = map(lambda m: recon_error(btchroma,mask,recon,m),
                  meas)
         meas_delta = ['eucl','cos','lhalf','thresh'] # others cant handle negatives
@@ -232,7 +280,6 @@ def test_maskedcol_on_dataset(datasetdir,method='random',ncols=1,win=3,rank=4,co
     Used arguments vary based on the method. For SIPLCA, we can use **kwargs
     to set priors.
     """
-    MINLENGTH = 70
     # get all matfiles
     matfiles = get_all_matfiles(datasetdir)
     # init
@@ -321,7 +368,6 @@ def test_maskedpatch_on_dataset(dataset,method='random',ncols=2,win=1,rank=4,cod
     RETURN
       - all errors, as a list of dict
     """
-    MINLENGTH = 70
     # get all matfiles
     if type(dataset).__name__ == 'str':
         matfiles = get_all_matfiles(dataset)
