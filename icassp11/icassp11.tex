@@ -5,6 +5,7 @@
 \documentclass{article}
 \usepackage{spconf,amsmath,graphicx}
 \usepackage{url}
+\usepackage{verbatim}
 
 % Example definitions.
 % --------------------
@@ -72,12 +73,18 @@ meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
-included speech denoising~\cite{} and model
+included speech denoising~\cite{Raj1998}, speech
+enhancement~\cite{Sanneck1996}, and model
 evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, to the best of
 our knowledge, previous research has only considered a few missing
-time-frequency bins.  In contrast, we define an imputation task where
-there are many consecutive time frames missing.  
+time-frequency \emph{bins}.  In contrast, we define an imputation task
+where there are many consecutive time frames missing.  We refer to
+this task as \emph{multi-frame} imputation.  This makes the problem
+more challenging, but also allows us to more carefully evaluate the
+temporal aspects of our model.  % needs to be reworded?
+% mention real-world packet-loss case?
 
+\begin{comment}
 and fully masking consecutive beats of music have not been
 considered. A real-life analogous problem would be a music stream
 signal that is lost for a few seconds. The goal here would be to infer
@@ -89,26 +96,43 @@ order dependancies present in the signal. For instance, the rate of
 note onsets, the number of notes activated at the same time, and other
 texture-like elements. We will argue that entropy is a good
 approximation of these characteristics.
+\end{comment}
 
-Figure \ref{fig:types} summarizes the difference between different sorts of imputation.
-Usually \cite{Smaragdis2009}, a few frequency bins are hidden and can be recovered from
-their neighborhood, both in time and frequency. Masking one full beat is a natural extension,
-and the solution is easy as music notes are often sustained over many beats. Two or three
-missing beats remain solvable as music bare many repetitions. One can usually find a similar
-section from an unmasked part of the song (think about a repeated chorus for instance).
-The real challenge arises from masking many consecutive beats.
+Figure \ref{fig:types} shows three matrices with different amounts of
+missing data.  As mentioned previously, other researchers
+\cite{Smaragdis2009} have worked with the partially missing data (see
+Figure~\ref{fig:types}).  A slightly more complex problem can be
+defined by masking out an entire time frame.  This problem is
+illustrated in Figure~\ref{fig:types}.  It is worth noting that due to
+our data representation (see Section~\ref{ssec:feats}), the
+single-frame imputation problem is somewhat easy.  In contrast, the
+problem of multiple missing frames (see Figure~\ref{fig:types}) can be
+made arbitrarily difficult.
 
-Figure \ref{fig:basic} shows an example of the imputation of $15$ beats on chroma features
-(c.f. Subsection \ref{ssec:feats}). The solution in that figure, although intuitively wrong, is very
-accurate according to euclidean distance. As we mentioned above, reconstruction error and
-music properties do not agree. Understanding this conflict is essential to the task
-definition.
+\begin{comment}
+a few frequency bins are hidden and can be
+recovered from their neighborhood, both in time and frequency. Masking
+one full beat is a natural extension, and the solution is easy as
+music notes are often sustained over many beats. Two or three missing
+beats remain solvable as music bare many repetitions. One can usually
+find a similar section from an unmasked part of the song (think about
+a repeated chorus for instance).  The real challenge arises from
+masking many consecutive beats.
+\end{comment}
 
+Music highly strucutred in time and as such is particularly suitable
+for the imputation task.  In addition to musicological implications,
+large-scale models of music data have numerous commercial
+applications, including recommendation systems, digital rights
+management, and creative tools.  
 
-\subsection{RELATED WORK} 
-\label{ssec:relwork}
-
-Prev work by me: \cite{Bertin-Mahieux2010a}. Imputation \cite{Smaragdis2009,Hoffman2010}.
+Figure \ref{fig:basic} shows an example of multi-frame imputation of
+music data.  Linear regression, which explicitly minimizes Euclidean
+distance, is used to impute the missing data in
+Figure~\ref{fig:basic}.  However, it is clear from visual inspection
+that linear regression yields an overly-smooth reconstruction.  In
+fact, we argue that a more extensive set of metrics is needed for
+proper evaluation.
 
 
 \section{TASK DEFINITION}
