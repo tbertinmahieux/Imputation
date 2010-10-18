@@ -223,7 +223,7 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         measfun = cond_entropy
     elif measure == 'binary':
         measfun = binarize_diff
-    elif measure == 'ddif':
+    elif measure == 'ddiff':
         delta = True
         measfun = diff_sum_abs
     elif measure == 'all':
@@ -238,7 +238,7 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         maskzeros = np.where(mask==0)
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
-        meas = ['eucl','kl','cos','dent','lhalf','ddif','jdiff','thresh',
+        meas = ['eucl','kl','cos','dent','lhalf','ddiff','jdiff','thresh',
                 'leven','condent']
         ds = map(lambda m: recon_error(btchroma,mask,recon,m),
                  meas)
@@ -569,7 +569,8 @@ def plot_oneexample(btchroma,mask,p1,p2,methods=(),methods_args=None,
     from plottools import plotall
     # inits and sanity checks
     for meas in measures:
-        assert meas in ('eucl','kl','cos','dent'),'unknown measure: '+meas
+        assert meas in ('eucl','kl','cos','dent','lhalf','ddiff','jdiff',
+                        'thresh','leven','condent'),'unknown measure: '+meas
     nmethods = len(methods)
     assert nmethods > 0,'we need at least one method...!'
     if methods_args is None:
