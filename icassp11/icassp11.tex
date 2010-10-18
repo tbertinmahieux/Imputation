@@ -91,8 +91,8 @@ signal that is lost for a few seconds. The goal here would be to infer
 a reasonable stream to replace the original one. Thus we do not only
 want a signal close to the original in a reconstruction sense, but
 also a signal that has similar ``musical properties'' to the user
-ear. These proporties are difficult to define, but we refer to higher
-order dependancies present in the signal. For instance, the rate of
+ear. These properties are difficult to define, but we refer to higher
+order dependencies present in the signal. For instance, the rate of
 note onsets, the number of notes activated at the same time, and other
 texture-like elements. We will argue that entropy is a good
 approximation of these characteristics.
@@ -120,7 +120,7 @@ a repeated chorus for instance).  The real challenge arises from
 masking many consecutive beats.
 \end{comment}
 
-Music highly strucutred in time and as such is particularly suitable
+Music highly structured in time and as such is particularly suitable
 for the imputation task.  In addition to musicological implications,
 large-scale models of music data have numerous commercial
 applications, including recommendation systems, digital rights
@@ -196,7 +196,7 @@ preserving the level of granularity of the original data in Figure
 We first consider Mahalanobis distances of the form $d_p =
 |x_1-x_2|^p$, especially with $p \leq 2$. Figure \ref{fig:measures}
 illustrates the effect of these measures on one dimensional data.  The
-grayed rectangle represents the case where a reconstruction is
+greyed rectangle represents the case where a reconstruction is
 considered valid if it is between some $\delta$ of the original and
 wrong otherwise.  Mahalanobis distance approximate this case with an
 increasingly smaller $\delta$ as $p \rightarrow 0$.
@@ -211,7 +211,7 @@ average and $d_2$, this error is $0.25$.  Hence, the average function
 seems the most accurate. However, with $d_1$, the errors are both
 equal to $0.5$. With $d_{1/2}$, errors are now $0.5$ and
 $0.71$. Hence, if the translated square wave should be a better
-approximation, euclidean distance is misleading.
+approximation, Euclidean distance is misleading.
 
 Vasicek estimator \cite{Learned-Miller2003}.
 Jensen difference \cite{Michel1994}.
@@ -234,16 +234,16 @@ $e_b = - log_2 b_b$ of each of the bins $b_{bi}$ for each of the two vectors $i$
 \]
 Note that D-ENT is not symmetric. In our experiment, the first vector is the original one.
 If we look at Figure \ref{fig:avgnnrand}, the reconstruction with the lowest D-ENT is using
-nearest neighbor and not averaging as with euclidean distance.
+nearest neighbor and not averaging as with Euclidean distance.
 
 Surprisingly, Kullback-Leibler divergence (KL) that is entropy related does not seem
-to measures things that differently from euclidean distance in our case. See Table
+to measures things that differently from Euclidean distance in our case. See Table
 \ref{tab:corrs}. Similar disappointment for $d_{1/2}$.
 
-We have explained why euclidean distance justifies disappointing reconstructions. At the same
+We have explained why Euclidean distance justifies disappointing reconstructions. At the same
 time, we do not argue that we should ignore or replace it. Euclidean distance measures
 reconstruction in a fundamental way. We believe we need a set of measures to quantify the
-quality of music patterns, euclidean distance being one of them.
+quality of music patterns, Euclidean distance being one of them.
 
 \begin{figure}[t]
 \begin{center}
@@ -295,7 +295,7 @@ of all visible beats. A more efficient way is to take the \textbf{average} of th
 within a certain range of the missing patch, for example within $3$ beats on each
 side (Figure \ref{fig:avgnnrand}, $3$rd row).
 A significant improvement is to predict the next missing beat based on the
-previous $N$ ones. We train a \textbf{linear transform} by minimizing the euclidean distance
+previous $N$ ones. We train a \textbf{linear transform} by minimizing the Euclidean distance
 on the visible parts of the song. This methods is shown in Figure \ref{fig:basic}.
 
 Nearest neighbor ($\mathbf{k}$\textbf{NN}) is a powerful technique. 
@@ -322,11 +322,11 @@ website\footnote{Code available at: \url{http://www.columbia.edu/~tb2332/somethi
 for data and code to reproduce the results.
 
 Figure \ref{fig:2dscore} shows the performance of $3$ methods for different numbers
-of missing beats. We report euclidean distance and D-ENT. One can see the result
+of missing beats. We report Euclidean distance and D-ENT. One can see the result
 of contradicting measures. Nearest neighbor method ($k=1$) creates a reconstruction
 with an entropy similar to the original for all mask sizes. It is a direct consequence
 of the fact that entropy is approximately constant throughout a song. The linear
-transform learns to minimize the euclidean distance and does it successfully. But as it
+transform learns to minimize the Euclidean distance and does it successfully. But as it
 can be seen from its entropy measure and Figure \ref{fig:basic} $3$rd row, it is
 done by a large amount of smoothing. The average reconstruction has the same entropy
 results than the linear transform, but due to less smoothing (or a less intelligent
@@ -337,9 +337,9 @@ one), it does not do as well with the euclidean distance.
 \includegraphics[width=.9\columnwidth]{recon_score_in_2d_5k}
 \end{center}
 \caption{Reconstruction error for $3$ methods and different
-number of masked beats. Errors are D-ENT and euclidean
+number of masked beats. Errors are D-ENT and Euclidean
 distance. In all cases, the larger the number of masked beats,
-the higher the euclidean distance. Lower left is better.
+the higher the Euclidean distance. Lower left is better.
 \label{fig:2dscore}}
 \end{figure}
 
@@ -354,7 +354,7 @@ $\rho_{X,Y}=\mathrm{corr}(X,Y)={\mathrm{cov}(X,Y) \over \sigma_X \sigma_Y} ={E[(
 value close to $1$ meaning high correlation.
 $\rho_{X,Y}$ is computed for many error measures and results are presented in
 Table \ref{tab:corrs}. It appears that measures tend to form two groups.
-The ``euclidean-like'' measures favor smoothing to minimize divergence on
+The ``Euclidean-like'' measures favor smoothing to minimize divergence on
 average. The ``entropy-like'' measures look at the texture of the reconstruction
 compared to the original (ONLY D-ENT IN THAT CATEGORY?????).
 
@@ -385,7 +385,7 @@ Results form a symmetric matrix, we only show the upper triangle.
 
 We know report results of a $15$ beat imputation on $5000$ songs in
 Table \ref{tab:res}. The linear transform is a clear winner based
-on euclidean distance. As before, nearest neighbor's strength
+on Euclidean distance. As before, nearest neighbor's strength
 is to preserve the texture of the original patch as can be seen
 from his D-ENT score. We can not report all results, but they
 are no serious surprises with other measures 
@@ -402,7 +402,7 @@ should be better constrained via priors for instance.
 \begin{small}
 \begin{center}
 \begin{tabular}{|l||c|c|c|} \hline
-method & euclidean & KL & D-ENT \\ \hline
+method & Euclidean & KL & D-ENT \\ \hline
 random & $0.168$ & $0.461$ & $0.252$ \\
 average & $0.079$ & $0.249$ & $0.430$ \\ \hline
 1NN & $0.072$ & $0.237$ & $\mathbf{0.123}$ \\
@@ -412,7 +412,7 @@ SIPLCA & & & \\
 HMM & & & \\ \hline
 \end{tabular}
 \caption{Results on $15$ missing beats by different methods
-on $5000$ songs and measured using euclidean distance and
+on $5000$ songs and measured using Euclidean distance and
 D-ENT.
 \label{tab:res}}
 \end{center}
