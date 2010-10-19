@@ -24,9 +24,11 @@ try:
     import hmm_imputation as IMPUTATION_HMM
 except ImportError:
     print 'dont seem you have HMM stuff, cant use it'
+HASMLAB=False
 try:
     # for MI Matlab package
     warnings.filterwarnings('ignore',category=DeprecationWarning)
+    import mlabwrap
     from mlabwrap import mlab
     warnings.filterwarnings('default',category=DeprecationWarning)    
     mipath = os.path.join(os.path.split(__file__)[0],'mi')
@@ -41,13 +43,18 @@ import masking as MASKING
 EPS = np.finfo(np.float).eps
 MINLENGTH = 70
 
-def cond_entropy(v1,v2):
+def cond_entropy(v1,v2,HASMLAB=HASMLAB):
     """
     Approximates conditional entropy of v2 given v1 using Matlab
+    if HASMLAB=False, return 0
     """
     if not HASMLAB:
         return 0
-    return mlab.condentropy(v2.flatten(),v1.flatten(),nout=1)
+    try:
+        return mlab.condentropy(v2.flatten(),v1.flatten(),nout=1)
+    except mlabwrap.MlabError: # if we had a ctrl-K for instance
+        HASMLAB = False
+        return 0
 
 def euclidean_dist_sq(v1,v2):
     """
