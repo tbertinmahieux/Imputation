@@ -22,11 +22,12 @@ P.plot(r,y1,'b-',label='L2')
 P.plot(r,y2,'g-.',label='L1')
 P.plot(r,y3,'r--',label='L1/2')
 #P.plot(r,y4,'m-',label='L.1')
+P.yticks([0.2,0.4,0.6,0.8])
 P.axvspan(-.1,.1,ymin=0,ymax=1,alpha=.2,label='L0')
 P.legend(loc='lower right')
 P.hold(False)
 P.show(mainloop=False)  # set to False for non blocking
-
+aspect = P.gca().get_aspect()
 
 # SQUARE WAVE
 npoints = 1000
@@ -56,4 +57,5 @@ P.ylim([-.1,1.1])
 P.xlim([0,1.25])
 P.xticks([0,.5,1.])
 P.legend(loc='lower right')
+P.gca().set_aspect(aspect)
 P.show(mainloop=True)
