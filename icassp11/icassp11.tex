@@ -1,3 +1,5 @@
+% -*- TeX-PDF-mode: t -*-
+
 % Template for ICASSP-2010 paper; to be used with:
 %          spconf.sty  - ICASSP/ICIP LaTeX style file, and
 %          IEEEbib.bst - IEEE bibliography style file.
@@ -6,11 +8,15 @@
 \usepackage{spconf,amsmath,graphicx}
 \usepackage{url}
 \usepackage{verbatim}
+%\usepackage{microtype}
 
 % Example definitions.
 % --------------------
 \def\x{{\mathbf x}}
 \def\L{{\cal L}}
+
+\usepackage{color}
+\newcommand{\FIXME}[2][FIXME]{\textcolor{blue}{\textbf{#1}: \emph{#2}}}
 
 % Title.
 % ------
@@ -47,9 +53,14 @@
 \maketitle
 %
 \begin{abstract}
-Imputation is cool. It is a well-defined problem, as opposed to segmentation.
+Imputation is cool. It is a well-defined problem
+\FIXME[ronw]{but isn't the whole point of the paper
+that it isn't to straightforward to evaluate?},
+as opposed to segmentation for which ground truth labels are often
+very ambiguous.
+%
 Gives a reasonable benchmark to compare algorithms that claim learning meaningful
-patterns on music. Hard to beat benchmarks comparison, for instance linear
+temporal patterns on music. Hard to beat benchmarks comparison, for instance linear
 prediction. We compare some methods and discuss contradicting error measures. 
 We'll track you down if you don't accept this paper.
 \end{abstract}
@@ -60,10 +71,13 @@ Missing data, chroma features, beat imputation, codebook learning
 %
 \section{Introduction}
 \label{sec:intro}
-Many signals show similarities and repetitions over time.  
-%Learning these repetitions in an unsupervised way remains a challenge. 
-Finding robust patterns may prove useful for tasks such as song
-similarity (recognizing songs with similar patterns), song
+As with many classes of time-series data, musical signals contain a
+substantial amount of complex structural information.  Given the
+complexity of musical data, learning structural models of music in an
+unsupervised fashion is particularly challenging.  In general, we are
+interested in models that capture local patterns (i.e. ``patches'') in
+the data.  Finding robust patterns may prove useful for tasks such as
+song similarity (recognizing songs with similar patterns), song
 segmentation (labeling chorus/verse structure), and cover song
 recognition (identifying songs with similar high-level patterns).
 Therefore, we are looking for patterns that not only explain the
@@ -71,7 +85,7 @@ low-level signal, but also contain musical characteristics.  However,
 it is unclear how to evaluate the quality of these patterns.  In this
 paper, we propose a task based on missing data imputation and discuss
 various performance metrics which are sensitive to musically
-meaningful aspects of the data.  
+meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
@@ -79,8 +93,14 @@ included speech denoising~\cite{Raj1998}, speech
 enhancement~\cite{Sanneck1996}, and model
 evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, to the best of
 our knowledge, previous research has only considered a few missing
-time-frequency \emph{bins}.  In contrast, we define an imputation task
-where there are many consecutive time frames missing.  We refer to
+time-frequency \emph{bins}
+\FIXME[ronw]{this isn't totally fair, some of the missing
+  data speech stuff is based on imputation using HMM/CRF models. E.g. see
+  figure 3 of
+  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
+}.
+In contrast, we define an imputation task
+in which  many consecutive time frames are missing.  We refer to
 this task as \emph{multi-frame} imputation.  This makes the problem
 more challenging, but also allows us to more carefully evaluate the
 temporal aspects of our model.  % needs to be reworded?
@@ -102,8 +122,12 @@ approximation of these characteristics.
 
 Figure \ref{fig:types} shows three matrices with different amounts of
 missing data.  As mentioned previously, other researchers
-\cite{Smaragdis2009} have worked with the partially missing data (see
-Figure~\ref{fig:types}).  A slightly more complex problem can be
+\cite{Smaragdis2009} have worked with the partially missing data for
+applications such as bandwidth expansion and source separation (see
+Figure~\ref{fig:types} \FIXME[ronw]{I don't think we need this figure
+  -- especially since we only focus on the last case, an example of
+  which is clearly
+  visible in figure 2}).  A slightly more complex problem can be
 defined by masking out an entire time frame.  This problem is
 illustrated in Figure~\ref{fig:types}.  It is worth noting that due to
 our data representation (see Section~\ref{ssec:feats}), the
@@ -122,19 +146,35 @@ a repeated chorus for instance).  The real challenge arises from
 masking many consecutive beats.
 \end{comment}
 
-Music highly structured in time and as such is particularly suitable
-for the imputation task.  In addition to musicological implications,
+
+Music is highly structured in time and as such is particularly suitable
+for the multi-frame imputation task.
+In addition to musicological implications,
 large-scale models of music data have numerous commercial
 applications, including recommendation systems, digital rights
 management, and creative tools.  
 
+\FIXME[ronw]{Do we need to describe the features before presenting
+  this figure?}
 Figure \ref{fig:basic} shows an example of multi-frame imputation of
 music data.  Linear regression, which explicitly minimizes Euclidean
 distance, is used to impute the missing data in
 Figure~\ref{fig:basic}.  However, it is clear from visual inspection
-that linear regression yields an overly-smooth reconstruction.  In
-fact, we argue that a more extensive set of metrics is needed for
-proper evaluation.
+that linear regression yields an overly-smooth reconstruction which is
+unable to predict the temporal evolution within the missing section.
+%
+A more sophisticated signal model which better leverages the
+surrounding context and makes use of long-term temporal information
+such as knowledge of repetitions within a song is necessary to achieve
+a musically coherent reconstruction.
+%
+Unfortunately, simple algorithms such as linear regression
+are often prone to identifying poor solutions, despite optimizing
+metrics such as Euclidean distance.
+%
+In this paper, we argue that a more extensive set of metrics is needed
+to properly evaluate a model's ability to predict musical sequences.
+%more for proper evaluation.
 
 
 \section{TASK DEFINITION}
@@ -532,6 +572,8 @@ the curse of boring smoothed patterns.
 A unified set of measures should also be selected
 by the community. Our code and test data is available to 
 reproduce and improve these results.
+
+
 
 
 %\section{ACKNOWLEDGEMENTS}
