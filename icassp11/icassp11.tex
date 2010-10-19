@@ -223,19 +223,18 @@ row) often result from powerful algorithms. Learning an overly
 smoothed solution and avoiding extreme values is rewarded by some
 metrics. $d_{1/2}$ seems to be a solution from the toy example in
 Figure \ref{fig:square}, but we will see in Section \ref{sec:exp} that
-it is not really the case in practice. 
-Similarly, Kullback-Leibler
-(KL) and Jensen difference \cite{Michel1994} are two measures based on
-entropy, thus should not behave necessarily in the same way as $d_p$.
-Once again, it is not the case in practice. We now look into other
-measures that would differ from $d_2$. 
-Upon visual inspection, they
-should reward granularity which is missing in Figure \ref{fig:basic}
-for instance. Delta chromas are the finite difference along the time
-axis of the chromas. Deltas of over-smoothed solution are closed to
-$0$ whereas typical songs have more varying deltas. \textbf{ddiff}
-measures the absolute difference between the sum of absolute values of
-the deltas for the original data and its reconstruction.
+it is not really the case in practice.  Similarly, Kullback-Leibler
+(KL), conditional entropy and Jensen difference \cite{Michel1994} are
+two measures based on entropy, thus should not behave necessarily in
+the same way as $d_p$.  Once again, it is not the case in practice. We
+now look into other measures that would differ from $d_2$.  Upon
+visual inspection, they should reward granularity which is missing in
+Figure \ref{fig:basic} for instance. Delta chromas are the finite
+difference along the time axis of the chromas. Deltas of over-smoothed
+solution are closed to $0$ whereas typical songs have more varying
+deltas. \textbf{ddiff} measures the absolute difference between the
+sum of absolute values of the deltas for the original data and its
+reconstruction.
 
 Another idea is to look at the histogram of values and compute its
 entropy. Once again, sustained solutions should measure differently
@@ -437,14 +436,13 @@ should be better constrained via priors for instance.
 \begin{small}
 \begin{center}
 \begin{tabular}{|l||c|c|c|} \hline
-method & Euclidean & KL & D-ENT \\ \hline
-random & $0.168$ & $0.461$ & $0.252$ \\
-average & $0.079$ & $0.249$ & $0.430$ \\ \hline
-1NN & $0.072$ & $0.237$ & $\mathbf{0.123}$ \\
+method & Euclidean & delta diff. & D-ENT \\ \hline
+random & $0.168$ & $$ & $0.252$ \\
+average & $0.079$ & $$ & $0.430$ \\ \hline
+1NN & $0.072$ & $$ & $\mathbf{0.123}$ \\
 codebook & & & \\ \hline
-lin. trans. & $\mathbf{0.056}$ & $0.183$ & $0.479$ \\
-SIPLCA & & & \\
-HMM & & & \\ \hline
+lin. trans. & $\mathbf{0.056}$ & $$ & $0.479$ \\
+SIPLCA & & & \\ \hline
 \end{tabular}
 \caption{Results on $15$ missing beats by different methods
 on $5000$ songs and measured using Euclidean distance and
