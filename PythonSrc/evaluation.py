@@ -121,10 +121,10 @@ def binarize_diff(v1,v2,thresh=.8):
     different values.
     """
     v1bin = np.zeros(v1.size)
-    v1bin[np.where(v1.flatten()>thresh)] = .1;
+    v1bin[np.where(v1.flatten()>thresh)] = 1;
     v2bin = np.zeros(v2.size)
-    v2bin[np.where(v2.flatten()>thresh)] = .1;
-    return len(np.where(v1bin+v2bin==1.)[0]) * 1. / v1.size
+    v2bin[np.where(v2.flatten()>thresh)] = 1;
+    return len(np.where(v1bin+v2bin==1)[0]) * 1. / v1.size
 
 def levenshtein(v1,v2,alpha=.2):
     """
