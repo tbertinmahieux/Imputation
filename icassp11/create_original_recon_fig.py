@@ -17,6 +17,7 @@ sys.path.append('/home/thierry/Columbia/Imputation/PythonSrc')
 import masking
 import evaluation
 import imputation as IMPUTATION
+import imputation_plca
 
 originals = []
 recons = []
@@ -36,9 +37,10 @@ errs = evaluation.recon_error(bt,mask,recon)
 s = 'method: linear transform\n'
 s += 'eucl = ' + nice_nums(errs['eucl']) + '\n'
 s += 'd1/2 = ' + nice_nums(errs['lhalf']) + '\n'
+s += 'cond. ent. = ' + nice_nums(errs['condent']) + '\n'
+s += 'delta diff. = ' + nice_nums(errs['ddiff']) + '\n'
 s += 'D-ENT = ' + nice_nums(errs['dent']) + '\n'
 s += 'Jensen diff. = ' + nice_nums(errs['jdiff']) + '\n'
-s += 'Levenshtein. = ' + nice_nums(errs['leven']) + '\n'
 originals.append( bt[:,p1:p2].copy() )
 recons.append( recon[:,p1:p2].copy() )
 texts.append(s)
@@ -52,9 +54,10 @@ errs = evaluation.recon_error(bt,mask,recon)
 s = 'method: NN\n'
 s += 'eucl = ' + nice_nums(errs['eucl']) + '\n'
 s += 'd1/2 = ' + nice_nums(errs['lhalf']) + '\n'
+s += 'cond. ent. = ' + nice_nums(errs['condent']) + '\n'
+s += 'delta diff. = ' + nice_nums(errs['ddiff']) + '\n'
 s += 'D-ENT = ' + nice_nums(errs['dent']) + '\n'
 s += 'Jensen diff. = ' + nice_nums(errs['jdiff']) + '\n'
-s += 'Levenshtein. = ' + nice_nums(errs['leven']) + '\n'
 originals.append( bt[:,p1:p2].copy() )
 recons.append( recon[:,p1:p2].copy() )
 texts.append(s)
@@ -68,13 +71,29 @@ errs = evaluation.recon_error(bt,mask,recon)
 s = 'method: Random\n'
 s += 'eucl = ' + nice_nums(errs['eucl']) + '\n'
 s += 'd1/2 = ' + nice_nums(errs['lhalf']) + '\n'
+s += 'cond. ent. = ' + nice_nums(errs['condent']) + '\n'
+s += 'delta diff. = ' + nice_nums(errs['ddiff']) + '\n'
 s += 'D-ENT = ' + nice_nums(errs['dent']) + '\n'
 s += 'Jensen diff. = ' + nice_nums(errs['jdiff']) + '\n'
-s += 'Levenshtein. = ' + nice_nums(errs['leven']) + '\n'
 originals.append( bt[:,p1:p2].copy() )
 recons.append( recon[:,p1:p2].copy() )
 texts.append(s)
 
+# SIPLCA
+bt = sio.loadmat('/home/thierry/Columbia/covers80/coversongs/covers32kENmats/garth_brooks+The_Chase+05-Walking_After_Midnight.mp3.mat')['btchroma']
+mask,p1,p2 = masking.random_patch_mask(bt,ncols=15,win=25)
+W, Z, H, norm, recon, logprob = imputation_plca.SIPLCA_mask.analyze(bt*mask,50,mask,win=40,niter=100)
+errs = evaluation.recon_error(bt,mask,recon)
+s = 'method: SIPLCA\n'
+s += 'eucl = ' + nice_nums(errs['eucl']) + '\n'
+s += 'd1/2 = ' + nice_nums(errs['lhalf']) + '\n'
+s += 'cond. ent. = ' + nice_nums(errs['condent']) + '\n'
+s += 'delta diff. = ' + nice_nums(errs['ddiff']) + '\n'
+s += 'D-ENT = ' + nice_nums(errs['dent']) + '\n'
+s += 'Jensen diff. = ' + nice_nums(errs['jdiff']) + '\n'
+originals.append( bt[:,p1:p2].copy() )
+recons.append( recon[:,p1:p2].copy() )
+texts.append(s)
 
 
 # done, plot
