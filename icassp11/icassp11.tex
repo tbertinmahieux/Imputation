@@ -35,13 +35,14 @@
 %
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
-\twoauthors {Thierry Bertin-Mahieux\sthanks{TBM is supported in part
+\twoauthors {Thierry Bertin-Mahieux\sthanks{supported in part
     by a NSERC PG scholarship.}, Graham Grindlay,} {Columbia
   University\\ LabROSA\\ New York, USA} 
    {Ron J. Weiss\sthanks{supported by NSF grant IIS-0844654 and Institute of
     Museum and Library Services grant LG-06-08-0073-08.}  and Daniel
-  P.W. Ellis\sthanks{This work was supported in part by the NSF grant
-    IIS-0713334.  Any opinions, findings and conclusions or
+  P.W. Ellis\sthanks{This work is supported by NSF grant
+    IIS-0713334 and by a gift from Google, Inc.
+    Any opinions, findings and conclusions or
     recommendations expressed in this material are those of the
     authors and do not necessarily reflect the views of the sponsors.}} 
 {New York University / Columbia University\\ MARL / LabROSA\\ New
@@ -71,10 +72,13 @@ Missing data, chroma features, beat imputation, codebook learning
 %
 \section{Introduction}
 \label{sec:intro}
-Many signals show similarities and repetitions over time.  
-%Learning these repetitions in an unsupervised way remains a challenge. 
-Finding robust patterns may prove useful for tasks such as song
-similarity (recognizing songs with similar patterns), song
+As with many classes of time-series data, musical signals contain a
+substantial amount of complex structural information.  Given the
+complexity of musical data, learning structural models of music in an
+unsupervised fashion is particularly challenging.  In general, we are
+interested in models that capture local patterns (i.e. ``patches'') in
+the data.  Finding robust patterns may prove useful for tasks such as
+song similarity (recognizing songs with similar patterns), song
 segmentation (labeling chorus/verse structure), and cover song
 recognition (identifying songs with similar high-level patterns).
 Therefore, we are looking for patterns that not only explain the
@@ -82,7 +86,7 @@ low-level signal, but also contain musical characteristics.  However,
 it is unclear how to evaluate the quality of these patterns.  In this
 paper, we propose a task based on missing data imputation and discuss
 various performance metrics which are sensitive to musically
-meaningful aspects of the data.  
+meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
@@ -400,47 +404,23 @@ details.
 
 \subsection{RESULTS}
 \label{ssec:results}
-It is impossible results for every algorithm, measure and number of masked columns.
-We selected the most meaningful ones; the reader is referred to our 
-website\footnote{Code available at: \url{http://www.columbia.edu/~tb2332/something}}
-for data and code to reproduce the results.
+As we mentioned in Subsection \ref{ssec:measures}, many metrics reward
+reconstructions in a very similar fashion. The Euclidean distance is
+the iconic measure, and we will see that many others tend to agree
+with it. At the same time, measures like delta difference and D-ENT
+offer another perspective. We try to rationalize this idea by
+measuring the correlation between our metrics. Pearson's
+correlation is defined as
+\[  \rho_{X,Y}=\mathrm{corr}(X,Y)={\mathrm{cov}(X,Y) \over \sigma_X
+    \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
+\]
+$\rho_{X,Y}$. Remember that $-1 \leq \rho_{X,Y} \leq 1$, an absolute
+value close to $1$ meaning high correlation. $\rho_{X,Y}$ is computed
+for many error measures based on results obtained by $3$ methods on
+two multi-beats imputation tasks. See results in Table
+\ref{tab:corrs}. Delta difference and D-ENT stand out as measuring
+things differently than Euclidean distance.
 
-Figure \ref{fig:2dscore} shows the performance of $3$ methods for different numbers
-of missing beats. We report Euclidean distance and D-ENT. One can see the result
-of contradicting measures. Nearest neighbor method ($k=1$) creates a reconstruction
-with an entropy similar to the original for all mask sizes. It is a direct consequence
-of the fact that entropy is approximately constant throughout a song. The linear
-transform learns to minimize the Euclidean distance and does it successfully. But as it
-can be seen from its entropy measure and Figure \ref{fig:basic} $3$rd row, it is
-done by a large amount of smoothing. The average reconstruction has the same entropy
-results than the linear transform, but due to less smoothing (or a less intelligent
-one), it does not do as well with the euclidean distance.
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.9\columnwidth]{recon_score_in_2d_5k}
-\end{center}
-\caption{Reconstruction error for $3$ methods and different
-number of masked beats. Errors are D-ENT and Euclidean
-distance. In all cases, the larger the number of masked beats,
-the higher the Euclidean distance. Lower left is better.
-\label{fig:2dscore}}
-\end{figure}
-
-In Subsection \ref{ssec:measures} we mentioned many different measures.
-We also showed how they could favor different kinds of reconstruction
-(with heavy smoothing or not, for instance). To make some sense of
-these, we investigate over large set of experiments which measures tend
-to agree with each other. We use Pearson's 
-correlation\footnote{
-$\rho_{X,Y}=\mathrm{corr}(X,Y)={\mathrm{cov}(X,Y) \over \sigma_X \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}$
-} $\rho_{X,Y}$. We have $-1 \leq \rho_{X,Y} \leq 1$, an absolute
-value close to $1$ meaning high correlation.
-$\rho_{X,Y}$ is computed for many error measures and results are presented in
-Table \ref{tab:corrs}. It appears that measures tend to form two groups.
-The ``Euclidean-like'' measures favor smoothing to minimize divergence on
-average. The ``entropy-like'' measures look at the texture of the reconstruction
-compared to the original (ONLY D-ENT IN THAT CATEGORY?????).
 
 \begin{table}[t]
 \begin{small}
@@ -467,6 +447,31 @@ Results form a symmetric matrix, we only show the upper triangle.
 \end{small}
 \end{table}
 
+We take a closer look at this divergence between measures in Figure
+\ref{fig:2dscore}.  It shows the performance of $3$ methods for
+different numbers of missing beats. We report Euclidean distance and
+D-ENT.  Nearest neighbor method ($k=1$) creates a reconstruction with
+a granularity similar to the original for all mask sizes. It is a
+direct consequence of the fact that D-ENT approximately constant
+throughout a song. The linear transform learns to minimize the
+Euclidean distance and does it successfully. But as it can be seen
+from the other measure and Figure \ref{fig:basic} $3$rd row, it is
+done by a large amount of smoothing. The average reconstruction has
+the same granularity than the linear transform, but due to less
+smoothing (or a less intelligent one), it does not do as well with the
+Euclidean distance.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{recon_score_in_2d_5k}
+\end{center}
+\caption{Reconstruction error for $3$ methods and different
+number of masked beats. Errors are D-ENT and Euclidean
+distance. In all cases, the larger the number of masked beats,
+the higher the Euclidean distance. Lower left is better.
+\label{fig:2dscore}}
+\end{figure}
+
 We know report results of a $15$ beat imputation on $5000$ songs in
 Table \ref{tab:res}. The linear transform is a clear winner based
 on Euclidean distance. As before, nearest neighbor's strength
@@ -481,6 +486,11 @@ probably only means that more research is needed. HMM should
 be extended to model more than one beat at a time. For SIPLCA,
 the activation matrix (that tells when each patch is used in time)
 should be better constrained via priors for instance.
+
+It is impossible results for every algorithm, measure and number of masked columns.
+We selected the most meaningful ones; the reader is referred to our 
+website\footnote{Code available at: \url{http://www.columbia.edu/~tb2332/something}}
+for data and code to reproduce the results.
 
 \begin{table}[t]
 \begin{small}
