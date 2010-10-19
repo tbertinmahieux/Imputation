@@ -101,9 +101,11 @@ Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
 included speech denoising~\cite{Raj1998}, source
 separation~\cite{Reyes-Gomez2005}, and model
-evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, to the best of
-our knowledge, previous research has only considered at most a single
-missing time frame.
+evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, much of the
+previous work has focused on at most a single time-frame.
+%However, to the best of
+%our knowledge, previous research has only considered at most a single
+%missing time frame.
 %a few missing time-frequency \emph{bins}
 %\FIXME[ronw]{this isn't totally fair, some of the missing
 %  data speech stuff is based on imputation using HMM/CRF models. E.g. see
@@ -194,18 +196,30 @@ to properly evaluate a model's ability to predict musical sequences.
 
 \subsection{DATA AND FEATURES}
 \label{ssec:feats}
-We represent music using chroma features \cite{Ellis2007a}, which
-record the intensity associated with each of the 12 semitones
-(e.g. piano keys) across all octaves.  One can see them as a very
-coarse %and noisy
-and low dimensional music transcription which captures the
-harmonic content of the signal while ignoring information related to
-timbre and instrumentation.
-We use an online API\footnote{\url{http://developer.echonest.com}} %
-%\cite{EchoNest} 
-that computes
-chroma from a constant-Q spectrogram.
+In the experiments described below, we use a set of $5000$ songs taken
+from the \emph{morecowbell.dj} dataset~\cite{Bertin-Mahieux2010a}.
+This dataset contains a wide variety of (predominantly western) pop
+music.  The raw audio was then converted to a chromagram
+representation using the online EchoNest
+API.\footnote{\url{http://developer.echonest.com}} A chromagram is
+similar in spirit to a spectrogram except that pitch content across
+all octaves has been folded into $12$ discrete bins which correspond
+to semitones (e.g. piano keys)~\cite{Ellis2007a}.
+
+
+%In the chroma representation, the pitch content at each point in time
+%is folded into a $12$ binsintensity associated with each of the 12
+%semitones (e.g. piano keys) across all octaves.
 %
+%One can see them as a very coarse %and noisy
+%and low dimensional music transcription which captures the harmonic
+%content of the signal while ignoring information related to timbre and
+%instrumentation.  
+%We use an online API\footnote{\url{http://developer.echonest.com}} %
+%\cite{EchoNest} 
+%that computes chroma from a constant-Q spectrogram.
+%
+
 Music naturally evolves over a time scale expressed in beats, as
 opposed to the fixed length frames commonly used in other audio
 processing applications.
@@ -390,6 +404,7 @@ $5000$ songs from the morecowbell.dj dataset
 beats.  The masked part is chosen at random, excluding the first and
 last $30$ beats.
 
+
 \subsection{ALGORITHMS}
 \label{ssec:algo}
 As multi-frame imputation has not been studied before, we report
@@ -406,15 +421,15 @@ sustained notes.
 
 Our first trained model is linear interpolation (called \textbf{linear
   transform} \FIXME[ronw]{Um, these two aren't the same...  it sounds
-  like you're actually training a linear transform  from the previous
+  like you're actually training a linear transform from the previous
   frames onto the missing one, not just finding the point that best
   fits the line that connects the visible beats on either side of the
-  mask (i.e. linear interpolation).  Or am I missing something?}
-in the text) where we use $N$ previous beats to predict
-the next one.  As it explicitly learns to minimize Euclidean distance
-on the visible data, this methods performs very well under certain
-metrics (See Figure \ref{fig:basic}). From our experiments, $N=1$ or
-$N=2$ work best.
+  mask (i.e. linear interpolation).  Or am I missing something?}  in
+the text) where we use $N$ previous beats to predict the next one.  As
+it explicitly learns to minimize Euclidean distance on the visible
+data, this methods performs very well under certain metrics (See
+Figure \ref{fig:basic}). From our experiments, $N=1$ or $N=2$ work
+best.
 
 Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate tehcnique
 to take advantage of the repetitions within a song. By looking at the
