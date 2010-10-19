@@ -82,14 +82,14 @@ substantial amounts of complex structural information.  Given the
 complexity of this data, learning structural models of music in an
 unsupervised fashion is a particularly challenging task.  For many
 applications we are interested in models that capture local patterns
-(i.e. ``patches'') in the data.  Finding robust patterns may prove
+(i.e. ``patches'') in the data.  Finding robust sequential
+patterns may prove
 useful for tasks such as song similarity (recognizing songs with
 similar patterns), song segmentation (labeling chorus/verse
 structure), and cover song recognition (identifying songs with similar
 high-level patterns).  All of these tasks would benefit from patch
 models that exhibit high-level musical characteristics while remaining
 faithful to the observed signal data.
-\FIXME[gg]{Do we need to back this up more?}
 %Therefore, we are interested in patterns that not only explain the
 %low-level signal, but also contain musical characteristics.  
 However, it is unclear how to evaluate the quality of this type of
@@ -100,8 +100,9 @@ to musically meaningful aspects of the data.
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
 included speech denoising~\cite{Raj1998}, source
-separation~\cite{Reyes-Gomez2005}, and model
-evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, much of the
+separation~\cite{Reyes-Gomez2005}, bandwidth
+expansion~\cite{Smaragdis2009}, and model
+evaluation~\cite{Hoffman2010}.  However, much of the
 previous work has focused on at most a single time-frame.
 %However, to the best of
 %our knowledge, previous research has only considered at most a single
@@ -112,12 +113,33 @@ previous work has focused on at most a single time-frame.
 %  figure 3 of
 %  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
 %}.
-In contrast, we define an imputation task in which many consecutive
-time frames are missing.  We refer to this task as \emph{multi-frame}
-imputation.  This makes the problem more challenging, but also allows
-us to more carefully evaluate the temporal aspects of our
-model.  % needs to be reworded?
+The single-frame imputation problem is often somewhat easy since the
+harmonic content of music tends to change at a time rate slower than a
+single frame.  However as the length of missing data increases,
+the problem becomes significantly more challenging.
+%
+We therefore focus on the task of \emph{multi-frame} imputation in
+% many consecutive time frames
+which long segments of the signal 
+are missing.
+%
+Obtaining good performance on this task requires the use of a model
+which takes advantage of the highly structured nature of music.  It
+therefore serves as a good way to
+% This allows us to
+more carefully evaluate the temporal aspects of competing
+models.  % needs to be reworded?
 % mention real-world packet-loss case?
+
+
+% Music is highly structured in time and as such is particularly suitable
+% for the multi-frame imputation task.
+% In addition to musicological implications,
+% large-scale models of music data have numerous commercial
+% applications, including recommendation systems, digital rights
+% management, and creative tools.  
+
+
 
 \begin{comment}
 and fully masking consecutive beats of music have not been
@@ -133,21 +155,6 @@ texture-like elements. We will argue that entropy is a good
 approximation of these characteristics.
 \end{comment}
 
-Figure \ref{fig:types} shows three matrices with different amounts of
-missing data.  As mentioned previously, other researchers
-\cite{Smaragdis2009} have worked with the partially missing data for
-applications such as bandwidth expansion and source separation (see
-Figure~\ref{fig:types} \FIXME[ronw]{I don't think we need this figure
-  -- especially since we only focus on the last case, an example of
-  which is clearly
-  visible in figure 2}).  A slightly more complex problem can be
-defined by masking out an entire time frame.  This problem is
-illustrated in Figure~\ref{fig:types}.  It is worth noting that due to
-our data representation (see Section~\ref{ssec:feats}), the
-single-frame imputation problem is somewhat easy.  In contrast, the
-problem of multiple missing frames (see Figure~\ref{fig:types}) can be
-made arbitrarily difficult.
-
 \begin{comment}
 a few frequency bins are hidden and can be
 recovered from their neighborhood, both in time and frequency. Masking
@@ -160,30 +167,23 @@ masking many consecutive beats.
 \end{comment}
 
 
-Music is highly structured in time and as such is particularly suitable
-for the multi-frame imputation task.
-In addition to musicological implications,
-large-scale models of music data have numerous commercial
-applications, including recommendation systems, digital rights
-management, and creative tools.  
-
-\FIXME[ronw]{Do we need to describe the features before presenting
-  this figure?}  
-Figure \ref{fig:basic} shows an example of
-multi-frame imputation of music data.  Linear regression, which
-explicitly minimizes Euclidean distance, is used to impute the missing
-data in Figure~\ref{fig:basic}.  However, it is clear from visual
-inspection that linear regression yields an overly-smooth
-reconstruction and is unable to predict the temporal evolution within
-the missing section.
+The difficult nature of multi-frame imputation of music data is
+demonstrated in Figure \ref{fig:basic}.
+%
+Linear regression\FIXME[ronw]{or transformation?}, which explicitly
+minimizes Euclidean distance, is used to impute the missing data in
+Figure~\ref{fig:basic}.  However, it is clear from visual inspection
+that linear regression yields an overly-smooth reconstruction and is
+unable to predict the temporal evolution within the missing section.
 %
 A more sophisticated signal model which better leverages the
 surrounding context and makes use of long-term temporal information
-such as knowledge of repetitions within a song is necessary to achieve
-a musically coherent reconstruction.
+such as knowledge of repetitions within a song (note that the
+missing sequence is repeated at frame 70) is necessary to achieve a musically
+coherent reconstruction.
 %
 Unfortunately, simple algorithms such as linear regression
-are often prone to identifying poor solutions, despite optimizing
+are often prone to identifying poor solutions, despite optimizing standard
 metrics such as Euclidean distance.
 %
 In this paper, we argue that a more extensive set of metrics is needed
