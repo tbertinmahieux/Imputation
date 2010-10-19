@@ -37,15 +37,11 @@
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
 \twoauthors {Thierry Bertin-Mahieux\sthanks{supported in part
-    by a NSERC PG scholarship.}, Graham Grindlay,} {Columbia
+    by a NSERC PG scholarship.}, Graham Grindlay} {Columbia
   University\\ LabROSA\\ New York, USA} 
    {Ron J. Weiss\sthanks{supported by NSF grant IIS-0844654 and Institute of
     Museum and Library Services grant LG-06-08-0073-08.}  and Daniel
-  P.W. Ellis\sthanks{This work is supported by NSF grant
-    IIS-0713334 and by a gift from Google, Inc.
-    Any opinions, findings and conclusions or
-    recommendations expressed in this material are those of the
-    authors and do not necessarily reflect the views of the sponsors.}} 
+  P.W. Ellis} 
 {New York University / Columbia University\\ MARL / LabROSA\\ New
   York, USA}
 
@@ -71,6 +67,15 @@ We'll track you down if you don't accept this paper.
 Missing data, chroma features, beat imputation, codebook learning
 \end{keywords}
 %
+
+% NSF thanks
+\makeatletter{\renewcommand*{\@makefnmark}{}
+\footnotetext{This work is supported by NSF grant
+    IIS-0713334 and by a gift from Google, Inc.
+    Any opinions, findings and conclusions or
+    recommendations expressed in this material are those of the
+    authors and do not necessarily reflect the views of the sponsors.}\makeatother}
+
 \section{Introduction}
 \label{sec:intro}
 As with many classes of time-series data, musical signals contain a
@@ -91,16 +96,17 @@ meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
-included speech denoising~\cite{Raj1998}, speech
+included speech denoising~\cite{Raj1998,Reyes-Gomez2005}, speech
 enhancement~\cite{Sanneck1996}, and model
 evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, to the best of
-our knowledge, previous research has only considered a few missing
-time-frequency \emph{bins}
-\FIXME[ronw]{this isn't totally fair, some of the missing
-  data speech stuff is based on imputation using HMM/CRF models. E.g. see
-  figure 3 of
-  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
-}.
+our knowledge, previous research has only considered at most a single
+missing time frame.
+%a few missing time-frequency \emph{bins}
+%\FIXME[ronw]{this isn't totally fair, some of the missing
+%  data speech stuff is based on imputation using HMM/CRF models. E.g. see
+%  figure 3 of
+%  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
+%}.
 In contrast, we define an imputation task
 in which  many consecutive time frames are missing.  We refer to
 this task as \emph{multi-frame} imputation.  This makes the problem
@@ -184,23 +190,35 @@ to properly evaluate a model's ability to predict musical sequences.
 
 \subsection{DATA AND FEATURES}
 \label{ssec:feats}
-We represent music using chroma features \cite{Ellis2007a}. They
+We represent music using chroma features \cite{Ellis2007a}, which
 record the intensity associated with each of the 12 semitones
-(e.g. piano keys) within one octave, but all octaves are folded
-together. One can see them as a very coarse and noisy music
-transcription. We use an online API \cite{EchoNest} that implements
-chromas over a constant-Q spectrogram.  Also, music has a natural time
-metric expressed in beats. Therefore, missing frames are equivalent to
-missing all features for the length of one beat. Accordingly, we
-resample the features so that each chroma vector spans one beat. Note
-that music beat tracking algorithms perform relatively well
-\cite{Davies2007} even if the task is not considered solved.
+(e.g. piano keys) across all octaves.  One can see them as a very
+coarse %and noisy
+and low dimensional music transcription which captures the
+harmonic content of the signal while ignoring information related to
+timbre and instrumentation.
+We use an online API \cite{EchoNest} that computes
+chroma from a constant-Q spectrogram.
+%
+Music naturally evolves over a time scale expressed in beats, as
+opposed to the fixed length frames commonly used in other audio
+processing applications.
+We therefore follow
+\cite{Ellis2007a} and
+resample the features so that each chroma vector spans one beat.
+% ronw: this sentence is unnecessary
+% Note
+%that music beat tracking algorithms perform relatively well
+%\cite{Davies2007} even if the task is not considered solved.
 
 Beat-aligned chroma features have been used for cover song recognition
 \cite{Ellis2007a} and segmentation \cite{Weiss2010}. In our previous work
 \cite{Bertin-Mahieux2010a}, we attempt to learn music patterns in that
-representation. Results on multi-beat imputation are done on a random
-subset of $5K$ songs of the cowbell dataset
+representation.
+% Results on multi-beat imputation are done on
+In the following sections we report experimental results over 
+a random
+subset of $5000$ songs from the morecowbell.dj dataset
 \cite{Bertin-Mahieux2010a}.
 
 
