@@ -8,6 +8,7 @@
 \usepackage{spconf,amsmath,graphicx}
 \usepackage{url}
 \usepackage{verbatim}
+\usepackage{subfig}
 %\usepackage{microtype}
 
 % Example definitions.
@@ -78,26 +79,30 @@ Missing data, chroma features, beat imputation, codebook learning
 
 \section{Introduction}
 \label{sec:intro}
-As with many classes of time-series data, musical signals contain a
-substantial amount of complex structural information.  Given the
-complexity of musical data, learning structural models of music in an
-unsupervised fashion is particularly challenging.  In general, we are
-interested in models that capture local patterns (i.e. ``patches'') in
-the data.  Finding robust patterns may prove useful for tasks such as
-song similarity (recognizing songs with similar patterns), song
-segmentation (labeling chorus/verse structure), and cover song
-recognition (identifying songs with similar high-level patterns).
-Therefore, we are looking for patterns that not only explain the
-low-level signal, but also contain musical characteristics.  However,
-it is unclear how to evaluate the quality of these patterns.  In this
-paper, we propose a task based on missing data imputation and discuss
-various performance metrics which are sensitive to musically
-meaningful aspects of the data.
+As with many classes of time-series data, musical signals contain
+substantial amounts of complex structural information.  Given the
+complexity of this data, learning structural models of music in an
+unsupervised fashion is a particularly challenging task.  For many
+applications we are interested in models that capture local patterns
+(i.e. ``patches'') in the data.  Finding robust patterns may prove
+useful for tasks such as song similarity (recognizing songs with
+similar patterns), song segmentation (labeling chorus/verse
+structure), and cover song recognition (identifying songs with similar
+high-level patterns).  All of these tasks would benefit from patch
+models that exhibit high-level musical characteristics while remaining
+faithful to the observed signal data.
+\FIXME[gg]{Do we need to back this up more?}
+%Therefore, we are interested in patterns that not only explain the
+%low-level signal, but also contain musical characteristics.  
+However, it is unclear how to evaluate the quality of this type of
+model.  In this paper, we propose a task based on missing data
+imputation and discuss various performance metrics which are sensitive
+to musically meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
-included speech denoising~\cite{Raj1998,Reyes-Gomez2005}, speech
-enhancement~\cite{Sanneck1996}, and model
+included speech denoising~\cite{Raj1998}, source
+separation~\cite{Reyes-Gomez2005}, and model
 evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, to the best of
 our knowledge, previous research has only considered at most a single
 missing time frame.
@@ -107,11 +112,11 @@ missing time frame.
 %  figure 3 of
 %  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
 %}.
-In contrast, we define an imputation task
-in which  many consecutive time frames are missing.  We refer to
-this task as \emph{multi-frame} imputation.  This makes the problem
-more challenging, but also allows us to more carefully evaluate the
-temporal aspects of our model.  % needs to be reworded?
+In contrast, we define an imputation task in which many consecutive
+time frames are missing.  We refer to this task as \emph{multi-frame}
+imputation.  This makes the problem more challenging, but also allows
+us to more carefully evaluate the temporal aspects of our
+model.  % needs to be reworded?
 % mention real-world packet-loss case?
 
 \begin{comment}
@@ -163,13 +168,14 @@ applications, including recommendation systems, digital rights
 management, and creative tools.  
 
 \FIXME[ronw]{Do we need to describe the features before presenting
-  this figure?}
-Figure \ref{fig:basic} shows an example of multi-frame imputation of
-music data.  Linear regression, which explicitly minimizes Euclidean
-distance, is used to impute the missing data in
-Figure~\ref{fig:basic}.  However, it is clear from visual inspection
-that linear regression yields an overly-smooth reconstruction which is
-unable to predict the temporal evolution within the missing section.
+  this figure?}  
+Figure \ref{fig:basic} shows an example of
+multi-frame imputation of music data.  Linear regression, which
+explicitly minimizes Euclidean distance, is used to impute the missing
+data in Figure~\ref{fig:basic}.  However, it is clear from visual
+inspection that linear regression yields an overly-smooth
+reconstruction and is unable to predict the temporal evolution within
+the missing section.
 %
 A more sophisticated signal model which better leverages the
 surrounding context and makes use of long-term temporal information
@@ -197,7 +203,9 @@ coarse %and noisy
 and low dimensional music transcription which captures the
 harmonic content of the signal while ignoring information related to
 timbre and instrumentation.
-We use an online API \cite{EchoNest} that computes
+We use an online API\footnote{\url{http://developer.echonest.com}} %
+%\cite{EchoNest} 
+that computes
 chroma from a constant-Q spectrogram.
 %
 Music naturally evolves over a time scale expressed in beats, as
@@ -343,26 +351,36 @@ nearest neighbor 5) using random.
 \label{fig:avgnnrand}}
 \end{figure}
 
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.85\columnwidth]{measures}
-\end{center}
-\caption{Effect of different measures on one-dimensional data.
-\label{fig:measures}}
+
+\begin{figure}%
+\centering
+\subfloat[]{%
+\label{fig:measures}%
+\includegraphics[width=0.475\columnwidth]{measures}} 
+\hspace{0.1cm}
+\subfloat[]{%
+\label{fig:square}%
+\includegraphics[width=0.475\columnwidth]{square}}%
+\hspace{8pt}%
+\caption{(a) Effect of different measures on one-dimensional data. (b)
+  Reconstruction error between a square wave and two approximations, a
+  square wave translated by a quarter of the period, and the average
+  function. Average error between original and translated wave is
+  always $0.5$ for any Mahalanobis measure $d_p$ on $[0,1]$.  For the
+  average function, the errors are $0.25$, $0.5$ and $0.71$ for $d_2$,
+  $d_1$ and $d_{1/2}$ respectively.}%
+\label{fig:two_measures}
 \end{figure}
 
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.8\columnwidth]{square}
-\end{center}
-\caption{Reconstruction error between a square wave and two approximation,
-a square wave translated by a quarter of the period, and the average
-function. Average error between original and translated wave is always $0.5$
-for any Mahalanobis measure $d_p$ on $[0,1]$. 
-For the average function, the errors are
-$0.25$, $0.5$ and $0.71$ for $d_2$, $d_1$ and $d_{1/2}$ respectively.
-\label{fig:square}}
-\end{figure}
+
+\begin{comment}
+  Reconstruction error between a square wave and two approximations, a
+  square wave translated by a quarter of the period, and the average
+  function. Average error between original and translated wave is
+  always $0.5$ for any Mahalanobis measure $d_p$ on $[0,1]$.  For the
+  average function, the errors are $0.25$, $0.5$ and $0.71$ for $d_2$,
+  $d_1$ and $d_{1/2}$ respectively.
+\end{comment}
 
 \section{EXPERIMENTS}
 \label{sec:exp}
