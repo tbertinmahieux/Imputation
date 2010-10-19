@@ -253,16 +253,17 @@ is the original one.  If we look at Figure \ref{fig:avgnnrand}, the
 reconstruction with the lowest D-ENT is using nearest neighbor and not
 averaging as with Euclidean distance.
 
-Note that we tried other entropy related measures, i.e. Kullback-Leibler divergence (KL)
-and Jensen difference \cite{Michel1994}. As for $d_{1/2}$, they behave in a surprisingly
-similar fashion as the Euclidean distance.
-
-We have explained why Euclidean distance justifies disappointing reconstructions. At the same
-time, we do not argue that we should ignore or replace it. Euclidean distance measures
-reconstruction in a fundamental way. We believe we need a set of measures to quantify the
-quality of music patterns, Euclidean distance being one of them. In the next section,
-we investigate which measures behave in a similar way, thus helping us to decide which
-ones are usefull to report.
+Note that we tried other entropy related measures,
+i.e. Kullback-Leibler divergence (KL) and Jensen difference
+\cite{Michel1994}. As for $d_{1/2}$, they behave in a surprisingly
+similar fashion as the Euclidean distance.  We explained above why
+Euclidean distance justifies disappointing reconstructions. At the
+same time, we do not argue that we should ignore or replace
+it. Euclidean distance measures reconstruction in a fundamental
+way. We believe we need a set of measures to quantify the quality of
+music patterns, Euclidean distance being one of them. In the next
+section, we investigate which measures behave in a similar way, thus
+helping us to decide which ones are usefull to report.
 
 \begin{figure}[t]
 \begin{center}
@@ -298,24 +299,31 @@ $0.25$, $0.5$ and $0.71$ for $d_2$, $d_1$ and $d_{1/2}$ respectively.
 
 \section{EXPERIMENTS}
 \label{sec:exp}
-We present results from different algorithms for imputing masked beats.
-Features are beat-aligned chromas and the dataset is made of $5000$ songs
-from the Cowbell dataset. Songs has to be of length at least $100$ beats.
-The masked part is chosen at random, excluding the first and last $30$ beats.
+We present results from different algorithms for imputing masked
+beats.  Features are beat-aligned chromas and the dataset is made of
+$5000$ songs from the Cowbell dataset
+\cite{Bertin-Mahieux2010a}. Songs has to be of length at least $100$
+beats.  The masked part is chosen at random, excluding the first and
+last $30$ beats.
 
 \subsection{ALGORITHMS}
 \label{ssec:algo}
-Algorithms named in bold are the ones used in the experiments.
+As multi-beat imputation has not been studied before, we report
+results on a variety of benchmark algorithms. We realize that such
+methods have a low probability of success at solving the task, but
+their relative performance is of interest.  Simple methods include
+\textbf{random} where each chroma bin is drawn from a uniform $[0,1)$
+distribution (Figure \ref{fig:avgnnrand}, $5$th row).  One can also
+pick a beat at random from the song, or take the average of all
+visible beats. Taking \textbf{average} of the beats within a certain
+range of the missing patch (Figure \ref{fig:avgnnrand}, $3$rd row)
+create a smooth reconstruction, but still solves the case of
+sustained notes.
 
-Simple methods include \textbf{random} where each pixel is drawn from a uniform $[0,1)$
-distribution (Figure \ref{fig:avgnnrand}, $5$th row). 
-We can also pick a beat at random from the song, or take the average
-of all visible beats. A more efficient way is to take the \textbf{average} of the beats
-within a certain range of the missing patch, for example within $3$ beats on each
-side (Figure \ref{fig:avgnnrand}, $3$rd row).
-A significant improvement is to predict the next missing beat based on the
-previous $N$ ones. We train a \textbf{linear transform} by minimizing the Euclidean distance
-on the visible parts of the song. This methods is shown in Figure \ref{fig:basic}.
+Our first trained model is linear interpolation (called \textbf{linear transform}
+in the text) where we use $N$ previous beats to predict the next one.
+As it explicitely learns to minimize Euclidean distance on the visible data,
+this methods performs very well under certain metrics (See Figure \ref{fig:basic}).
 
 Nearest neighbor ($\mathbf{k}$\textbf{NN}) is a powerful technique. 
 As we mentioned in the introduction, many segments
