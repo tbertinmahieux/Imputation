@@ -386,7 +386,7 @@ nearest neighbor 5) using random.
 \label{sec:exp}
 We present results from different algorithms for imputing masked
 beats.  Features are beat-aligned chromas and the dataset is made of
-$5000$ songs from the Cowbell dataset
+$5000$ songs from the morecowbell.dj dataset
 \cite{Bertin-Mahieux2010a}. Songs has to be of length at least $100$
 beats.  The masked part is chosen at random, excluding the first and
 last $30$ beats.
@@ -478,21 +478,14 @@ cos & $0.88$ & $0.76$ & $0.97$ & $-0.03$ & $0.20$ \\
 KL & $0.77$ & $0.64$ & $0.95$ & $-0.04$ & $0.17$ \\ 
 cond. ent. & $0.58$ & $0.68$ & $0.37$ & $0.32$ & $0.18$ \\
 thresh. & $0.68$ & $0.91$ & $0.51$ & $0.20$ & $0.35$ \\ \hline
-% & eucl. & KL & D-ENT & $d_{1/2}$ & Jensen \\ \hline
-%eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $0.84$\\
-%cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $0.97$ \\
-%KL &  &  & $1$ & $0.17$ & $0.64$ & $0.95$ \\
-%D-ENT &  & $$ & $$ & $1$ & $0.27$ & $0.20$ \\
-%$d_{1/2}$ & & & & & $1$ & $0.71$ \\ 
-%Jensen & & & & & & $1$ \\ 
-%Leven & $0.59$ & $0.46$ & $0.35$ &$0.41$ & $0.81$ & $0.40$ \\
-%Thresh. & $0.68$& $0.56$ & $0.46$ & $0.35$ & $0.90$ & $0.51$ \\ \hline
 \end{tabular}
 \caption{Pearson correlation between measures. Based on all results
-from random, average, $1$NN and linear transform on $5000$K songs
-with $1$ and $10$ missing beats. $1$ or $-1$ means high
-correlation, $0$ means none.
-Results form a symmetric matrix, we only show the upper triangle.
+  from random, average, $1$NN and linear transform on $5000$K songs
+  with $1$ and $10$ missing beats. $1$ or $-1$ means high correlation,
+  $0$ means none. ``Jensen'' is Jensen difference, ``cos'' is cosine
+  distance, ``cond. ent.'' is conditional entropy, ``thresh.'' is the
+  greyed area measure from Figure \ref{fig:measures} with $\delta =
+  0.2$.
 \label{tab:corrs}}
 \end{center}
 \end{small}
@@ -523,25 +516,13 @@ the higher the Euclidean distance. Lower left is better.
 \label{fig:2dscore}}
 \end{figure}
 
-We know report results of a $15$ beat imputation on $5000$ songs in
+We now report results of a $15$ beat imputation on $5000$ songs in
 Table \ref{tab:res}. The linear transform is a clear winner based
 on Euclidean distance. As before, nearest neighbor's strength
 is to preserve the texture of the original patch as can be seen
 from his D-ENT score. We can not report all results, but they
 are no serious surprises with other measures 
 as can be expected from Table \ref{tab:corrs}.
-
-It is a disappointment that powerful methods such as SIPLCA
-and HMM did not perform better in our experiments. It
-probably only means that more research is needed. HMM should
-be extended to model more than one beat at a time. For SIPLCA,
-the activation matrix (that tells when each patch is used in time)
-should be better constrained via priors for instance.
-
-It is impossible results for every algorithm, measure and number of masked columns.
-We selected the most meaningful ones; the reader is referred to our 
-website\footnote{Code available at: \url{http://www.columbia.edu/~tb2332/something}}
-for data and code to reproduce the results.
 
 \begin{table}[t]
 \begin{small}
@@ -563,7 +544,8 @@ D-ENT.
 \end{small}
 \end{table}
 
-Below are specific examples of original / reconstruction pairs.
+In Figure \ref{fig:origrecon} we present specific examples of
+original / reconstruction pairs.
 
 \begin{figure}[t]
 \begin{center}
@@ -576,57 +558,6 @@ reported on the right.
 \label{fig:origrecon}}
 \end{figure}
 
-
-
-\iffalse
-\begin{table}[t]
-\begin{small}
-\begin{center}
-\begin{tabular}{l|c|c|c|c|c|}
-\# beats  & 1 & 2 & 5 & 10 & 15 \\ \hline \hline
-random & $0.166$ & $0.166$ & $0.167$ & $0.167$ & $0.168$  \\
-rand. song & $0.115$ & $0.114$ & $0.114$ & $0.115$ & $0.115$  \\
-average all & $0.057$ & $0.057$ & $0.057$ & $0.057$ & $0.058$ \\
-average & $0.047$ & $0.053$ & $0.062$ & $0.065$ & $0.069$ \\ \hline
-knn eucl & $0.048$ & $0.049$ & $0.055$ & $0.064$ &  $0.070$ \\
-knn kl & $0.049$ & $0.050$ & $0.056$ & $0.066$ &  $0.071$ \\
-lin. trans. & $\mathbf{0.044}$ & $\mathbf{0.047}$ & $\mathbf{0.051}$ & $\mathbf{0.053}$ & $\mathbf{0.055}$ \\
-codebook & & & & &  \\
-SIPLCA & & & & &  \\ \hline
-\end{tabular}
-\caption{Results based on euclidean distance on $43K$ songs.
-Song has to be at least $70$ beats long. 
-For ``average'', window is $2$ beats each side of the masked patch.
-For ``knn eucl'' and ``knn kl'', window is $10$ beats each side of the masked patch.
-For ``lin. trans.'', window is the $2$ previous beats.}
-\label{tab:reseucl}
-\end{center}
-\end{small}
-\end{table}
-
-\begin{table}[t]
-\begin{small}
-\begin{center}
-\begin{tabular}{l|c|c|c|c|c|}
-\# beats & 1 & 2 & 5 & 10 & 15 \\ \hline \hline
-random & $0.428$ & $0.450$ & $0.461$ & $0.461$ & $0.462$  \\
-rand. song & $0.334$ & $0.351$ & $0.371$ & $0.377$ & $0.380$  \\
-average all & $0.164$ & $0.175$ & $0.183$ & $0.187$ & $0.189$ \\ 
-average & $0.121$ & $0.154$ & $0.194$ & $0.212$ &  $0.223$ \\ \hline
-knn eucl & $\mathbf{0.116}$ & $0.136$ & $0.169$ & $0.212$ & $0.233$ \\
-knn kl & $\mathbf{0.116}$ & $\mathbf{0.135}$ & $\mathbf{0.167}$ & $0.209$ & $0.229$ \\
-lin. trans. & $0.141$ & $0.157$ & $0.170$ & $\mathbf{0.180}$ & $\mathbf{0.184}$ \\
-codebook & & & & &  \\
-SIPLCA & & & & &  \\ \hline
-\end{tabular}
-\caption{Results based on symmetric KL divergence on $43K$ songs.
-See Table \ref{tab:reseucl} for the exact parameters used.}
-\label{tab:reskl}
-\end{center}
-\end{small}
-\end{table}
-\fi
-
 \section{CONCLUSION AND FUTURE WORK}
 \label{sec:conclusion}
 As mentioned, modifications of HMM and SIPLCA are ongoing
@@ -637,7 +568,7 @@ A unified set of measures should also be selected
 by the community. Our code and test data is available to 
 reproduce and improve these results.
 
-
+Code available at \url{http://www.columbia.edu/~tb2332/proj/imputation.html}.
 
 
 %\section{ACKNOWLEDGEMENTS}
