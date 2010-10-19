@@ -325,12 +325,11 @@ in the text) where we use $N$ previous beats to predict the next one.
 As it explicitely learns to minimize Euclidean distance on the visible data,
 this methods performs very well under certain metrics (See Figure \ref{fig:basic}).
 
-Nearest neighbor ($\mathbf{k}$\textbf{NN}) is a powerful technique. 
-As we mentioned in the introduction, many segments
-of a song are repeated at least once. Thus, we can infer the missing beats by looking at
-the neighbor ones and finding another section that has similar adjacent beats. Note
-that we can use a \textbf{codebook} made of other songs instead of the current one. Also, future
-work include working with $k > 1$.
+Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate tehcnique to take advantage
+of the repetitions within a song. By looking at the nearby beats of the missing data,
+we can impute a reconstruction by spotting a similar neighborhood. Note that instead
+of using the visible part of the song, one can use a \textbf{codebook} made of other songs.
+$k$NN with $k>1$ is ongoing research.
 
 We experimented with algorithms with greater representational power, e.g. \textbf{HMM} and
 shift invariant probabilistic latent component analysis (\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}.
