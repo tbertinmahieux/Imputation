@@ -50,16 +50,21 @@
 \maketitle
 %
 \begin{abstract}
-Imputation is cool. It is a well-defined problem
-\FIXME[ronw]{but isn't the whole point of the paper
-that it isn't to straightforward to evaluate?},
-as opposed to segmentation for which ground truth labels are often
-very ambiguous.
+  We investigate the task of missing data imputation in music signals
+  as a means of evaluating the ability of different signal models to
+  accurately capture the temporal structure present in music.
+  %
+  We analyze beat-synchronous chromagrams and compare linear ??? ...
+  %
+  Simple predictive models perform best when measured using a
+  Euclidean distance metric, despite producing results which are not
+  musically meaningful.  We therefore investigate alternate evaluation
+  measures which emphasize musical consistency....
 %
+
 Gives a reasonable benchmark to compare algorithms that claim learning meaningful
 temporal patterns on music. Hard to beat benchmarks comparison, for instance linear
 prediction. We compare some methods and discuss contradicting error measures. 
-We'll track you down if you don't accept this paper.
 \end{abstract}
 %
 \begin{keywords}
@@ -170,7 +175,7 @@ masking many consecutive beats.
 The difficult nature of multi-frame imputation of music data is
 demonstrated in Figure \ref{fig:basic}.
 %
-Linear regression\FIXME[ronw]{or transformation?}, which explicitly
+Linear regression\FIXME[ronw]{or prediction?}, which explicitly
 minimizes Euclidean distance, is used to impute the missing data in
 Figure~\ref{fig:basic}.  However, it is clear from visual inspection
 that linear regression yields an overly-smooth reconstruction and is
