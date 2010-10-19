@@ -506,18 +506,18 @@ thresh. & $0.68$ & $0.91$ & $0.51$ & $0.20$ & $0.35$ \\ \hline
 \end{table}
 
 We take a closer look at this divergence between measures in Figure
-\ref{fig:2dscore}.  It shows the performance of $3$ methods for
+\ref{fig:2dscore}.  It shows the performance of three methods for
 different numbers of missing beats. We report Euclidean distance and
-D-ENT.  Nearest neighbor method ($k=1$) creates a reconstruction with
-a granularity similar to the original for all mask sizes. It is a
-direct consequence of the fact that D-ENT approximately constant
-throughout a song. The linear transform learns to minimize the
-Euclidean distance and does it successfully. But as it can be seen
-from the other measure and Figure \ref{fig:basic} $3$rd row, it is
-done by a large amount of smoothing. The average reconstruction has
-the same granularity than the linear transform, but due to less
-smoothing (or a less intelligent one), it does not do as well with the
-Euclidean distance.
+D-ENT. Nearest neighbor (NN) method creates a reconstruction with a
+granularity similar to the original for all mask sizes. We can assume
+that D-ENT is approximately constant throughout a song. Thus, a
+imputation from NN preserve this characteristic.  Regarding the linear
+transform, it learns to minimize the Euclidean distance and does it
+successfully. But as it can be seen with D-ENT and in Figure
+\ref{fig:basic} $3$rd row, it is done by a large amount of
+smoothing. The average reconstruction has the same granularity than
+the linear transform, but due to less smoothing (or a less intelligent
+one), it does not do as well with the Euclidean distance.
 
 \begin{figure}[t]
 \begin{center}
@@ -531,12 +531,13 @@ the higher the Euclidean distance. Lower left is better.
 \end{figure}
 
 We now report results of a $15$ beat imputation on $5000$ songs in
-Table \ref{tab:res}. The linear transform is a clear winner based
-on Euclidean distance. As before, nearest neighbor's strength
-is to preserve the texture of the original patch as can be seen
-from his D-ENT score. We can not report all results, but they
-are no serious surprises with other measures 
-as can be expected from Table \ref{tab:corrs}.
+Table \ref{tab:res}. The linear transform is a clear winner based on
+Euclidean distance. As before, nearest neighbor's strength is to
+preserve the texture of the original patch as can be seen from his
+D-ENT score. We can not present all results (other number of missing
+beats, oter error measures, etc) due to space constraints, but they
+are no serious surprises with other measures as can be expected from
+Table \ref{tab:corrs}.
 
 \begin{table}[t]
 \begin{small}
@@ -558,8 +559,13 @@ D-ENT.
 \end{small}
 \end{table}
 
-In Figure \ref{fig:origrecon} we present specific examples of
-original / reconstruction pairs.
+In Figure \ref{fig:origrecon} we present specific examples of original
+/ reconstruction pairs. Pay attention to the D-ENT values and the fact
+that it prefers the second reconstruction.  It is due to a similar
+repartition of graey-scale values troughout the patch. Once again,
+this measure favors NN-like methods. Note also that delta difference
+tends to reward overly-granular solution, as it is the only measure to
+prefer the $3$rd reconstruction to the $2$nd one.
 
 \begin{figure}[t]
 \begin{center}
