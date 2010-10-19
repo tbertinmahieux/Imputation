@@ -420,12 +420,8 @@ range of the missing patch (Figure \ref{fig:avgnnrand}, $3$rd row)
 create a smooth reconstruction, but still solves the case of
 sustained notes.
 
-Our first trained model is linear interpolation (called \textbf{linear
-  transform} \FIXME[ronw]{Um, these two aren't the same...  it sounds
-  like you're actually training a linear transform from the previous
-  frames onto the missing one, not just finding the point that best
-  fits the line that connects the visible beats on either side of the
-  mask (i.e. linear interpolation).  Or am I missing something?}  in
+Our first trained model is linear regression (called \textbf{linear
+  transform} in
 the text) where we use $N$ previous beats to predict the next one.  As
 it explicitly learns to minimize Euclidean distance on the visible
 data, this methods performs very well under certain metrics (See
