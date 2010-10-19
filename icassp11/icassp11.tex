@@ -314,7 +314,7 @@ their relative performance is of interest.  Simple methods include
 \textbf{random} where each chroma bin is drawn from a uniform $[0,1)$
 distribution (Figure \ref{fig:avgnnrand}, $5$th row).  One can also
 pick a beat at random from the song, or take the average of all
-visible beats. Taking \textbf{average} of the beats within a certain
+visible beats. Taking the \textbf{average} of the beats within a certain
 range of the missing patch (Figure \ref{fig:avgnnrand}, $3$rd row)
 create a smooth reconstruction, but still solves the case of
 sustained notes.
@@ -323,7 +323,8 @@ Our first trained model is linear interpolation (called \textbf{linear
   transform} in the text) where we use $N$ previous beats to predict
 the next one.  As it explicitely learns to minimize Euclidean distance
 on the visible data, this methods performs very well under certain
-metrics (See Figure \ref{fig:basic}).
+metrics (See Figure \ref{fig:basic}). From our experiments, $N=1$ or
+$N=2$ work best.
 
 Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate tehcnique
 to take advantage of the repetitions within a song. By looking at the
