@@ -60,10 +60,13 @@ Missing data, chroma features, beat imputation, codebook learning
 %
 \section{Introduction}
 \label{sec:intro}
-Many signals show similarities and repetitions over time.  
-%Learning these repetitions in an unsupervised way remains a challenge. 
-Finding robust patterns may prove useful for tasks such as song
-similarity (recognizing songs with similar patterns), song
+As with many classes of time-series data, musical signals contain a
+substantial amount of complex structural information.  Given the
+complexity of musical data, learning structural models of music in an
+unsupervised fashion is particularly challenging.  In general, we are
+interested in models that capture local patterns (i.e. ``patches'') in
+the data.  Finding robust patterns may prove useful for tasks such as
+song similarity (recognizing songs with similar patterns), song
 segmentation (labeling chorus/verse structure), and cover song
 recognition (identifying songs with similar high-level patterns).
 Therefore, we are looking for patterns that not only explain the
@@ -71,7 +74,7 @@ low-level signal, but also contain musical characteristics.  However,
 it is unclear how to evaluate the quality of these patterns.  In this
 paper, we propose a task based on missing data imputation and discuss
 various performance metrics which are sensitive to musically
-meaningful aspects of the data.  
+meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
