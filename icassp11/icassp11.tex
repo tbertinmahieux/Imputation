@@ -320,24 +320,33 @@ range of the missing patch (Figure \ref{fig:avgnnrand}, $3$rd row)
 create a smooth reconstruction, but still solves the case of
 sustained notes.
 
-Our first trained model is linear interpolation (called \textbf{linear transform}
-in the text) where we use $N$ previous beats to predict the next one.
-As it explicitely learns to minimize Euclidean distance on the visible data,
-this methods performs very well under certain metrics (See Figure \ref{fig:basic}).
+Our first trained model is linear interpolation (called \textbf{linear
+  transform} in the text) where we use $N$ previous beats to predict
+the next one.  As it explicitely learns to minimize Euclidean distance
+on the visible data, this methods performs very well under certain
+metrics (See Figure \ref{fig:basic}).
 
-Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate tehcnique to take advantage
-of the repetitions within a song. By looking at the nearby beats of the missing data,
-we can impute a reconstruction by spotting a similar neighborhood. Note that instead
-of using the visible part of the song, one can use a \textbf{codebook} made of other songs.
-$k$NN with $k>1$ is ongoing research.
+Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate tehcnique
+to take advantage of the repetitions within a song. By looking at the
+nearby beats of the missing data, we can impute a reconstruction by
+spotting a similar neighborhood. Note that instead of using the
+visible part of the song, one can use a \textbf{codebook} made of
+other songs.  $k$NN with $k>1$ is ongoing research.
 
-We experimented with algorithms with greater representational power, e.g. \textbf{HMM} and
-shift invariant probabilistic latent component analysis (\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}.
-ADD SOME DETAILS, DIAGONAL/SEQUENCE STATE TRANSITION MATRIX FOR THE HMM, 
-RANK AND WIN SIZE FOR SIPLCA.
-Due to lack of space and the numerous parameters to tune, we present results without
-much details. We refer the reader to our code and mention that this is part of our
-ongoing research.
+Previous methods rely on local information which should not be enough
+to solve multi-beats imputation. HMM or NMF should better leverage
+long term dependencies and nearby information.  We experiment with
+shift invariant probabilistic latent component analysis
+(\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}, a probabilistic
+version of NMF. SIPLCA learn how to encode the signal as overlapping
+patches. The missing data is inferred by maximizing expectation.
+Problems arisewhen the number of missing beats is larger than a patch
+size. SIPLCA can activate patches or not without any penalty. Thus, we
+regularize the the activation by applying a second level of SIPLCA.
+Still, results are not impressive and improvements are part of our
+ongoing research. We refer the interested reader to our code for more
+details.
+
 
 
 \subsection{RESULTS}
