@@ -208,7 +208,7 @@ Beat-aligned chroma features have been used for cover song recognition
 \cite{Ellis2007a} and segmentation \cite{Weiss2010}. In our previous work
 \cite{Bertin-Mahieux2010a}, we attempt to learn music patterns in that
 representation.
-% Results on multi-beat imputation are done on
+% Results on multi-frame imputation are done on
 In the following sections we report experimental results over 
 a random
 subset of $5000$ songs from the morecowbell.dj dataset
@@ -238,23 +238,30 @@ subset of $5000$ songs from the morecowbell.dj dataset
 %evaluation.plot_oneexample(btchroma2,mask,p1,p2,methods=['lintrans'],methods_args=[{'win':1}],measures=('eucl','kl','dent'),plotrange=(p1-10,p2+70))
 
 
-\subsection{MEASURES}
+%\subsection{MEASURES}
+\subsection{EVALUATION METRICS}
 \label{ssec:measures}
 Euclidean distance is a natural choice for reconstruction and encoding
 tasks. However, we saw from Figure \ref{fig:basic} that it can favor
-unsatisfying results for multi-beats imputation. We devote a great
+unsatisfying results for multi-frame imputation. We devote a great
 part of this work to exploring metrics that measure other aspects of
 the reconstruction: for instance, a metric that would reward
 preserving the level of granularity of the original data in Figure
 \ref{fig:basic}.
 
 We first consider Mahalanobis distances of the form $d_p =
-|x_1-x_2|^p$, especially with $p \leq 2$. Figure \ref{fig:measures}
+|x_1-x_2|^p$,
+\FIXME[ronw]{I don't think Mahalanobis distance is the right term here
+  -- there is no covariance weighting here.  ``Euclidean'' or
+  ``generalized Euclidean'' might be
+  safer even though ``Euclidean'' implies that $p=2$.}
+ especially with $p \leq 2$. Figure \ref{fig:measures}
 illustrates the effect of these measures on one dimensional data.  The
 greyed rectangle represents the case where a reconstruction is
 considered valid if it is between some $\delta$ of the original and
 wrong otherwise.  Mahalanobis distance approximate this case with an
 increasingly smaller $\delta$ as $p \rightarrow 0$.
+\FIXME[ronw]{elaborate on this, it's kind of unclear}
 
 Let's consider these cases on the toy example of Figure
 \ref{fig:square}.  The square wave of period $1$ could be one row of
@@ -267,7 +274,7 @@ seems the most accurate. However, with $d_1$, the errors are both
 equal to $0.5$. With $d_{1/2}$, errors are now $0.5$ and
 $0.71$. Hence, if the translated square wave should be a better
 approximation, Euclidean distance is misleading.
-
+\FIXME[ronw]{This paragraph is confusing and should be rewritten.}
 %Vasicek estimator \cite{Learned-Miller2003}.  
 
 The phenomena above explain why reconstruction such as in Figure
@@ -284,8 +291,9 @@ now look into other measures that would differ from $d_2$.  Upon
 visual inspection, they should reward granularity which is missing in
 Figure \ref{fig:basic} for instance. Delta chromas are the finite
 difference along the time axis of the chromas. Deltas of over-smoothed
-solution are closed to $0$ whereas typical songs have more varying
-deltas. \textbf{ddiff} measures the absolute difference between the
+solution are closed to $0$ whereas features of typical songs have more
+variation over time.
+\textbf{ddiff} measures the absolute difference between the
 sum of absolute values of the deltas for the original data and its
 reconstruction.
 
@@ -315,7 +323,7 @@ it. Euclidean distance measures reconstruction in a fundamental
 way. We believe we need a set of measures to quantify the quality of
 music patterns, Euclidean distance being one of them. In the next
 section, we investigate which measures behave in a similar way, thus
-helping us to decide which ones are usefull to report.
+helping us to decide which ones are useful to report.
 
 \begin{figure}[t]
 \begin{center}
@@ -360,7 +368,7 @@ last $30$ beats.
 
 \subsection{ALGORITHMS}
 \label{ssec:algo}
-As multi-beat imputation has not been studied before, we report
+As multi-frame imputation has not been studied before, we report
 results on a variety of benchmark algorithms. We realize that such
 methods have a low probability of success at solving the task, but
 their relative performance is of interest.  Simple methods include
@@ -373,8 +381,13 @@ create a smooth reconstruction, but still solves the case of
 sustained notes.
 
 Our first trained model is linear interpolation (called \textbf{linear
-  transform} in the text) where we use $N$ previous beats to predict
-the next one.  As it explicitely learns to minimize Euclidean distance
+  transform} \FIXME[ronw]{Um, these two aren't the same...  it sounds
+  like you're actually training a linear transform  from the previous
+  frames onto the missing one, not just finding the point that best
+  fits the line that connects the visible beats on either side of the
+  mask (i.e. linear interpolation).  Or am I missing something?}
+in the text) where we use $N$ previous beats to predict
+the next one.  As it explicitly learns to minimize Euclidean distance
 on the visible data, this methods performs very well under certain
 metrics (See Figure \ref{fig:basic}). From our experiments, $N=1$ or
 $N=2$ work best.
@@ -387,13 +400,13 @@ visible part of the song, one can use a \textbf{codebook} made of
 other songs.  $k$NN with $k>1$ is ongoing research.
 
 Previous methods rely on local information which should not be enough
-to solve multi-beats imputation. HMM or NMF should better leverage
+to solve multi-frame imputation. HMM or NMF should better leverage
 long term dependencies and nearby information.  We experiment with
 shift invariant probabilistic latent component analysis
 (\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}, a probabilistic
 version of NMF. SIPLCA learn how to encode the signal as overlapping
 patches. The missing data is inferred by maximizing expectation.
-Problems arisewhen the number of missing beats is larger than a patch
+Problems arise when the number of missing beats is larger than the patch
 size. SIPLCA can activate patches or not without any penalty. Thus, we
 regularize the the activation by applying a second level of SIPLCA.
 Still, results are not impressive and improvements are part of our
@@ -406,7 +419,7 @@ details.
 \label{ssec:results}
 As we mentioned in Subsection \ref{ssec:measures}, many metrics reward
 reconstructions in a very similar fashion. The Euclidean distance is
-the iconic measure, and we will see that many others tend to agree
+often the default choice, and we will see that many others tend to agree
 with it. At the same time, measures like delta difference and D-ENT
 offer another perspective. We try to rationalize this idea by
 measuring the correlation between our metrics. Pearson's
@@ -417,7 +430,7 @@ correlation is defined as
 $\rho_{X,Y}$. Remember that $-1 \leq \rho_{X,Y} \leq 1$, an absolute
 value close to $1$ meaning high correlation. $\rho_{X,Y}$ is computed
 for many error measures based on results obtained by $3$ methods on
-two multi-beats imputation tasks. See results in Table
+two multi-frame imputation tasks. See results in Table
 \ref{tab:corrs}. Delta difference and D-ENT stand out as measuring
 things differently than Euclidean distance.
 
