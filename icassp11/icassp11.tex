@@ -95,6 +95,7 @@ structure), and cover song recognition (identifying songs with similar
 high-level patterns).  All of these tasks would benefit from patch
 models that exhibit high-level musical characteristics while remaining
 faithful to the observed signal data.
+%\FIXME[gg]{Do we need to back this up more?}
 %Therefore, we are interested in patterns that not only explain the
 %low-level signal, but also contain musical characteristics.  
 However, it is unclear how to evaluate the quality of this type of
@@ -207,11 +208,9 @@ This dataset contains a wide variety of (predominantly western) pop
 music.  The raw audio was then converted to a chromagram
 representation using the online EchoNest
 API.\footnote{\url{http://developer.echonest.com}} A chromagram is
-similar in spirit to a spectrogram except that pitch content across
-all octaves has been folded into $12$ discrete bins which correspond
-to semitones (e.g. piano keys)~\cite{Ellis2007a}.
-
-
+similar in spirit to a constant-Q spectrogram except that pitch
+content across all octaves has been folded into $12$ discrete bins,
+each of which corresponds to a semitone (e.g. piano key).
 %In the chroma representation, the pitch content at each point in time
 %is folded into a $12$ binsintensity associated with each of the 12
 %semitones (e.g. piano keys) across all octaves.
@@ -223,28 +222,31 @@ to semitones (e.g. piano keys)~\cite{Ellis2007a}.
 %We use an online API\footnote{\url{http://developer.echonest.com}} %
 %\cite{EchoNest} 
 %that computes chroma from a constant-Q spectrogram.
-%
 
 Music naturally evolves over a time scale expressed in beats, as
-opposed to the fixed length frames commonly used in other audio
-processing applications.
-We therefore follow
-\cite{Ellis2007a} and
-resample the features so that each chroma vector spans one beat.
+opposed to the fixed-length frames commonly used in other audio
+processing applications.  Beat-aligned chroma can be formed by
+resampling a chromagram so that each chroma (column) vector spans a
+single beat.  This representation has been successfully used for cover
+song recognition~\cite{Ellis2007a}, segmentation~\cite{Weiss2010}, and
+in our previous work on patch modeling~\cite{Bertin-Mahieux2010a}.  As
+a post-processing step, we remove variability due to loudness by
+normalizing each column to have a maximum value of $1$.
+
 % ronw: this sentence is unnecessary
 % Note
 %that music beat tracking algorithms perform relatively well
 %\cite{Davies2007} even if the task is not considered solved.
 
-Beat-aligned chroma features have been used for cover song recognition
-\cite{Ellis2007a} and segmentation \cite{Weiss2010}. In our previous work
-\cite{Bertin-Mahieux2010a}, we attempt to learn music patterns in that
-representation.
+%Beat-aligned chroma features have been used for cover song recognition
+%\cite{Ellis2007a} and segmentation \cite{Weiss2010}. In our previous work
+%\cite{Bertin-Mahieux2010a}, we attempt to learn music patterns in that
+%representation.
 % Results on multi-frame imputation are done on
-In the following sections we report experimental results over 
-a random
-subset of $5000$ songs from the morecowbell.dj dataset
-\cite{Bertin-Mahieux2010a}.
+%In the following sections we report experimental results over 
+%a random
+%subset of $5000$ songs from the morecowbell.dj dataset
+%\cite{Bertin-Mahieux2010a}.
 
 
 \begin{figure}[t]
@@ -309,7 +311,7 @@ approximation, Euclidean distance is misleading.
 \FIXME[ronw]{This paragraph is confusing and should be rewritten.}
 %Vasicek estimator \cite{Learned-Miller2003}.  
 
-The phenomena above explain why reconstruction such as in Figure
+The phenomena above explains why reconstruction such as in Figure
 \ref{fig:basic} ($3$rd row) or in Figure \ref{fig:avgnnrand} ($3$rd
 row) often result from powerful algorithms. Learning an overly
 smoothed solution and avoiding extreme values is rewarded by some
@@ -424,12 +426,8 @@ range of the missing patch (Figure \ref{fig:avgnnrand}, $3$rd row)
 create a smooth reconstruction, but still solves the case of
 sustained notes.
 
-Our first trained model is linear interpolation (called \textbf{linear
-  transform} \FIXME[ronw]{Um, these two aren't the same...  it sounds
-  like you're actually training a linear transform from the previous
-  frames onto the missing one, not just finding the point that best
-  fits the line that connects the visible beats on either side of the
-  mask (i.e. linear interpolation).  Or am I missing something?}  in
+Our first trained model is linear regression (called \textbf{linear
+  transform} in
 the text) where we use $N$ previous beats to predict the next one.  As
 it explicitly learns to minimize Euclidean distance on the visible
 data, this methods performs very well under certain metrics (See
@@ -511,18 +509,18 @@ thresh. & $0.68$ & $0.91$ & $0.51$ & $0.20$ & $0.35$ \\ \hline
 \end{table}
 
 We take a closer look at this divergence between measures in Figure
-\ref{fig:2dscore}.  It shows the performance of $3$ methods for
+\ref{fig:2dscore}.  It shows the performance of three methods for
 different numbers of missing beats. We report Euclidean distance and
-D-ENT.  Nearest neighbor method ($k=1$) creates a reconstruction with
-a granularity similar to the original for all mask sizes. It is a
-direct consequence of the fact that D-ENT approximately constant
-throughout a song. The linear transform learns to minimize the
-Euclidean distance and does it successfully. But as it can be seen
-from the other measure and Figure \ref{fig:basic} $3$rd row, it is
-done by a large amount of smoothing. The average reconstruction has
-the same granularity than the linear transform, but due to less
-smoothing (or a less intelligent one), it does not do as well with the
-Euclidean distance.
+D-ENT. Nearest neighbor (NN) method creates a reconstruction with a
+granularity similar to the original for all mask sizes. We can assume
+that D-ENT is approximately constant throughout a song. Thus, a
+imputation from NN preserve this characteristic.  Regarding the linear
+transform, it learns to minimize the Euclidean distance and does it
+successfully. But as it can be seen with D-ENT and in Figure
+\ref{fig:basic} $3$rd row, it is done by a large amount of
+smoothing. The average reconstruction has the same granularity than
+the linear transform, but due to less smoothing (or a less intelligent
+one), it does not do as well with the Euclidean distance.
 
 \begin{figure}[t]
 \begin{center}
@@ -536,12 +534,13 @@ the higher the Euclidean distance. Lower left is better.
 \end{figure}
 
 We now report results of a $15$ beat imputation on $5000$ songs in
-Table \ref{tab:res}. The linear transform is a clear winner based
-on Euclidean distance. As before, nearest neighbor's strength
-is to preserve the texture of the original patch as can be seen
-from his D-ENT score. We can not report all results, but they
-are no serious surprises with other measures 
-as can be expected from Table \ref{tab:corrs}.
+Table \ref{tab:res}. The linear transform is a clear winner based on
+Euclidean distance. As before, nearest neighbor's strength is to
+preserve the texture of the original patch as can be seen from his
+D-ENT score. We can not present all results (other number of missing
+beats, oter error measures, etc) due to space constraints, but they
+are no serious surprises with other measures as can be expected from
+Table \ref{tab:corrs}.
 
 \begin{table}[t]
 \begin{small}
@@ -563,8 +562,15 @@ D-ENT.
 \end{small}
 \end{table}
 
-In Figure \ref{fig:origrecon} we present specific examples of
-original / reconstruction pairs.
+In Figure \ref{fig:origrecon} we present specific examples of original
+/ reconstruction pairs. Pay attention to the D-ENT values and the fact
+that it prefers the second reconstruction.  It is due to a similar
+repartition of graey-scale values troughout the patch. Once again,
+this measure favors NN-like methods. Note also that delta difference
+tends to reward overly-granular solution, as it is the only measure to
+prefer the $3$rd reconstruction to the $2$nd one. Finally, the
+reconstruction by SIPLCA is in our opinion an example of a
+reconstruction that visually makes sense but get disppointing results.
 
 \begin{figure}[t]
 \begin{center}
