@@ -300,19 +300,18 @@ approximate this case with an increasingly smaller $\delta$ as $p
 \rightarrow 0$.  
 \FIXME[ronw]{elaborate on this, it's kind of unclear}
 
-Let's consider these cases on the toy example of Figure
-\ref{fig:square}.  The square wave of period $1$ could be one row of
-our missing data for instance.  We approximate it by two signals: the
-same square wave translated by a quarter of its period and the average
-function (constant at $0.5$). The average reconstruction errors on
-$[0,1]$ for the translated wave, with any $d_p$, is $0.5$.  For the
-average and $d_2$, this error is $0.25$.  Hence, the average function
-seems the most accurate. However, with $d_1$, the errors are both
-equal to $0.5$. With $d_{1/2}$, errors are now $0.5$ and
-$0.71$. Hence, if the translated square wave should be a better
-approximation, Euclidean distance is misleading.
-\FIXME[ronw]{This paragraph is confusing and should be rewritten.}
-%Vasicek estimator \cite{Learned-Miller2003}.  
+Consider the toy example of Figure \ref{fig:square}. We impute the
+original one-dimensional signal, a square wave, by two signals: (a) a
+translated identical square wave, and (b) a constant signal.  The
+error is measure by $d_p$. For all $p$, signal (a) always yields a
+reconstruction error of $0.5$ since it misses by $1$ half of the time
+and is correct otherwise. Signal (b) yields an error of $0.25$, $0.5$
+and $0.71$ for $p=2$, $p=1$ and $p=1/2$ respectively. This illustrates
+how the Euclidean distance favors signal (b) to signal (a) in order to
+approximate the original square wave, even though the shape of signal
+(a) is more similar to the original. Applied to a multidimensional
+signal, it implies that Euclidean distance rewards overly-smoothed
+reconstruction, thus it can be misleading.
 
 The phenomena above explains why reconstruction such as in Figure
 \ref{fig:basic} ($3$rd row) or in Figure \ref{fig:avgnnrand} ($3$rd
