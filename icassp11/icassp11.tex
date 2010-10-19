@@ -84,13 +84,15 @@ Missing data, chroma features, beat imputation, codebook learning
 \label{sec:intro}
 As with many classes of time-series data, musical signals contain
 substantial amounts of complex structural information.  Given the
-complexity of this data, learning structural models of music in an
-unsupervised fashion is a particularly challenging task.  For many
-applications we are interested in models that capture local patterns
-(i.e. ``patches'') in the data.  Finding robust sequential
-patterns may prove
-useful for tasks such as song similarity (recognizing songs with
-similar patterns), song segmentation (labeling chorus/verse
+intricate nature of this data, learning models of music in an
+unsupervised fashion is a particularly challenging task.  In addition
+to musicological implications, large-scale models of music data have
+numerous commercial applications, including recommendation systems,
+digital rights management, and creative tools.  For many applications
+we are interested in models that capture local patterns
+(i.e. ``patches'') in the data.  Finding robust sequential patterns
+may prove useful for tasks such as song similarity (recognizing songs
+with similar patterns), song segmentation (labeling chorus/verse
 structure), and cover song recognition (identifying songs with similar
 high-level patterns).  All of these tasks would benefit from patch
 models that exhibit high-level musical characteristics while remaining
@@ -120,14 +122,13 @@ previous work has focused on at most a single time-frame.
 %  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
 %}.
 The single-frame imputation problem is often somewhat easy since the
-harmonic content of music tends to change at a time rate slower than a
-single frame.  However as the length of missing data increases,
-the problem becomes significantly more challenging.
+harmonic content of music tends to change more slowly than a single
+frame.  However as the length of missing data increases, the problem
+becomes significantly more challenging.
 %
 We therefore focus on the task of \emph{multi-frame} imputation in
 % many consecutive time frames
-which long segments of the signal 
-are missing.
+which long segments of the signal are missing.
 %
 Obtaining good performance on this task requires the use of a model
 which takes advantage of the highly structured nature of music.  It
@@ -249,13 +250,13 @@ normalizing each column to have a maximum value of $1$.
 %\cite{Bertin-Mahieux2010a}.
 
 
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=.7\columnwidth]{type_imputation}
-\end{center}
-\caption{Imputation types.
-\label{fig:types}}
-\end{figure}
+%\begin{figure}[t]
+%\begin{center}
+%\includegraphics[width=.7\columnwidth]{type_imputation}
+%\end{center}
+%\caption{Imputation types.
+%\label{fig:types}}
+%\end{figure}
 
 \begin{figure}[t]
 \begin{center}
@@ -284,17 +285,19 @@ preserving the level of granularity of the original data in Figure
 \ref{fig:basic}.
 
 We first consider Mahalanobis distances of the form $d_p =
-|x_1-x_2|^p$,
-\FIXME[ronw]{I don't think Mahalanobis distance is the right term here
-  -- there is no covariance weighting here.  ``Euclidean'' or
-  ``generalized Euclidean'' might be
-  safer even though ``Euclidean'' implies that $p=2$.}
- especially with $p \leq 2$. Figure \ref{fig:measures}
-illustrates the effect of these measures on one dimensional data.  The
-greyed rectangle represents the case where a reconstruction is
-considered valid if it is between some $\delta$ of the original and
-wrong otherwise.  Mahalanobis distance approximate this case with an
-increasingly smaller $\delta$ as $p \rightarrow 0$.
+|x_1-x_2|^p$, 
+
+\FIXME[ronw]{I don't think Mahalanobis distance is the
+  right term here -- there is no covariance weighting here.
+  ``Euclidean'' or ``generalized Euclidean'' might be safer even
+  though ``Euclidean'' implies that $p=2$.}  
+especially with $p \leq
+2$. Figure \ref{fig:measures} illustrates the effect of these measures
+on one dimensional data.  The greyed rectangle represents the case
+where a reconstruction is considered valid if it is between some
+$\delta$ of the original and wrong otherwise.  Mahalanobis distance
+approximate this case with an increasingly smaller $\delta$ as $p
+\rightarrow 0$.  
 \FIXME[ronw]{elaborate on this, it's kind of unclear}
 
 Let's consider these cases on the toy example of Figure
