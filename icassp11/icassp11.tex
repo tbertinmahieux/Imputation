@@ -223,11 +223,13 @@ row) often result from powerful algorithms. Learning an overly
 smoothed solution and avoiding extreme values is rewarded by some
 metrics. $d_{1/2}$ seems to be a solution from the toy example in
 Figure \ref{fig:square}, but we will see in Section \ref{sec:exp} that
-it is not really the case in practice. Similarly, Kullback-Leibler
+it is not really the case in practice. 
+Similarly, Kullback-Leibler
 (KL) and Jensen difference \cite{Michel1994} are two measures based on
 entropy, thus should not behave necessarily in the same way as $d_p$.
 Once again, it is not the case in practice. We now look into other
-measures that would differ from $d_2$. Upon visual inspection, they
+measures that would differ from $d_2$. 
+Upon visual inspection, they
 should reward granularity which is missing in Figure \ref{fig:basic}
 for instance. Delta chromas are the finite difference along the time
 axis of the chromas. Deltas of over-smoothed solution are closed to
@@ -246,18 +248,21 @@ $i$. Finally:
 \[
 \mbox{D-ENT} = \left( \Sigma_b \frac{e_{b1} - e_{b2}}{e_{b1}} \right) / (\mbox{\# bins})
 \]
-Note that D-ENT is not symmetric. In our experiment, the first vector is the original one.
-If we look at Figure \ref{fig:avgnnrand}, the reconstruction with the lowest D-ENT is using
-nearest neighbor and not averaging as with Euclidean distance.
+Note that D-ENT is not symmetric. In our experiment, the first vector
+is the original one.  If we look at Figure \ref{fig:avgnnrand}, the
+reconstruction with the lowest D-ENT is using nearest neighbor and not
+averaging as with Euclidean distance.
 
-Surprisingly, Kullback-Leibler divergence (KL) that is entropy related does not seem
-to measures things that differently from Euclidean distance in our case. See Table
-\ref{tab:corrs}. Similar disappointment for $d_{1/2}$.
+Note that we tried other entropy related measures, i.e. Kullback-Leibler divergence (KL)
+and Jensen difference \cite{Michel1994}. As for $d_{1/2}$, they behave in a surprisingly
+similar fashion as the Euclidean distance.
 
 We have explained why Euclidean distance justifies disappointing reconstructions. At the same
 time, we do not argue that we should ignore or replace it. Euclidean distance measures
 reconstruction in a fundamental way. We believe we need a set of measures to quantify the
-quality of music patterns, Euclidean distance being one of them.
+quality of music patterns, Euclidean distance being one of them. In the next section,
+we investigate which measures behave in a similar way, thus helping us to decide which
+ones are usefull to report.
 
 \begin{figure}[t]
 \begin{center}
