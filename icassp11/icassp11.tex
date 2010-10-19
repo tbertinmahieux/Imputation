@@ -36,15 +36,11 @@
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
 \twoauthors {Thierry Bertin-Mahieux\sthanks{supported in part
-    by a NSERC PG scholarship.}, Graham Grindlay,} {Columbia
+    by a NSERC PG scholarship.}, Graham Grindlay} {Columbia
   University\\ LabROSA\\ New York, USA} 
    {Ron J. Weiss\sthanks{supported by NSF grant IIS-0844654 and Institute of
     Museum and Library Services grant LG-06-08-0073-08.}  and Daniel
-  P.W. Ellis\sthanks{This work is supported by NSF grant
-    IIS-0713334 and by a gift from Google, Inc.
-    Any opinions, findings and conclusions or
-    recommendations expressed in this material are those of the
-    authors and do not necessarily reflect the views of the sponsors.}} 
+  P.W. Ellis} 
 {New York University / Columbia University\\ MARL / LabROSA\\ New
   York, USA}
 
@@ -70,6 +66,15 @@ We'll track you down if you don't accept this paper.
 Missing data, chroma features, beat imputation, codebook learning
 \end{keywords}
 %
+
+% NSF thanks
+\makeatletter{\renewcommand*{\@makefnmark}{}
+\footnotetext{This work is supported by NSF grant
+    IIS-0713334 and by a gift from Google, Inc.
+    Any opinions, findings and conclusions or
+    recommendations expressed in this material are those of the
+    authors and do not necessarily reflect the views of the sponsors.}\makeatother}
+
 \section{Introduction}
 \label{sec:intro}
 As with many classes of time-series data, musical signals contain a
@@ -90,16 +95,17 @@ meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
-included speech denoising~\cite{Raj1998}, speech
+included speech denoising~\cite{Raj1998,Reyes-Gomez2005}, speech
 enhancement~\cite{Sanneck1996}, and model
 evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, to the best of
-our knowledge, previous research has only considered a few missing
-time-frequency \emph{bins}
-\FIXME[ronw]{this isn't totally fair, some of the missing
-  data speech stuff is based on imputation using HMM/CRF models. E.g. see
-  figure 3 of
-  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
-}.
+our knowledge, previous research has only considered at most a single
+missing time frame.
+%a few missing time-frequency \emph{bins}
+%\FIXME[ronw]{this isn't totally fair, some of the missing
+%  data speech stuff is based on imputation using HMM/CRF models. E.g. see
+%  figure 3 of
+%  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
+%}.
 In contrast, we define an imputation task
 in which  many consecutive time frames are missing.  We refer to
 this task as \emph{multi-frame} imputation.  This makes the problem
