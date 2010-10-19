@@ -20,7 +20,8 @@
 
 % Title.
 % ------
-\title{IMPUTATION OF BEAT-ALIGNED FEATURES AND MUSIC PATTERN LEARNING}
+%\title{IMPUTATION OF BEAT-ALIGNED FEATURES AND MUSIC PATTERN LEARNING}
+\title{EVALUATING MODELS OF MUSIC THROUGH MISSING DATA}
 %
 % Single address.
 % ---------------
@@ -409,21 +410,34 @@ two multi-beats imputation tasks. See results in Table
 \ref{tab:corrs}. Delta difference and D-ENT stand out as measuring
 things differently than Euclidean distance.
 
-
+% MEASURES IN ORDER: (bad matfile saving)
+%array(['condent', 'binary', 'cos', 'eucl', 'lhalf', 'lhalf_delta', 'dent',
+%       'thresh', 'thresh_delta', 'cos_delta', 'jdiff', 'kl', 'ddiff',
+%       'eucl_delta', 'leven'], 
+%      dtype='|S12')
 \begin{table}[t]
 \begin{small}
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|} \hline
- & eucl. & cos & KL & D-ENT & $d_{1/2}$ & Jensen \\ \hline
-eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $0.84$\\
-cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $0.97$ \\
-KL &  &  & $1$ & $0.17$ & $0.64$ & $0.95$ \\
-D-ENT &  & $$ & $$ & $1$ & $0.27$ & $0.20$ \\
-$d_{1/2}$ & & & & & $1$ & $0.71$ \\ 
-Jensen & & & & & & $1$ \\ 
-Leven & $0.59$ & $0.46$ & $0.35$ &$0.41$ & $0.81$ & $0.40$ \\
-Thresh. & $0.68$& $0.56$ & $0.46$ & $0.35$ & $0.90$ & $0.51$ \\ \hline
-
+\begin{tabular}{|l|c|c|c|c|c|} \hline
+ & Eucl. & $d_{1/2}$ & Jensen & Delta diff. & D-ENT \\ \hline
+Eucl. & $1$ & $0.84$ & & & \\ 
+$d_{1/2}$. & $0.90$ & $1$ & & & \\ 
+Jensen & $0.84$ & & $1$ & & \\ 
+Delta diff. & $0.21$ & & & $1$ & \\ 
+D-ENT & $0.12$ & & & & $1$ \\ \hline
+cos & $0.88$ & & & & \\
+KL & $0.77$ & & & & \\ 
+cond. ent. & $0.58$ & & & & \\
+thresh. & $0.68$ & & & & \\ \hline
+% & eucl. & KL & D-ENT & $d_{1/2}$ & Jensen \\ \hline
+%eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $0.84$\\
+%cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $0.97$ \\
+%KL &  &  & $1$ & $0.17$ & $0.64$ & $0.95$ \\
+%D-ENT &  & $$ & $$ & $1$ & $0.27$ & $0.20$ \\
+%$d_{1/2}$ & & & & & $1$ & $0.71$ \\ 
+%Jensen & & & & & & $1$ \\ 
+%Leven & $0.59$ & $0.46$ & $0.35$ &$0.41$ & $0.81$ & $0.40$ \\
+%Thresh. & $0.68$& $0.56$ & $0.46$ & $0.35$ & $0.90$ & $0.51$ \\ \hline
 \end{tabular}
 \caption{Pearson correlation between measures. Based on all results
 from random, average, $1$NN and linear transform on $5000$K songs
