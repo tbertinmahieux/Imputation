@@ -20,7 +20,8 @@
 
 % Title.
 % ------
-\title{IMPUTATION OF BEAT-ALIGNED FEATURES AND MUSIC PATTERN LEARNING}
+%\title{IMPUTATION OF BEAT-ALIGNED FEATURES AND MUSIC PATTERN LEARNING}
+\title{EVALUATING MUSIC SEQUENCE MODELS THROUGH MISSING DATA}
 %
 % Single address.
 % ---------------
@@ -36,15 +37,11 @@
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
 \twoauthors {Thierry Bertin-Mahieux\sthanks{supported in part
-    by a NSERC PG scholarship.}, Graham Grindlay,} {Columbia
+    by a NSERC PG scholarship.}, Graham Grindlay} {Columbia
   University\\ LabROSA\\ New York, USA} 
    {Ron J. Weiss\sthanks{supported by NSF grant IIS-0844654 and Institute of
     Museum and Library Services grant LG-06-08-0073-08.}  and Daniel
-  P.W. Ellis\sthanks{This work is supported by NSF grant
-    IIS-0713334 and by a gift from Google, Inc.
-    Any opinions, findings and conclusions or
-    recommendations expressed in this material are those of the
-    authors and do not necessarily reflect the views of the sponsors.}} 
+  P.W. Ellis} 
 {New York University / Columbia University\\ MARL / LabROSA\\ New
   York, USA}
 
@@ -70,6 +67,15 @@ We'll track you down if you don't accept this paper.
 Missing data, chroma features, beat imputation, codebook learning
 \end{keywords}
 %
+
+% NSF thanks
+\makeatletter{\renewcommand*{\@makefnmark}{}
+\footnotetext{This work is supported by NSF grant
+    IIS-0713334 and by a gift from Google, Inc.
+    Any opinions, findings and conclusions or
+    recommendations expressed in this material are those of the
+    authors and do not necessarily reflect the views of the sponsors.}\makeatother}
+
 \section{Introduction}
 \label{sec:intro}
 As with many classes of time-series data, musical signals contain a
@@ -90,16 +96,17 @@ meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
-included speech denoising~\cite{Raj1998}, speech
+included speech denoising~\cite{Raj1998,Reyes-Gomez2005}, speech
 enhancement~\cite{Sanneck1996}, and model
 evaluation~\cite{Smaragdis2009,Hoffman2010}.  However, to the best of
-our knowledge, previous research has only considered a few missing
-time-frequency \emph{bins}
-\FIXME[ronw]{this isn't totally fair, some of the missing
-  data speech stuff is based on imputation using HMM/CRF models. E.g. see
-  figure 3 of
-  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
-}.
+our knowledge, previous research has only considered at most a single
+missing time frame.
+%a few missing time-frequency \emph{bins}
+%\FIXME[ronw]{this isn't totally fair, some of the missing
+%  data speech stuff is based on imputation using HMM/CRF models. E.g. see
+%  figure 3 of
+%  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
+%}.
 In contrast, we define an imputation task
 in which  many consecutive time frames are missing.  We refer to
 this task as \emph{multi-frame} imputation.  This makes the problem
@@ -434,21 +441,34 @@ two multi-frame imputation tasks. See results in Table
 \ref{tab:corrs}. Delta difference and D-ENT stand out as measuring
 things differently than Euclidean distance.
 
-
+% MEASURES IN ORDER: (bad matfile saving)
+%array(['condent', 'binary', 'cos', 'eucl', 'lhalf', 'lhalf_delta', 'dent',
+%       'thresh', 'thresh_delta', 'cos_delta', 'jdiff', 'kl', 'ddiff',
+%       'eucl_delta', 'leven'], 
+%      dtype='|S12')
 \begin{table}[t]
 \begin{small}
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|} \hline
- & eucl. & cos & KL & D-ENT & $d_{1/2}$ & Jensen \\ \hline
-eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $0.84$\\
-cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $0.97$ \\
-KL &  &  & $1$ & $0.17$ & $0.64$ & $0.95$ \\
-D-ENT &  & $$ & $$ & $1$ & $0.27$ & $0.20$ \\
-$d_{1/2}$ & & & & & $1$ & $0.71$ \\ 
-Jensen & & & & & & $1$ \\ 
-Leven & $0.59$ & $0.46$ & $0.35$ &$0.41$ & $0.81$ & $0.40$ \\
-Thresh. & $0.68$& $0.56$ & $0.46$ & $0.35$ & $0.90$ & $0.51$ \\ \hline
-
+\begin{tabular}{|l|c|c|c|c|c|} \hline
+ & Eucl. & $d_{1/2}$ & Jensen & Delta diff. & D-ENT \\ \hline
+Eucl. & $1$ & $0.84$ & & & \\ 
+$d_{1/2}$. & $0.90$ & $1$ & & & \\ 
+Jensen & $0.84$ & & $1$ & & \\ 
+Delta diff. & $0.21$ & & & $1$ & \\ 
+D-ENT & $0.12$ & & & & $1$ \\ \hline
+cos & $0.88$ & & & & \\
+KL & $0.77$ & & & & \\ 
+cond. ent. & $0.58$ & & & & \\
+thresh. & $0.68$ & & & & \\ \hline
+% & eucl. & KL & D-ENT & $d_{1/2}$ & Jensen \\ \hline
+%eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $0.84$\\
+%cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $0.97$ \\
+%KL &  &  & $1$ & $0.17$ & $0.64$ & $0.95$ \\
+%D-ENT &  & $$ & $$ & $1$ & $0.27$ & $0.20$ \\
+%$d_{1/2}$ & & & & & $1$ & $0.71$ \\ 
+%Jensen & & & & & & $1$ \\ 
+%Leven & $0.59$ & $0.46$ & $0.35$ &$0.41$ & $0.81$ & $0.40$ \\
+%Thresh. & $0.68$& $0.56$ & $0.46$ & $0.35$ & $0.90$ & $0.51$ \\ \hline
 \end{tabular}
 \caption{Pearson correlation between measures. Based on all results
 from random, average, $1$NN and linear transform on $5000$K songs
