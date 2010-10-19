@@ -423,19 +423,19 @@ spotting a similar neighborhood. Note that instead of using the
 visible part of the song, one can use a \textbf{codebook} made of
 other songs.  $k$NN with $k>1$ is ongoing research.
 
-Previous methods rely on local information which should not be enough
-to solve multi-frame imputation. HMM or NMF should better leverage
-long term dependencies and nearby information.  We experiment with
-shift invariant probabilistic latent component analysis
+Previous methods rely on local, low-level information which should not
+be enough to solve multi-frame imputation. HMM or NMF should better
+leverage long term dependencies and nearby information.  We experiment
+with shift invariant probabilistic latent component analysis
 (\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}, a probabilistic
 version of NMF. SIPLCA learn how to encode the signal as overlapping
 patches. The missing data is inferred by maximizing expectation.
-Problems arise when the number of missing beats is larger than the patch
-size. SIPLCA can activate patches or not without any penalty. Thus, we
-regularize the the activation by applying a second level of SIPLCA.
-Still, results are not impressive and improvements are part of our
-ongoing research. We refer the interested reader to our code for more
-details.
+Problems arise when the number of missing beats is larger than the
+patch size. SIPLCA can activate patches or not without any
+penalty. Thus, we regularize the the activation by applying a second
+level of SIPLCA.  Still, results are not impressive and improvements
+are part of our ongoing research. We refer the interested reader to
+our code for more details.
 
 
 
@@ -443,17 +443,17 @@ details.
 \label{ssec:results}
 As we mentioned in Subsection \ref{ssec:measures}, many metrics reward
 reconstructions in a very similar fashion. The Euclidean distance is
-often the default choice, and we will see that many others tend to agree
-with it. At the same time, measures like delta difference and D-ENT
-offer another perspective. We try to rationalize this idea by
-measuring the correlation between our metrics. Pearson's
-correlation is defined as
+often the default choice for many tasks, and we will see that many
+others measures tend to agree with it. At the same time, measures like
+delta difference and D-ENT offer another perspective. We try to
+rationalize this idea by measuring the correlation between our
+metrics. Pearson's correlation is defined as
 \[  \rho_{X,Y}=\mathrm{corr}(X,Y)={\mathrm{cov}(X,Y) \over \sigma_X
     \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
 \]
 $\rho_{X,Y}$. Remember that $-1 \leq \rho_{X,Y} \leq 1$, an absolute
 value close to $1$ meaning high correlation. $\rho_{X,Y}$ is computed
-for many error measures based on results obtained by $3$ methods on
+for many error measures based on results obtained by three methods on
 two multi-frame imputation tasks. See results in Table
 \ref{tab:corrs}. Delta difference and D-ENT stand out as measuring
 things differently than Euclidean distance.
