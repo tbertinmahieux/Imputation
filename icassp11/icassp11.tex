@@ -460,21 +460,14 @@ cos & $0.88$ & $0.76$ & $0.97$ & $-0.03$ & $0.20$ \\
 KL & $0.77$ & $0.64$ & $0.95$ & $-0.04$ & $0.17$ \\ 
 cond. ent. & $0.58$ & $0.68$ & $0.37$ & $0.32$ & $0.18$ \\
 thresh. & $0.68$ & $0.91$ & $0.51$ & $0.20$ & $0.35$ \\ \hline
-% & eucl. & KL & D-ENT & $d_{1/2}$ & Jensen \\ \hline
-%eucl. & $1$ & $0.88$ & $0.77$ & $0.12$ & $0.90$ & $0.84$\\
-%cos &  & $1$ & $0.91$ & $0.20$ & $0.76$ & $0.97$ \\
-%KL &  &  & $1$ & $0.17$ & $0.64$ & $0.95$ \\
-%D-ENT &  & $$ & $$ & $1$ & $0.27$ & $0.20$ \\
-%$d_{1/2}$ & & & & & $1$ & $0.71$ \\ 
-%Jensen & & & & & & $1$ \\ 
-%Leven & $0.59$ & $0.46$ & $0.35$ &$0.41$ & $0.81$ & $0.40$ \\
-%Thresh. & $0.68$& $0.56$ & $0.46$ & $0.35$ & $0.90$ & $0.51$ \\ \hline
 \end{tabular}
 \caption{Pearson correlation between measures. Based on all results
-from random, average, $1$NN and linear transform on $5000$K songs
-with $1$ and $10$ missing beats. $1$ or $-1$ means high
-correlation, $0$ means none.
-Results form a symmetric matrix, we only show the upper triangle.
+  from random, average, $1$NN and linear transform on $5000$K songs
+  with $1$ and $10$ missing beats. $1$ or $-1$ means high correlation,
+  $0$ means none. ``Jensen'' is Jensen difference, ``cos'' is cosine
+  distance, ``cond. ent.'' is conditional entropy, ``thresh.'' is the
+  greyed area measure from Figure \ref{fig:measures} with $\delta =
+  0.2$.
 \label{tab:corrs}}
 \end{center}
 \end{small}
