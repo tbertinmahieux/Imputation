@@ -599,16 +599,42 @@ then reconstruction using same algorithms as Fig~\ref{fig:basic} (except random)
 \label{fig:basic3}}
 \end{figure}
 
-\section{CONCLUSION AND FUTURE WORK}
+\section{CONCLUSION} % AND FUTURE WORK}
 \label{sec:conclusion}
-We focused on the task of multi-frame imputation for evaluating model
-of music sequences. We presented and discuss a set of possible metrics
-and came up with a selection of a few ones.  We report results on a
-dataset of thousands of songs for benchmark algorithms and peek at
-ongoing research with SIPLCA. Finally, as the goal is to encourage
-researchers to further explore this task, the code and data to
-reproduce these results is available
-online\footnote{\scriptsize\url{http://www.columbia.edu/~tb2332/proj/imputation.html}}.
+
+We investigate the task of multi-frame imputation as a method for
+evaluating models of music sequences.  
+%
+Key to this evaluation is the definition of appropriate performance
+metrics.  
+%
+Experimental results over a data set of thousands of songs demonstrate
+that many standard metrics for comparing feature sequences, including
+Euclidean distance and Kullback-Leibler divergence, do not reliably
+measure the ability of an imputation algorithm to produce musically
+consistent reconstructions.  We therefore propose to complement
+Euclidean distance with a measure of the entropy difference between
+the original features and their reconstruction.
+%
+The proposed measure more consistently predicts an algorithm's ability
+to produce musically coherent reconstructions that are consistent with
+the original signal.
+%
+The best performing imputation algorithm according to Euclidean
+distance often produces poor reconstructions, preferring to reuse a
+single sustained chord.  The same linear prediction model performs
+poorly under the proposed measures, while more sophisticated
+sequence-based models show significantly better performance. 
+
+Given an appropriate framework for evaluating music sequence models,
+we intend to shift our focus to the exploration of more sophisticated
+sequential imputation algorithms in the future, including hidden
+Markov models and SIPLCA.
+%
+Our goal is to encourage researchers to further explore this task.  We
+have therefore made the code and data to reproduce these results
+available
+online.\footnote{\scriptsize\url{http://www.columbia.edu/~tb2332/proj/imputation.html}}
 
 
 %\section{ACKNOWLEDGEMENTS}
