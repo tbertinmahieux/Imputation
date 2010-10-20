@@ -80,26 +80,27 @@ P.gca().grid(False)
 P.yticks([4,8])
 P.xticks([])
 P.title('1NN, ' + errs_to_str(err_nn),fontsize='small')
-# avg
+# siplca
 P.subplot(614)
+P.imshow(recon_siplca[:,pos1:pos2],**pargs)
+P.gca().grid(False)
+P.yticks([4,8])
+P.xticks([])
+P.title('SIPLCA, ' + errs_to_str(err_siplca),fontsize='small')
+# avg
+P.subplot(615)
 P.imshow(recon_avg[:,pos1:pos2],**pargs)
 P.gca().grid(False)
 P.yticks([4,8])
 P.xticks([])
 P.title('AVERAGE, ' + errs_to_str(err_avg),fontsize='small')
 # lintrans
-P.subplot(615)
+P.subplot(616)
 P.imshow(recon_lintrans[:,pos1:pos2],**pargs)
 P.gca().grid(False)
 P.yticks([4,8])
-P.xticks([])
-P.title('LIN. TRANS., ' + errs_to_str(err_lintrans),fontsize='small')
-# siplca
-P.subplot(616)
-P.imshow(recon_siplca[:,pos1:pos2],**pargs)
-P.gca().grid(False)
-P.yticks([4,8])
 #P.xticks([])
-P.title('SIPLCA, ' + errs_to_str(err_siplca),fontsize='small')
+P.title('LIN. TRANS., ' + errs_to_str(err_lintrans),fontsize='small')
+
 
 P.show()
