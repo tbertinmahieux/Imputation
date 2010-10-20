@@ -343,13 +343,14 @@ general, as $p \rightarrow 0$ the resulting distance measures penalize
 small values more heavily.  This has the effect of favoring
 ``sharper'' data sequences and is illustrated in Figure
 \ref{fig:measures}.  The greyed rectangle represents the case where a
-reconstruction is considered valid if it is between some $\delta$ of
-the original and wrong otherwise.  The Minkowski distance approximates
-this case with an increasingly smaller $\delta$ as $p \rightarrow 0$.
-In the experiments described below, we consider $p=0.5$ and $p=2$.
-With $p=0.5$, on the example of Figure \ref{fig:square}, the
-translated square wave is now favored (with a reconstruction error of
-$0.5$) to the second signal whose reconstruction error is now $0.71$.
+reconstruction is considered valid (error equals $0$ if it is between
+some $\delta$ of the original and wrong otherwise (error equals $1$).
+The Minkowski distance approximates this case with an increasingly
+smaller $\delta$ as $p \rightarrow 0$.  In the experiments described
+below, we consider $p=0.5$ and $p=2$.  With $p=0.5$, on the example of
+Figure \ref{fig:square}, the translated square wave is now favored
+(with a reconstruction error of $0.5$) to the second signal whose
+reconstruction error is now $0.71$.
 %\FIXME[ronw]{elaborate on this, it's kind of unclear}
 
 Looking at the differences between the original data and the imputed
