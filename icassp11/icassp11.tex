@@ -444,13 +444,12 @@ range of the missing patch (Figure \ref{fig:avgnnrand}, $3$rd row)
 create a smooth reconstruction, but still solves the case of
 sustained notes.
 
-Our first trained model is linear regression (called \textbf{linear
-  transform} in
-the text) where we use $N$ previous beats to predict the next one.  As
-it explicitly learns to minimize Euclidean distance on the visible
-data, this methods performs very well under certain metrics (See
-Figure \ref{fig:basic}). From our experiments, $N=1$ or $N=2$ work
-best.
+Our first trained model is linear regression (also called
+\textbf{linear transform} in the text) where we use $N$ previous beats
+to predict the next one.  As it explicitly learns to minimize
+Euclidean distance on the visible data, this methods performs very
+well under certain metrics (See Figure \ref{fig:basic}). From our
+experiments, $N=1$ or $N=2$ work best.
 
 Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate tehcnique
 to take advantage of the repetitions within a song. By looking at the
@@ -490,18 +489,19 @@ Pearson's correlation is defined as
 $\rho_{X,Y}$. Remember that $-1 \leq \rho_{X,Y} \leq 1$, an absolute
 value close to $1$ meaning high correlation. $\rho_{X,Y}$ is computed
 for many error measures based on results obtained by three methods on
-two multi-frame imputation tasks. See results in Table
-\ref{tab:corrs}. 
+two multi-frame imputation tasks. See results in
+Table~\ref{tab:corrs}.
 
 The first conclusion is that a large set of measures tend to agree
 with Euclidean distance. It might not be a surprise for cosine
 distance and $d_{1/2}$ as they are similar in their
 formulation. However, the fact that entropy-based measures such as KL
 has high correlation with Euclidean distance means it might not serve
-our purpose.
-
-Delta difference and D-ENT stand out as measuring
-things differently than Euclidean distance.
+our purpose. Two measures still stand out from the pack.
+Delta difference and D-ENT are global statistics, the first looking at the
+variance in time and the second at the histogram of values. From
+Table~\ref{tab:corrs}, they do seem to bring an added value to our set
+of metrics.
 
 % MEASURES IN ORDER: (bad matfile saving)
 %array(['condent', 'binary', 'cos', 'eucl', 'lhalf', 'lhalf_delta', 'dent',
@@ -535,19 +535,22 @@ thresh. & $0.68$ & $0.91$ & $0.51$ & $0.20$ & $0.35$ \\ \hline
 \end{small}
 \end{table}
 
-We take a closer look at this divergence between measures in Figure
-\ref{fig:2dscore}.  It shows the performance of three methods for
-different numbers of missing beats. We report Euclidean distance and
-D-ENT. Nearest neighbor (NN) method creates a reconstruction with a
+We take a closer look at the divergence between two measures in
+Figure~\ref{fig:2dscore}.  It shows the performance of three methods
+for different numbers of missing beats. We report Euclidean distance
+and D-ENT. As we saw, they have a low empirical correlation of
+$0.12$. Nearest neighbor (NN) method creates a reconstruction with a
 granularity similar to the original for all mask sizes. We can assume
 that D-ENT is approximately constant throughout a song. Thus, a
-imputation from NN preserve this characteristic.  Regarding the linear
-transform, it learns to minimize the Euclidean distance and does it
-successfully. But as it can be seen with D-ENT and in Figure
+imputation from NN easily preserve this characteristic.  Regarding the
+linear transform, it learns to minimize the Euclidean distance and
+does it successfully. But as it can be seen with D-ENT and in Figure
 \ref{fig:basic} $3$rd row, it is done by a large amount of
-smoothing. The average reconstruction has the same granularity than
-the linear transform, but due to less smoothing (or a less intelligent
-one), it does not do as well with the Euclidean distance.
+smoothing. The average reconstruction has the same D-ENT as the linear
+transform, which is consistent with
+Figure~\ref{fig:basic} and Figure~\ref{fig:avgnnrand}.  However, due to less
+smoothing (or a less intelligent one), it does not do as well with the
+Euclidean distance.
 
 \begin{figure}[t]
 \begin{center}
