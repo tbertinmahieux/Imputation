@@ -287,13 +287,12 @@ leverage long term dependencies and nearby information.  We experiment
 with shift invariant probabilistic latent component analysis (SIPLCA)
 \cite{Smaragdis2009,Weiss2010}, a probabilistic variant of convolutive
 NMF. SIPLCA learn how to encode the signal as a set of overlapping
-patches. The missing data is inferred by maximizing expectation
-\FIXME[ronw]{what does this mean?}.  
+patches. 
 As a gross simplification, one
 could compare SIPLCA to a smart nearest-neighbors. However, by
 controlling the activations, i.e. the matrix deciding when and where
 to use each patch, we can hope to impute the missing data with patches
-smaller than the missing data. This is important when the amount of
+smaller than the missing gap. This is important when the amount of
 missing data is increased as learning longer patterns is exponentially
 difficult.  
 \FIXME[ronw]{Why do the SIPLCA ``patches'' need to be
