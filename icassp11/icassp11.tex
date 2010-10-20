@@ -254,6 +254,59 @@ for algorithmic details). Song longer than shown here.
 %evaluation.plot_oneexample(btchroma2,mask,p1,p2,methods=['lintrans'],methods_args=[{'win':1}],measures=('eucl','kl','dent'),plotrange=(p1-10,p2+70))
 
 
+
+\subsection{ALGORITHMS}
+\label{ssec:algo}
+As multi-frame imputation has not been studied before, we report
+results on a variety of benchmark algorithms. We realize that such
+methods have a low probability of success at solving the task, but
+their relative performance is of interest.  Simple methods include
+random where each chroma bin is drawn from a uniform $[0,1)$
+distribution (Figure \ref{fig:basic}, $3$rd row).  One can also pick a
+beat at random from the song, or take the average of all visible
+beats. Taking the average of the beats within a certain range
+of the missing patch (Figure \ref{fig:basic}, $5$th row) create a
+smooth reconstruction, but still solves the case of sustained notes.
+
+Our first trained model is linear regression (also called linear
+transform in the text) where we use $N$ previous beats to predict the
+next one.  As it explicitly learns to minimize Euclidean distance on
+the visible data, this methods performs very well under certain
+metrics (See Figure \ref{fig:basic}). From our experiments, $N=1$ or
+$N=2$ work best.
+
+Nearest neighbor ($1$NN) is an appropriate technique
+to take advantage of the repetitions within a song. By looking at the
+nearby beats of the missing data, we can impute a reconstruction by
+spotting a similar neighborhood. Note that instead of using the
+visible part of the song, one can use a codebook made of
+other songs.  $k$NN with $k>1$ is ongoing research.
+
+Previous methods rely on local, low-level information which should not
+be enough to solve multi-frame imputation. HMM or NMF should better
+leverage long term dependencies and nearby information.  We experiment
+with shift invariant probabilistic latent component analysis (SIPLCA)
+\cite{Smaragdis2009,Weiss2010}, a probabilistic variant of convolutive
+NMF. SIPLCA learn how to encode the signal as a set of overlapping
+patches. The missing data is inferred by maximizing expectation
+\FIXME[ronw]{what does this mean?}.  
+As a gross simplification, one
+could compare SIPLCA to a smart nearest-neighbors. However, by
+controlling the activations, i.e. the matrix deciding when and where
+to use each patch, we can hope to impute the missing data with patches
+smaller than the missing data. This is important when the amount of
+missing data is increased as learning longer patterns is exponentially
+difficult.  
+\FIXME[ronw]{Why do the SIPLCA ``patches'' need to be
+  shorter than the amount of missing data?}  
+In our case, we use a
+hierarchical SIPLCA model which will be described in detail in a
+future publication.  SIPLCA for imputation is ongoing research, we
+refer the interested reader to our code until then.  
+\FIXME[ronw]{The last half of this paragraph is confusing...}  
+\FIXME[TBM]{and now that I cut details?} 
+
+
 %\subsection{MEASURES}
 \subsection{EVALUATION METRICS}
 \label{ssec:measures}
@@ -385,61 +438,6 @@ nearest neighbor 5) using random.
 %\cite{Bertin-Mahieux2010a}.  We ensure that songs have a length of at
 %least $100$ beats.  The masked part is chosen at random, excluding the
 %first and last $30$ beats.
-
-
-\subsection{ALGORITHMS}
-\label{ssec:algo}
-As multi-frame imputation has not been studied before, we report
-results on a variety of benchmark algorithms. We realize that such
-methods have a low probability of success at solving the task, but
-their relative performance is of interest.  Simple methods include
-random where each chroma bin is drawn from a uniform $[0,1)$
-distribution (Figure \ref{fig:basic}, $3$rd row).  One can also pick a
-beat at random from the song, or take the average of all visible
-beats. Taking the average of the beats within a certain range
-of the missing patch (Figure \ref{fig:basic}, $5$th row) create a
-smooth reconstruction, but still solves the case of sustained notes.
-
-Our first trained model is linear regression (also called linear
-transform in the text) where we use $N$ previous beats to predict the
-next one.  As it explicitly learns to minimize Euclidean distance on
-the visible data, this methods performs very well under certain
-metrics (See Figure \ref{fig:basic}). From our experiments, $N=1$ or
-$N=2$ work best.
-
-Nearest neighbor ($1$NN) is an appropriate technique
-to take advantage of the repetitions within a song. By looking at the
-nearby beats of the missing data, we can impute a reconstruction by
-spotting a similar neighborhood. Note that instead of using the
-visible part of the song, one can use a codebook made of
-other songs.  $k$NN with $k>1$ is ongoing research.
-
-Previous methods rely on local, low-level information which should not
-be enough to solve multi-frame imputation. HMM or NMF should better
-leverage long term dependencies and nearby information.  We experiment
-with shift invariant probabilistic latent component analysis (SIPLCA)
-\cite{Smaragdis2009,Weiss2010}, a probabilistic variant of convolutive
-NMF. SIPLCA learn how to encode the signal as a set of overlapping
-patches. The missing data is inferred by maximizing expectation
-\FIXME[ronw]{what does this mean?}.  
-As a gross simplification, one
-could compare SIPLCA to a smart nearest-neighbors. However, by
-controlling the activations, i.e. the matrix deciding when and where
-to use each patch, we can hope to impute the missing data with patches
-smaller than the missing data. This is important when the amount of
-missing data is increased as learning longer patterns is exponentially
-difficult.  
-\FIXME[ronw]{Why do the SIPLCA ``patches'' need to be
-  shorter than the amount of missing data?}  
-In our case, we use a
-hierarchical SIPLCA model which will be described in detail in a
-future publication.  SIPLCA for imputation is ongoing research, we
-refer the interested reader to our code until then.  
-\FIXME[ronw]{The last half of this paragraph is confusing...}  
-\FIXME[TBM]{and now that I cut details?} 
-
-\subsection{RESULTS}
-\label{ssec:results}
 As we mentioned in Subsection \ref{ssec:measures}, there exist
 numerous metrics to evaluate the reconstruction of a signal. Euclidean
 distance is a natural first choice, but does not necessarily reward
