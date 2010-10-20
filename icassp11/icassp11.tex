@@ -55,19 +55,27 @@
   as a means of evaluating the ability of different signal models to
   accurately capture the temporal structure of music.
   %
-  We analyze beat-synchronous chromagrams and compare imputation based
-  on linear prediction\FIXME[ronw]{???} to more complex signal models
-  including nearest neighbor selection and hidden Markov models.
+  We analyze beat-synchronous chroma features and compare imputation
+  based on simple linear prediction\FIXME[ronw]{???} to more complex
+  signal models including nearest neighbor selection and
+  shift-invariant probabilistic latent component analysis.
   %
-  Simple predictive models perform best when measured using a
-  Euclidean distance metric, despite producing results which are not
+  Simple predictive models perform best according to a Euclidean
+  distance metric, despite producing stationary results which are not
   musically meaningful.  We therefore investigate alternate evaluation
-  measures which emphasize musical consistency and find that
-  \FIXME{fill me in}....
-%
-% Gives a reasonable benchmark to compare algorithms that claim learning meaningful
-% temporal patterns on music. Hard to beat benchmarks comparison, for instance linear
-% prediction. We compare some methods and discuss contradicting error measures. 
+  measures % which emphasize musical consistency
+  and find that an entropy difference %information theoretic
+  metric tends to correlate
+  better with our %intuitive
+  expectations for musically consistent reconstructions.
+  %
+  The imputation algorithm which optimizes the proposed metric over a
+  large data set of popular music reconstructs masked sections by
+  choosing the nearest neighbor to the surrounding observations within
+  the song.
+  %
+  This result is consistent with the highly repetitive structure found
+  throughout pop music.
 \end{abstract}
 %
 \begin{keywords}
@@ -411,16 +419,24 @@ with shift invariant probabilistic latent component analysis
 (SIPLCA) \cite{Smaragdis2009,Weiss2010}, a probabilistic
 variant of convolutive NMF. SIPLCA learn how to encode the signal as a
 set of overlapping patches. The missing data is inferred by maximizing
-expectation. As a gross simplification, one  could compare SIPLCA to
+expectation \FIXME[ronw]{what does this mean?}.
+As a gross simplification, one  could compare SIPLCA to
 a smart nearest-neighbors. However, by controlling the activations, 
 i.e. the matrix deciding when and where to use each patch, we can
 hope to impute the missing data with patches smaller than the
-missing data. In our case, we regularize the activation by
+missing data \FIXME[ronw]{Why do the SIPLCA ``patches'' need to be
+shorter than the amount of missing data?}.
+In our case, we regularize the activation by
 making them the reconstruction of another SIPLCA level, and we
-still use larger patches. SIPLCA for imputation is ongoing research,
+still use larger patches \FIXME[ronw]{I don't understand what the
+  ``outer'' SIPLCA adds.  Maybe you don't need to go into so much
+detail and can just mention that you used a hierarchical SIPLCA
+decomposition which will be described in detail in a future
+publication?}. SIPLCA for imputation is ongoing research,
 we refer the interested reader to our code.
 \FIXME[ronw]{The last half of this paragraph is confusing...}
 \FIXME[TBM]{Slightly better?}
+\FIXME[ronw]{I still don't get it.  See my comments above.}
 
 \subsection{RESULTS}
 \label{ssec:results}
