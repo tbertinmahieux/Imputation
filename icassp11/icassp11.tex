@@ -55,19 +55,27 @@
   as a means of evaluating the ability of different signal models to
   accurately capture the temporal structure of music.
   %
-  We analyze beat-synchronous chromagrams and compare imputation based
-  on linear prediction\FIXME[ronw]{???} to more complex signal models
-  including nearest neighbor selection and hidden Markov models.
+  We analyze beat-synchronous chroma features and compare imputation
+  based on simple linear prediction\FIXME[ronw]{???} to more complex
+  signal models including nearest neighbor selection and
+  shift-invariant probabilistic latent component analysis.
   %
-  Simple predictive models perform best when measured using a
-  Euclidean distance metric, despite producing results which are not
+  Simple predictive models perform best according to a Euclidean
+  distance metric, despite producing stationary results which are not
   musically meaningful.  We therefore investigate alternate evaluation
-  measures which emphasize musical consistency and find that
-  \FIXME{fill me in}....
-%
-% Gives a reasonable benchmark to compare algorithms that claim learning meaningful
-% temporal patterns on music. Hard to beat benchmarks comparison, for instance linear
-% prediction. We compare some methods and discuss contradicting error measures. 
+  measures % which emphasize musical consistency
+  and find that an entropy difference %information theoretic
+  metric tends to correlate
+  better with our %intuitive
+  expectations for musically consistent reconstructions.
+  %
+  The imputation algorithm which optimizes the proposed metric over a
+  large data set of popular music reconstructs masked sections by
+  choosing the nearest neighbor to the surrounding observations within
+  the song.
+  %
+  This result is consistent with the highly repetitive structure found
+  throughout pop music.
 \end{abstract}
 %
 \begin{keywords}
