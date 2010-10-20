@@ -417,28 +417,26 @@ other songs.  $k$NN with $k>1$ is ongoing research.
 Previous methods rely on local, low-level information which should not
 be enough to solve multi-frame imputation. HMM or NMF should better
 leverage long term dependencies and nearby information.  We experiment
-with shift invariant probabilistic latent component analysis
-(SIPLCA) \cite{Smaragdis2009,Weiss2010}, a probabilistic
-variant of convolutive NMF. SIPLCA learn how to encode the signal as a
-set of overlapping patches. The missing data is inferred by maximizing
-expectation \FIXME[ronw]{what does this mean?}.
-As a gross simplification, one  could compare SIPLCA to
-a smart nearest-neighbors. However, by controlling the activations, 
-i.e. the matrix deciding when and where to use each patch, we can
-hope to impute the missing data with patches smaller than the
-missing data \FIXME[ronw]{Why do the SIPLCA ``patches'' need to be
-shorter than the amount of missing data?}.
-In our case, we regularize the activation by
-making them the reconstruction of another SIPLCA level, and we
-still use larger patches \FIXME[ronw]{I don't understand what the
-  ``outer'' SIPLCA adds.  Maybe you don't need to go into so much
-detail and can just mention that you used a hierarchical SIPLCA
-decomposition which will be described in detail in a future
-publication?}. SIPLCA for imputation is ongoing research,
-we refer the interested reader to our code.
-\FIXME[ronw]{The last half of this paragraph is confusing...}
-\FIXME[TBM]{Slightly better?}
-\FIXME[ronw]{I still don't get it.  See my comments above.}
+with shift invariant probabilistic latent component analysis (SIPLCA)
+\cite{Smaragdis2009,Weiss2010}, a probabilistic variant of convolutive
+NMF. SIPLCA learn how to encode the signal as a set of overlapping
+patches. The missing data is inferred by maximizing expectation
+\FIXME[ronw]{what does this mean?}.  
+As a gross simplification, one
+could compare SIPLCA to a smart nearest-neighbors. However, by
+controlling the activations, i.e. the matrix deciding when and where
+to use each patch, we can hope to impute the missing data with patches
+smaller than the missing data. This is important when the amount of
+missing data is increased as learning longer patterns is exponentially
+difficult.  
+\FIXME[ronw]{Why do the SIPLCA ``patches'' need to be
+  shorter than the amount of missing data?}  
+In our case, we use a
+hierarchical SIPLCA model which will be described in detail in a
+future publication.  SIPLCA for imputation is ongoing research, we
+refer the interested reader to our code until then.  
+\FIXME[ronw]{The last half of this paragraph is confusing...}  
+\FIXME[TBM]{and now that I cut details?} 
 
 \subsection{RESULTS}
 \label{ssec:results}
