@@ -242,6 +242,8 @@ def recon_error(btchroma,mask,recon,measure='all',delta=False):
         if delta:
             btchroma = np.concatenate([np.zeros((12,1)),np.diff(btchroma)],
                                       axis=1)
+            recon = np.concatenate([np.zeros((12,1)),np.diff(recon)],
+                                   axis=1)
         maskzeros = np.where(mask==0)
         return measfun( btchroma[maskzeros] , recon[maskzeros] )
     else:
