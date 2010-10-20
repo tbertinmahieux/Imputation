@@ -268,7 +268,7 @@ normalizing each column to have a maximum value of one.
 \caption{$15$ beats imputation example, rows are 1) original 2) original masked,
 then reconstruction using 3) random 4) nearest neighbor 5) average of nearby beats
 6) linear transform of one previous beat 7) SIPLCA (see Subsection \ref{ssec:algo}
-for algorithmic details).
+for algorithmic details). Song longer than shown here.
 \label{fig:basic}}
 \end{figure}
 
@@ -480,7 +480,8 @@ set of overlapping patches. The missing data is inferred by maximizing
 expectation.  Problems arise when the number of missing beats is
 similar or larger to the patch size. SIPLCA can activate patches or
 not without any penalty. Thus, we regularize the activation by
-applying a second level of SIPLCA.  Still, results are not impressive
+making them the reconstruction of another SIPLCA level.  
+Still, results are not impressive
 and improvements are part of our ongoing research. We refer the
 interested reader to our code for more details.
 \FIXME[ronw]{The last half of this paragraph is confusing...}
