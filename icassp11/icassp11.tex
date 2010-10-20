@@ -40,7 +40,7 @@
 % ----------------------------------------------------------
 \twoauthors {Thierry Bertin-Mahieux\sthanks{supported in part by a
     NSERC PG scholarship.}, Graham Grindlay} {Columbia University\\
-  LabROSA\\ New York, USA} {Ron J. Weiss\sthanks{supported by NSFi
+  LabROSA\\ New York, USA} {Ron J. Weiss\sthanks{supported by NSF
     grant IIS-0844654 and Institute of Museum and Library Services
     grant LG-06-08-0073-08.} and Daniel P.W. Ellis} {New York
   University / Columbia University\\ MARL / LabROSA\\ New York, USA}
@@ -69,7 +69,7 @@
   better with our %intuitive
   expectations for musically consistent reconstructions.
   %
-  The imputation algorithm which optimizes the proposed metric over a
+  The imputation algorithm which optimizes this entropy-based metric over a
   large data set of popular music reconstructs masked sections by
   choosing the nearest neighbor to the surrounding observations within
   the song.
@@ -99,7 +99,7 @@ intricate nature of this data, learning models of music in an
 unsupervised fashion is a particularly challenging task.  In addition
 to musicological implications, large-scale models of music data have
 numerous commercial applications, including recommendation systems,
-digital rights management, and creative tools.  For many applications
+digital rights management, and creative tools.  In many of these cases
 we are interested in models that capture local patterns
 (i.e. ``patches'') in the data.  Finding robust sequential patterns
 may prove useful for tasks such as song similarity (recognizing songs
@@ -111,10 +111,11 @@ faithful to the observed signal data.
 %\FIXME[gg]{Do we need to back this up more?}
 %Therefore, we are interested in patterns that not only explain the
 %low-level signal, but also contain musical characteristics.  
-However, it is unclear how to evaluate the quality of this type of
-model.  In this paper, we propose a task based on missing data
-imputation and discuss various performance metrics which are sensitive
-to musically meaningful aspects of the data.
+However, the requirement that patches be musically sensible makes it
+unclear how to evaluate the quality of this type of model.  In this
+paper, we propose a task based on missing data imputation and discuss
+various performance metrics which are sensitive to musically
+meaningful aspects of the data.
 
 Imputation refers to a family of techniques used to fill in missing
 data entries.  Previous work on audio-related applications has
@@ -134,7 +135,7 @@ focused on at most a single time-frame.
 %}.
 The single-frame imputation problem is often somewhat easy since the
 harmonic content of music tends to change more slowly than a single
-frame.  However as the length of missing data increases, the problem
+frame.  However as the amount of missing data increases, the problem
 becomes significantly more challenging.
 %
 We therefore focus on the task of \emph{multi-frame} imputation in
@@ -142,7 +143,7 @@ We therefore focus on the task of \emph{multi-frame} imputation in
 which long segments of the signal are missing.
 %
 Obtaining good performance on this task requires the use of a model
-which takes advantage of the highly structured nature of music.  It
+which can take advantage of the highly structured nature of music.  It
 therefore serves as a good way to
 % This allows us to
 more carefully evaluate the temporal aspects of competing
@@ -153,20 +154,21 @@ models.  % needs to be reworded?
 The difficult nature of multi-frame imputation of music data is
 demonstrated in Figure \ref{fig:basic}.
 %
-Linear regression\FIXME[ronw]{isn't it really prediction?}, which explicitly
-minimizes Euclidean distance, is used to impute the missing data in
-Figure~\ref{fig:basic}.  However, it is clear from visual inspection
-that linear regression yields an overly-smooth reconstruction and is
-unable to predict the temporal evolution within the missing section.
+Linear regression\FIXME[ronw]{isn't it really prediction?}, which
+explicitly minimizes Euclidean distance, is used to impute the missing
+data in Figure~\ref{fig:basic}.  However, it is clear from visual
+inspection that linear regression yields an overly-smooth
+reconstruction and is unable to predict the temporal evolution within
+the missing section.
 %
 A more sophisticated signal model which better leverages the
 surrounding context and makes use of long-term temporal information
-such as knowledge of repetitions within a song (note that the
-missing sequence in Figure~\ref{fig:basic} is repeated at frame 70) is necessary to achieve a musically
-coherent reconstruction.
+such as knowledge of repetitions within a song (note that the missing
+sequence in Figure~\ref{fig:basic} is repeated at frame 70) is
+necessary to achieve a musically coherent reconstruction.
 %
-Unfortunately, simple algorithms such as linear regression
-are often prone to identifying poor solutions, despite optimizing standard
+Unfortunately, simple algorithms such as linear regression are often
+prone to identifying poor solutions, despite optimizing standard
 metrics such as Euclidean distance.
 %
 In this paper, we argue that a more extensive set of metrics is needed
@@ -377,12 +379,12 @@ nearest neighbor 5) using random.
 
 \section{EXPERIMENTS}
 \label{sec:exp}
-We present results using different algorithms for imputing masked
-sections of beat-aligned chromagrams.  The evaluation dataset is made
-of $5000$ songs from the \emph{morecowbell.dj} data described in
-\cite{Bertin-Mahieux2010a}.  We ensure that songs have a length of at
-least $100$ beats.  The masked part is chosen at random, excluding the
-first and last $30$ beats.
+%We present results using different algorithms for imputing masked
+%sections of beat-aligned chromagrams.  The evaluation dataset is made
+%of $5000$ songs from the \emph{morecowbell.dj} data described in
+%\cite{Bertin-Mahieux2010a}.  We ensure that songs have a length of at
+%least $100$ beats.  The masked part is chosen at random, excluding the
+%first and last $30$ beats.
 
 
 \subsection{ALGORITHMS}
