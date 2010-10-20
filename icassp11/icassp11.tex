@@ -52,19 +52,21 @@
 \begin{abstract}
   We investigate the task of missing data imputation in music signals
   as a means of evaluating the ability of different signal models to
-  accurately capture the temporal structure present in music.
+  accurately capture the temporal structure of music.
   %
-  We analyze beat-synchronous chromagrams and compare linear ??? ...
+  We analyze beat-synchronous chromagrams and compare imputation based
+  on linear prediction\FIXME[ronw]{???} to more complex signal models
+  including nearest neighbor selection and hidden Markov models.
   %
   Simple predictive models perform best when measured using a
   Euclidean distance metric, despite producing results which are not
   musically meaningful.  We therefore investigate alternate evaluation
-  measures which emphasize musical consistency....
+  measures which emphasize musical consistency and find that
+  \FIXME{fill me in}....
 %
-
-Gives a reasonable benchmark to compare algorithms that claim learning meaningful
-temporal patterns on music. Hard to beat benchmarks comparison, for instance linear
-prediction. We compare some methods and discuss contradicting error measures. 
+% Gives a reasonable benchmark to compare algorithms that claim learning meaningful
+% temporal patterns on music. Hard to beat benchmarks comparison, for instance linear
+% prediction. We compare some methods and discuss contradicting error measures. 
 \end{abstract}
 %
 \begin{keywords}
@@ -177,7 +179,7 @@ masking many consecutive beats.
 The difficult nature of multi-frame imputation of music data is
 demonstrated in Figure \ref{fig:basic}.
 %
-Linear regression\FIXME[ronw]{or prediction?}, which explicitly
+Linear regression\FIXME[ronw]{isn't it really prediction?}, which explicitly
 minimizes Euclidean distance, is used to impute the missing data in
 Figure~\ref{fig:basic}.  However, it is clear from visual inspection
 that linear regression yields an overly-smooth reconstruction and is
@@ -186,7 +188,7 @@ unable to predict the temporal evolution within the missing section.
 A more sophisticated signal model which better leverages the
 surrounding context and makes use of long-term temporal information
 such as knowledge of repetitions within a song (note that the
-missing sequence is repeated at frame 70) is necessary to achieve a musically
+missing sequence in Figure~\ref{fig:basic} is repeated at frame 70) is necessary to achieve a musically
 coherent reconstruction.
 %
 Unfortunately, simple algorithms such as linear regression
@@ -207,7 +209,7 @@ In the experiments described below, we use a set of $5000$ songs taken
 from the \emph{morecowbell.dj} dataset~\cite{Bertin-Mahieux2010a}.
 This dataset contains a wide variety of (predominantly western) pop
 music.  The raw audio was then converted to a chromagram
-representation using the online EchoNest
+representation using the online Echo Nest
 API.\footnote{\url{http://developer.echonest.com}} A chromagram is
 similar in spirit to a constant-Q spectrogram except that pitch
 content across all octaves has been folded into $12$ discrete bins,
@@ -232,7 +234,7 @@ single beat.  This representation has been successfully used for cover
 song recognition~\cite{Ellis2007a}, segmentation~\cite{Weiss2010}, and
 in our previous work on patch modeling~\cite{Bertin-Mahieux2010a}.  As
 a post-processing step, we remove variability due to loudness by
-normalizing each column to have a maximum value of $1$.
+normalizing each column to have a maximum value of one.
 
 % ronw: this sentence is unnecessary
 % Note
@@ -276,12 +278,12 @@ normalizing each column to have a maximum value of $1$.
 %\subsection{MEASURES}
 \subsection{EVALUATION METRICS}
 \label{ssec:measures}
-Euclidean distance is a natural first choice for reconstruction and
-encoding tasks. However, as can be seen in Figure \ref{fig:basic},
-algorithms which minimize this metric do not necessarily capture all
-of the relevant data statistics.  In particular, the solution is
-overly smooth and longer-term temporal patterns are poorly
-reconstructed.
+Euclidean distance is a natural first choice for evaluating
+reconstruction and encoding tasks. However, as can be seen in Figure
+\ref{fig:basic}, algorithms which minimize this metric do not
+necessarily capture all of the relevant data statistics.  In
+particular, the solution is overly smooth and longer-term temporal
+patterns are poorly reconstructed.
 
 Clearly, the simplicity of the model is largely responsible for these
 issues.  However, inherent in the Euclidean distance criterion is a
@@ -328,35 +330,35 @@ conditional entropy~\cite{Peng2005}, Jensen difference~\cite{Michel1994}, and
 the normalize difference entropy (\textbf{D-ENT})
 \cite{Mentzelopoulos2004}.
 
-Jensen entropy of two distribution $x_1$ and $x_2$ is given by
+The Jensen entropy of two distribution $x_1$ and $x_2$ is given by
 \[
 \mbox{Jensen} = entropy(\frac{x_1+x_2}{2}) - \frac{entropy(x_1) + entropy(x_2)}{2}
 \]
-For D-ENT, we build a $10$-bins histogram of the grey scale values,
-and compute the difference of entropy for each bin between an original
-distribution and its approximation. With $e_b = - log_2 b_b$
-entropy of one bin, it means that:
+For D-ENT, we build a $10$-bin histogram of the feature values,
+and compute the difference of entropy for each bin between the original
+distribution and its approximation:
 \[
 \mbox{D-ENT} = \left( \Sigma_b \frac{e_{b1} - e_{b2}}{e_{b1}} \right) / (\mbox{\# bins})
 \]
-Note that D-ENT is not symmetric. In our experiment, the first vector
-is the original one. Also, the position of the different values does not
-matter.
+where $e_b = - log_2 b_b$ \FIXME[ronw]{should $b_b$ be $x_b$?} is the
+entropy of one bin.  Note that D-ENT is not symmetric. In our
+experiments, we set the first vector to be the original
+features. Also, the position of the different values does not matter.
 
 Another idea to measure the ``sharpness'' of a reconstruction compared
-to the original is the delta. Delta chromas are the finite difference
-in time of the chromas. \textbf{Delta difference} is computed by
-summing the absolute value of the delta, then taking the absolute
+to the original using the first-order difference of the feature
+vectors across time. We compute the \textbf{delta difference} by summing
+the absolute value of the delta, then taking the absolute
 difference. Once again, the position of the delta values does not
 matter.
 
 We explained above why Euclidean distance can justify disappointing
 reconstructions. At the same time, we do not argue that we should
 ignore or replace it. Euclidean distance measures reconstruction in a
-fundamental way. We believe we need a set of measures to quantify the
-quality of music patterns, Euclidean distance being one of them. In
-the next section, we investigate which measures behave in a similar
-way, thus helping us to decide which ones are useful to report.
+fundamental way. We believe we need a combination of measures to
+quantify the quality of music patterns, Euclidean distance being one
+of them. In the next section, we investigate which measures behave in
+a similar way, thus helping us to decide which ones are useful.
 
 \begin{comment}
 The smoothing phenomena described above explains why reconstruction
