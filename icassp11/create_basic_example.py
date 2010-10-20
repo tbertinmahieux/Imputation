@@ -15,9 +15,12 @@ import imputation as IMPUTATION
 import imputation_plca as IMPUTATION_PLCA
 
 
+def nice_nums(val):
+    return evaluation.nice_nums(val)
+
 # load btchroma, create mask
 btchroma = sio.loadmat('/home/thierry/Columbia/covers80/coversongs/covers32kENmats/john_lennon+Double_Fantasy+05-I_m_Losing_You.mp3.mat')['btchroma']
-p1=185;p2=p1+15;mask=np.ones(btchroma2.shape);mask[:,p1:p2]=0.
+p1=185;p2=p1+15;mask=np.ones(btchroma.shape);mask[:,p1:p2]=0.
 
 # method: lintrans
 recon_lintrans,tmp = IMPUTATION.lintransform_patch(btchroma,mask,p1,p2,win=1)
@@ -45,22 +48,47 @@ pos2 = p2+70
 P.figure()
 P.hold(True)
 # original and masked
-P.subplot(611)
+P.subplot(711)
 P.imshow(btchroma[:,pos1:pos2],**pargs)
+P.gca().grid(False)
 P.yticks([4,8])
 P.xticks()
-P.subplot(612)
+P.subplot(712)
 P.imshow((btchroma*mask)[:,pos1:pos2],**pargs)
+P.gca().grid(False)
 P.yticks([4,8])
 P.xticks()
 # random
-
+P.subplot(713)
+P.imshow(recon_rand[:pos1:pos2],**pargs)
+P.gca().grid(False)
+P.yticks([4,8])
+P.xticks()
+P.title('allo')
 # nn
-
+P.subplot(714)
+P.imshow(recon_nn[:pos1:pos2],**pargs)
+P.gca().grid(False)
+P.yticks([4,8])
+P.xticks()
 # avg
-
-
-
+P.subplot(715)
+P.imshow(recon_avg[:pos1:pos2],**pargs)
+P.gca().grid(False)
+P.yticks([4,8])
+P.xticks()
+# siplca
+P.subplot(716)
+P.imshow(recon_siplca[:pos1:pos2],**pargs)
+P.gca().grid(False)
+P.yticks([4,8])
+P.xticks()
+# lintran
+P.subplot(717)
+P.imshow(recon_lintrans[:pos1:pos2],**pargs)
+P.gca().grid(False)
+P.yticks([4,8])
+P.xticks()
 
 #%evaluation.plot_oneexample(btchroma2,mask,p1,p2,methods=['lintrans'],methods_args=[{'win':1}],measures=('eucl','kl','dent'),plotrange=(p1-10,p2+70))
 
