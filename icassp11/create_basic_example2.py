@@ -38,7 +38,7 @@ err_rand = evaluation.recon_error(btchroma,mask,recon_rand)
 recon_avg = IMPUTATION.average_patch(btchroma,mask,p1,p2,win=1)
 err_avg = evaluation.recon_error(btchroma,mask,recon_avg)
 # method: NN
-recon_nn,tmp = IMPUTATION.knn_patch(btchroma,mask,p1,p2,win=8,measure='eucl')
+recon_nn,tmp = IMPUTATION.knn_patch(btchroma,mask,p1,p2,win=11,measure='eucl')
 err_nn = evaluation.recon_error(btchroma,mask,recon_nn)
 # method: SIPLCA
 recon_siplca = IMPUTATION_PLCA.SIPLCA_mask.analyze((btchroma*mask).copy(),
