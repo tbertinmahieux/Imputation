@@ -262,7 +262,8 @@ normalizing each column to have a maximum value of one.
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=.95\columnwidth]{basic}
+%\includegraphics[width=.95\columnwidth]{basic}
+\includegraphics[width=.99\columnwidth]{basic2}
 \end{center}
 \caption{$15$ beats imputation example, rows are 1) original 2) original masked
 3) reconstruction using a linear transform of one previous beat.
@@ -362,8 +363,8 @@ a similar way, thus helping us to decide which ones are useful.
 
 \begin{comment}
 The smoothing phenomena described above explains why reconstruction
-such as in Figure \ref{fig:basic} ($3$rd row) or in Figure
-\ref{fig:avgnnrand} ($3$rd row) may occur.  Learning an overly
+such as in Figure \ref{fig:basic} ($5$th and $6$th rows).  
+Learning an overly
 smoothed solution and avoiding extreme values is rewarded by some
 metrics.  Figure~\ref{fig:square} suggests that $d_{1/2}$ might
 perform well for real imputation tasks
@@ -384,6 +385,7 @@ between the sum of absolute values of the deltas for the original data
 and its reconstruction.
 \end{comment}
 
+\begin{comment} % merged with figure 1 ``basic''
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=.95\columnwidth]{avg_nn_rand}
@@ -394,6 +396,7 @@ rows are 1) original 2) original masked
 nearest neighbor 5) using random.
 \label{fig:avgnnrand}}
 \end{figure}
+\end{comment}
 
 
 \begin{figure}%
@@ -444,10 +447,10 @@ results on a variety of benchmark algorithms. We realize that such
 methods have a low probability of success at solving the task, but
 their relative performance is of interest.  Simple methods include
 \textbf{random} where each chroma bin is drawn from a uniform $[0,1)$
-distribution (Figure \ref{fig:avgnnrand}, $5$th row).  One can also
+distribution (Figure \ref{fig:basic}, $3$rd row).  One can also
 pick a beat at random from the song, or take the average of all
 visible beats. Taking the \textbf{average} of the beats within a certain
-range of the missing patch (Figure \ref{fig:avgnnrand}, $3$rd row)
+range of the missing patch (Figure \ref{fig:basic}, $5$th row)
 create a smooth reconstruction, but still solves the case of
 sustained notes.
 
@@ -555,7 +558,7 @@ does it successfully. But as it can be seen with D-ENT and in Figure
 \ref{fig:basic} $3$rd row, it is done by a large amount of
 smoothing. The average reconstruction has the same D-ENT as the linear
 transform, which is consistent with
-Figure~\ref{fig:basic} and Figure~\ref{fig:avgnnrand}.  However, due to less
+Figure~\ref{fig:basic}.  However, due to less
 smoothing (or a less intelligent one), it does not do as well with the
 Euclidean distance.
 
