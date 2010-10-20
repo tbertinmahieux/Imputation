@@ -19,9 +19,9 @@ def nice_nums(val):
     return evaluation.nice_nums(val)
 
 def errs_to_str(errs):
-    s = 'eucl. = ' + nice_num(errs['eucl'])
-    s += ', delta diff. = ' + nice_num(errs['ddiff'])
-    s += ', D-ENT = ' + nice_num(errs['dent'])
+    s = 'eucl. = ' + nice_nums(errs['eucl'])
+    s += ', delta diff. = ' + nice_nums(errs['ddiff'])
+    s += ', D-ENT = ' + nice_nums(errs['dent'])
     return s
 
 # load btchroma, create mask
