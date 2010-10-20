@@ -92,7 +92,7 @@ P.subplot(717)
 P.imshow(recon_lintrans[:,pos1:pos2],**pargs)
 P.gca().grid(False)
 P.yticks([4,8])
-P.xticks([])  we let the last one!
+P.xticks([])
 P.title('LIN. TRANS., ' + errs_to_str(err_lintrans),fontsize='small')
 # siplca
 P.subplot(716)
