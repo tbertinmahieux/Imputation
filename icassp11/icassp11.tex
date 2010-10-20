@@ -143,7 +143,7 @@ We therefore focus on the task of \emph{multi-frame} imputation in
 % many consecutive time frames
 which long segments of the signal are missing.
 %
-Obtaining good performance on this task requires the use of a model
+Obtaining good performance on this task requires the use of models
 which can take advantage of the highly structured nature of music.  It
 therefore serves as a good way to
 % This allows us to
@@ -153,19 +153,19 @@ models.  % needs to be reworded?
 
 
 The difficult nature of multi-frame imputation of music data is
-demonstrated in Figure \ref{fig:basic}.
-Linear prediction, which
+demonstrated in Figure \ref{fig:basic}.  Linear prediction, which
 explicitly minimizes Euclidean distance, is used to impute the missing
-data in Figure~\ref{fig:basic} $6$th row.  However, it is clear from
-visual inspection that linear prediction yields an overly-smooth
-reconstruction and is unable to predict the temporal evolution within
-the missing section.
+data and is shown in the $6$th row of Figure~\ref{fig:basic}.
+However, it is clear from visual inspection that linear prediction
+yields an overly-smooth reconstruction and is unable to predict the
+temporal evolution within the missing section.
 %
-A more sophisticated signal model which better leverages the
-surrounding context and makes use of long-term temporal information
-such as knowledge of repetitions within a song (note that the missing
-sequence in Figure~\ref{fig:basic} is repeated at frame 70) is
-necessary to achieve a musically coherent reconstruction.
+A more sophisticated signal model which makes better use of long-term temporal information, 
+% better leverages the surrounding context and makes use of long-term
+% temporal information
+such as knowledge of repetitions within a song, 
+%(note that the missing sequence in Figure~\ref{fig:basic} is repeated at frame 70) 
+is necessary to achieve a musically coherent reconstruction.
 %
 Unfortunately, simple algorithms such as linear prediction are often
 prone to identifying poor solutions, despite optimizing standard
@@ -241,11 +241,14 @@ normalizing each column to have a maximum value of one.
 %\includegraphics[width=.95\columnwidth]{basic}
 \includegraphics[width=.99\columnwidth]{basic2}
 \end{center}
-\caption{$15$ beats imputation example, rows are 1) original 2) original masked,
-then reconstruction using 3) random 4) nearest neighbor 5) average of nearby beats
-6) linear transform of one previous beat 7) SIPLCA (see Subsection \ref{ssec:algo}
-for algorithmic details). Song longer than shown here.
-\label{fig:basic}}
+\caption{$15$-beat imputation example.  Rows are (1) original data,
+  (2) masked data, (3) random reconstruction, (4) nearest-neighbor
+  reconstruction, (5) reconstruction using average of nearby beats, 
+  (6) reconstruction using linear transform of one previous beat, 
+  and (7) SIPLCA (see Subsection \ref{ssec:algo} for algorithmic details). 
+  Note that only excerpts are shown.
+  %Song longer than shown here.
+  \label{fig:basic}}
 \end{figure}
 
 % IPYTHON COMMAND TO RECREATE ABOVE FIGURE
@@ -262,33 +265,35 @@ results on a variety of benchmark algorithms. We realize that such
 methods have a low probability of success at solving the task, but
 their relative performance is of interest.  Simple methods include
 random where each chroma bin is drawn from a uniform $[0,1)$
-distribution (Figure \ref{fig:basic}, $3$rd row).  One can also pick a
-beat at random from the song, or take the average of all visible
-beats. Taking the average of the beats within a certain range
-of the missing patch (Figure \ref{fig:basic}, $5$th row) create a
-smooth reconstruction, but still solves the case of sustained notes.
+distribution (Figure \ref{fig:basic}, $3$rd row).  Other baseline
+algorithms include picking a beat at random from the song and taking
+the average of all visible beats.
+%Taking the average of the beats
+%within a certain range of the missing patch (Figure \ref{fig:basic},
+%$5$th row) creates a smooth
+%reconstruction.%, but still solves the case of sustained notes.
 
-Our first trained model is linear prediction (also called linear
-transform in the text) where we use $N$ previous beats to predict the
-next one.  As it explicitly learns to minimize Euclidean distance on
-the visible data, this methods performs very well under certain
-metrics (See Figure \ref{fig:basic}). From our experiments, $N=1$ or
-$N=2$ work best.
+Our first trained model uses a linear transform to predict the next beat from the previous $N$ beats.
+% linear prediction (also called linear transform in the text) where
+% we use $N$ previous beats to predict the next one.
+As it explicitly learns to minimize Euclidean distance on the visible
+data, this method performs very well under certain metrics (see Figure
+\ref{fig:basic}). From our experiments, $N=1$ or $N=2$ works best.
 
-Nearest neighbor ($1$NN) is an appropriate technique
-to take advantage of the repetitions within a song. By looking at the
-nearby beats of the missing data, we can impute a reconstruction by
-spotting a similar neighborhood. Note that instead of using the
-visible part of the song, one can use a codebook made of
-other songs.  $k$NN with $k>1$ is ongoing research.
+Nearest neighbor ($1$NN) is an appropriate technique to take advantage
+of the repetitions within a song.  By looking at the nearby beats of
+the missing data, we can impute a reconstruction by spotting a similar
+neighborhood. Note that instead of using the visible part of the song,
+one can use a codebook constructed from other songs.  $k$NN with $k>1$
+is ongoing research.
 
-Previous methods rely on local, low-level information which should not
-be enough to solve multi-frame imputation. HMM or NMF should better
-leverage long term dependencies and nearby information.  We experiment
-with shift invariant probabilistic latent component analysis (SIPLCA)
-\cite{Smaragdis2009,Weiss2010}, a probabilistic variant of convolutive
-NMF. SIPLCA learn how to encode the signal as a set of overlapping
-patches. 
+The algorithms discussed above rely on low-level information which is
+unlikely be adequate for the multi-frame imputation problem.
+Therefore, we experiment with shift-invariant probabilistic latent
+component analysis (SIPLCA) \cite{Smaragdis2009,Weiss2010}, which is
+capable of capturing temporal dependencies.
+%a probabilistic variant of convolutive NMF.  SIPLCA learn how to
+%encode the signal as a set of overlapping patches.
 %As a gross simplification, one
 %could compare SIPLCA to a smart nearest-neighbors. However, by
 %controlling the activations, i.e. the matrix deciding when and where
@@ -301,15 +306,14 @@ patches.
 %In our case, we use a
 %hierarchical SIPLCA model which will be described in detail in a
 %future publication.  
-The SIPLCA algorithm extracts template chroma
-patches that are consistently repeated throughout a song.  Missing
-data is imputed by identifying templates consistent with the features
-neighboring the missing segment.  In the case of missing segments
-longer than the identified templates, our imputation algorithm
-utilizes a hierarchical reconstruction scheme, whose detailed
-explanation is beyond the scope of this paper.  SIPLCA for imputation
-is ongoing research, we refer the interested reader to our code until
-then.
+The SIPLCA algorithm extracts template chroma patches that are
+consistently repeated throughout a song.  Missing data is imputed by
+identifying templates consistent with the features neighboring the
+missing segment.  In the case of missing segments longer than the
+identified templates, our imputation algorithm utilizes a hierarchical
+reconstruction scheme, whose detailed explanation is beyond the scope
+of this paper.  SIPLCA for imputation is ongoing research and we refer
+the interested reader to our code until then.
 
 
 %\subsection{MEASURES}
