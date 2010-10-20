@@ -324,7 +324,7 @@ values, it appears that we need to encourage sparsity in our
 solutions.  Entropy is a natural measure of the sparsity of a
 distribution and therefore it makes sense to consider related metrics.
 We examined the (symmetric) Kullback-Leibler divergence, (approximate)
-conditional entropy~\cite{}, Jensen difference~\cite{Michel1994}, and
+conditional entropy~\cite{Peng2005}, Jensen difference~\cite{Michel1994}, and
 the normalize difference entropy (\textbf{D-ENT})
 \cite{Mentzelopoulos2004}.
 
@@ -484,14 +484,23 @@ highly-structures imputations. In order to rationalize the set of
 measures we should report in our experiments, we first compute the
 empirical agreement of these metrics.
 Pearson's correlation is defined as
-\[  \rho_{X,Y}=\mathrm{corr}(X,Y)={\mathrm{cov}(X,Y) \over \sigma_X
+\[  \rho_{X,Y}={\mathrm{cov}(X,Y) \over \sigma_X
     \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
 \]
 $\rho_{X,Y}$. Remember that $-1 \leq \rho_{X,Y} \leq 1$, an absolute
 value close to $1$ meaning high correlation. $\rho_{X,Y}$ is computed
 for many error measures based on results obtained by three methods on
 two multi-frame imputation tasks. See results in Table
-\ref{tab:corrs}. Delta difference and D-ENT stand out as measuring
+\ref{tab:corrs}. 
+
+The first conclusion is that a large set of measures tend to agree
+with Euclidean distance. It might not be a surprise for cosine
+distance and $d_{1/2}$ as they are similar in their
+formulation. However, the fact that entropy-based measures such as KL
+has high correlation with Euclidean distance means it might not serve
+our purpose.
+
+Delta difference and D-ENT stand out as measuring
 things differently than Euclidean distance.
 
 % MEASURES IN ORDER: (bad matfile saving)
