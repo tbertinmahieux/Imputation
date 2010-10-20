@@ -187,7 +187,7 @@ This dataset contains a wide variety of (predominantly western) pop
 music.  The raw audio was then converted to a chromagram
 representation using the online Echo Nest
 API.\footnote{\url{http://developer.echonest.com}} A chromagram is
-similar in spirit to a constant-Q spectrogram except that pitch
+similar in spirit to a \mbox{constant-Q} spectrogram except that pitch
 content across all octaves has been folded into $12$ discrete bins,
 each of which corresponds to a semitone (e.g. piano key).
 %In the chroma representation, the pitch content at each point in time
@@ -343,13 +343,14 @@ general, as $p \rightarrow 0$ the resulting distance measures penalize
 small values more heavily.  This has the effect of favoring
 ``sharper'' data sequences and is illustrated in Figure
 \ref{fig:measures}.  The greyed rectangle represents the case where a
-reconstruction is considered valid if it is between some $\delta$ of
-the original and wrong otherwise.  The Minkowski distance approximates
-this case with an increasingly smaller $\delta$ as $p \rightarrow 0$.
-In the experiments described below, we consider $p=0.5$ and $p=2$.
-With $p=0.5$, on the example of Figure \ref{fig:square}, the
-translated square wave is now favored (with a reconstruction error of
-$0.5$) to the second signal whose reconstruction error is now $0.71$.
+reconstruction is considered valid (error equals $0$ if it is between
+some $\delta$ of the original and wrong otherwise (error equals $1$).
+The Minkowski distance approximates this case when both
+$\delta \rightarrow 0$ and $p \rightarrow 0$.  In the experiments described
+below, we consider $p=0.5$ and $p=2$.  With $p=0.5$, on the example of
+Figure \ref{fig:square}, the translated square wave is now favored
+(with a reconstruction error of $0.5$) to the second signal whose
+reconstruction error is now $0.71$.
 %\FIXME[ronw]{elaborate on this, it's kind of unclear}
 
 Looking at the differences between the original data and the imputed
@@ -517,7 +518,7 @@ smoothing (or a less intelligent one), it does not do as well with the
 Euclidean distance.
 
 % to create this figure:
-%time evaluation.plot_2_measures_dataset(test,methods=['knn_eucl','average','lintrans'],measures=['eucl','dent'],methods_args=[{'win':8},{'win':1},{'win':1}],ncols=[1,2,10,15])
+%time evaluation.plot_2_measures_dataset(test,methods=['knn_eucl','average','lintrans'],measures=['eucl','dent'],methods_args=[{'win':8},{'win':1},{'win':1}],ncols=[1,2,5,10])
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=.8\columnwidth]{recon_score_in_2d_5k}
