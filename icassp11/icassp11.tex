@@ -283,62 +283,50 @@ of the relevant data statistics.  In particular, the solution is
 overly smooth and longer-term temporal patterns are poorly
 reconstructed.
 
-There is no doubt that this poor reconstruction is in part due to
-the simplicity of the model. That said, we argue that minimizing
-Euclidean distance also leads to such reconstructions, i.e. when 
-a model is unsure of a value, it gets the most reward from a smooth
-solution.
-Consider the toy example of Figure \ref{fig:square}. We impute the
-original one-dimensional signal, a square wave (solid line), by two
-signals: a translated identical square wave (dot-dashed line), and a
-constant signal (dashed line). The first signal has an average reconstruction
-error of $0.5$ using Euclidean distance. The second signal has an
-average error of only $0.25$, even if the result is less visually satisfying.
-Applied to a multidimensional signal, it implies that
-Euclidean distance rewards overly-smoothed reconstruction, thus it can
-be misleading.
+Clearly, the simplicity of the model is largely responsible for these
+issues.  However, inherent in the Euclidean distance criterion is a
+preference for smooth solutions.
+%There is no doubt that this poor reconstruction is in part due to
+%the simplicity of the model. That said, we argue that minimizing
+%Euclidean distance also leads to such reconstructions, i.e. when 
+%a model is unsure of a value, it gets the most reward from a smooth
+%solution.
+To see why, consider the toy example of Figure \ref{fig:square}. We
+impute the original one-dimensional signal, a square wave (solid
+line), by two signals: a translated identical square wave (dot-dashed
+line), and a constant signal (dashed line). The first signal has an
+average reconstruction error of $0.50$ using Euclidean distance. The
+second signal has an average error of only $0.25$, despite the fact
+that it does not appear to reflect the overall shape of the original
+data.
 
+%Applied to a multidimensional signal, it implies that Euclidean
+%distance rewards overly-smoothed reconstruction, thus it can be
+%misleading.
 
+The class of Minkowski distances are given by the form $d_p =
+|x_1-x_2|^p$, of which the Euclidean is a special case ($p=2$).  In
+general, as $p \rightarrow 0$ the resulting distance measures penalize
+small values more heavily.  This has the effect of favoring
+``sharper'' data sequences and is illustrated in Figure
+\ref{fig:measures}.  The greyed rectangle represents the case where a
+reconstruction is considered valid if it is between some $\delta$ of
+the original and wrong otherwise.  The Minkowski distance approximates
+this case with an increasingly smaller $\delta$ as $p \rightarrow 0$.
+In the experiments described below, we consider $p=0.5$ and $p=2$.
+%\FIXME[ronw]{elaborate on this, it's kind of unclear}
 
-
-We first consider other Mahalanobis distances of the form $d_p =
-|x_1-x_2|^p$, 
-
-\FIXME[ronw]{I don't think Mahalanobis distance is the
-  right term here -- there is no covariance weighting here.
-  ``Euclidean'' or ``generalized Euclidean'' might be safer even
-  though ``Euclidean'' implies that $p=2$.}  
-especially with $p \leq
-2$. Figure \ref{fig:measures} illustrates the effect of these measures
-on one dimensional data.  The greyed rectangle represents the case
-where a reconstruction is considered valid if it is between some
-$\delta$ of the original and wrong otherwise.  Mahalanobis distance
-approximate this case with an increasingly smaller $\delta$ as $p
-\rightarrow 0$.  
-\FIXME[ronw]{elaborate on this, it's kind of unclear}
-
-The phenomena above explains why reconstruction such as in Figure
-\ref{fig:basic} ($3$rd row) or in Figure \ref{fig:avgnnrand} ($3$rd
-row) often result from powerful algorithms. Learning an overly
-smoothed solution and avoiding extreme values is rewarded by some
-metrics. $d_{1/2}$ seems to be a solution from the toy example in
-Figure \ref{fig:square}, but we will see in Section \ref{sec:exp} that
-it is not really the case in practice.  Similarly, Kullback-Leibler
-(KL), conditional entropy and Jensen difference \cite{Michel1994} are
-two measures based on entropy, thus should not behave necessarily in
-the same way as $d_p$.  Once again, it is not the case in practice. We
-now look into other measures that would differ from $d_2$.  Upon
-visual inspection, they should reward granularity which is missing in
-Figure \ref{fig:basic} for instance. Delta chromas are the finite
-difference along the time axis of the chromas. Deltas of over-smoothed
-solution are closed to $0$ whereas features of typical songs have more
-variation over time.
-\textbf{ddiff} measures the absolute difference between the
-sum of absolute values of the deltas for the original data and its
-reconstruction.
+Looking at the differences between the original data and the imputed
+values, it appears that we need to encourage sparsity in our
+solutions.  Entropy is a natural measure of the sparsity of a
+distribution and therefore it makes sense to consider related metrics.
+We examined the (symmetric) Kullback-Leibler divergence, (approximate)
+conditional entropy~\cite{}, Jensen difference~\cite{Michel1994}, and
+the normalize difference entropy (\textbf{D-ENT})
+\cite{Mentzelopoulos2004}.
 
 Another idea is to look at the histogram of values and compute its
-entropy. Once again, sustained solutions should measure differently
+entropy.  Once again, sustained solutions should measure differently
 than the original.  Absolute normalize difference entropy
 (\textbf{D-ENT}) \cite{Mentzelopoulos2004} between two vectors is
 computed as follow: we discretize $(0,1)$ in $10$ bins and create the
@@ -364,6 +352,30 @@ way. We believe we need a set of measures to quantify the quality of
 music patterns, Euclidean distance being one of them. In the next
 section, we investigate which measures behave in a similar way, thus
 helping us to decide which ones are useful to report.
+
+\begin{comment}
+The smoothing phenomena described above explains why reconstruction
+such as in Figure \ref{fig:basic} ($3$rd row) or in Figure
+\ref{fig:avgnnrand} ($3$rd row) may occur.  Learning an overly
+smoothed solution and avoiding extreme values is rewarded by some
+metrics.  Figure~\ref{fig:square} suggests that $d_{1/2}$ might
+perform well for real imputation tasks
+
+$d_{1/2}$ seems to be a solution from the toy example in
+Figure \ref{fig:square}, but we will see in Section \ref{sec:exp} that
+it is not really the case in practice.  Similarly, Kullback-Leibler
+(KL), conditional entropy and Jensen difference \cite{Michel1994} are
+two measures based on entropy, thus should not behave necessarily in
+the same way as $d_p$.  Once again, it is not the case in practice. We
+now look into other measures that would differ from $d_2$.  Upon
+visual inspection, they should reward granularity which is missing in
+Figure \ref{fig:basic} for instance. Delta chromas are the finite
+difference along the time axis of the chromas. Deltas of over-smoothed
+solution are closed to $0$ whereas features of typical songs have more
+variation over time.  \textbf{ddiff} measures the absolute difference
+between the sum of absolute values of the deltas for the original data
+and its reconstruction.
+\end{comment}
 
 \begin{figure}[t]
 \begin{center}
@@ -391,7 +403,7 @@ nearest neighbor 5) using random.
   Reconstruction error between a square wave and two approximations, a
   square wave translated by a quarter of the period, and the average
   function. Average error between original and translated wave is
-  always $0.5$ for any Mahalanobis measure $d_p$ on $[0,1]$.  For the
+  always $0.5$ for any Minkowski measure $d_p$ on $[0,1]$.  For the
   average function, the errors are $0.25$, $0.5$ and $0.71$ for $d_2$,
   $d_1$ and $d_{1/2}$ respectively.}%
 \label{fig:two_measures}
@@ -402,7 +414,7 @@ nearest neighbor 5) using random.
   Reconstruction error between a square wave and two approximations, a
   square wave translated by a quarter of the period, and the average
   function. Average error between original and translated wave is
-  always $0.5$ for any Mahalanobis measure $d_p$ on $[0,1]$.  For the
+  always $0.5$ for any Minkowski measure $d_p$ on $[0,1]$.  For the
   average function, the errors are $0.25$, $0.5$ and $0.71$ for $d_2$,
   $d_1$ and $d_{1/2}$ respectively.
 \end{comment}
