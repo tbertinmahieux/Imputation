@@ -315,8 +315,8 @@ the original and wrong otherwise.  The Minkowski distance approximates
 this case with an increasingly smaller $\delta$ as $p \rightarrow 0$.
 In the experiments described below, we consider $p=0.5$ and $p=2$.
 With $p=0.5$, on the example of Figure \ref{fig:square}, the
-translated square wave is now favored (reconstruction error is $0.5$)
-to the second signal (reconstruction error is $0.71$).
+translated square wave is now favored (with a reconstruction error of
+$0.5$) to the second signal whose reconstruction error is now $0.71$.
 %\FIXME[ronw]{elaborate on this, it's kind of unclear}
 
 Looking at the differences between the original data and the imputed
@@ -343,7 +343,12 @@ Note that D-ENT is not symmetric. In our experiment, the first vector
 is the original one. Also, the position of the different values does not
 matter.
 
-\FIXME[TBM]{DELTA DIFFERENCE HERE!!!!!!!!!}
+Another idea to measure the ``sharpness'' of a reconstruction compared
+to the original is the delta. Delta chromas are the finite difference
+in time of the chromas. \textbf{Delta difference} is computed by
+summing the absolute value of the delta, then taking the absolute
+difference. Once again, the position of the delta values does not
+matter.
 
 We explained above why Euclidean distance can justify disappointing
 reconstructions. At the same time, we do not argue that we should
@@ -451,7 +456,7 @@ Euclidean distance on the visible data, this methods performs very
 well under certain metrics (See Figure \ref{fig:basic}). From our
 experiments, $N=1$ or $N=2$ work best.
 
-Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate tehcnique
+Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate technique
 to take advantage of the repetitions within a song. By looking at the
 nearby beats of the missing data, we can impute a reconstruction by
 spotting a similar neighborhood. Note that instead of using the
@@ -585,8 +590,8 @@ lin. trans. & $\mathbf{0.056}$ & $$ & $0.479$ \\
 SIPLCA & & & \\ \hline
 \end{tabular}
 \caption{Results on $15$ missing beats by different methods
-on $5000$ songs and measured using Euclidean distance and
-D-ENT.
+on $5000$ songs and measured using Euclidean distance, delta
+difference, and D-ENT.
 \label{tab:res}}
 \end{center}
 \end{small}
