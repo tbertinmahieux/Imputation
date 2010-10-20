@@ -113,8 +113,8 @@ data entries.  Previous work on audio-related applications has
 included speech denoising~\cite{Cooke1996,Raj1998}, source
 separation~\cite{Reyes-Gomez2005}, bandwidth
 expansion~\cite{Smaragdis2009}, and model
-evaluation~\cite{Hoffman2010}.  However, much of the
-previous work has focused on at most a single time-frame.
+evaluation~\cite{Hoffman2010}.  However, much of the previous work has
+focused on at most a single time-frame.
 %However, to the best of
 %our knowledge, previous research has only considered at most a single
 %missing time frame.
@@ -140,41 +140,6 @@ therefore serves as a good way to
 more carefully evaluate the temporal aspects of competing
 models.  % needs to be reworded?
 % mention real-world packet-loss case?
-
-
-% Music is highly structured in time and as such is particularly suitable
-% for the multi-frame imputation task.
-% In addition to musicological implications,
-% large-scale models of music data have numerous commercial
-% applications, including recommendation systems, digital rights
-% management, and creative tools.  
-
-
-
-\begin{comment}
-and fully masking consecutive beats of music have not been
-considered. A real-life analogous problem would be a music stream
-signal that is lost for a few seconds. The goal here would be to infer
-a reasonable stream to replace the original one. Thus we do not only
-want a signal close to the original in a reconstruction sense, but
-also a signal that has similar ``musical properties'' to the user
-ear. These properties are difficult to define, but we refer to higher
-order dependencies present in the signal. For instance, the rate of
-note onsets, the number of notes activated at the same time, and other
-texture-like elements. We will argue that entropy is a good
-approximation of these characteristics.
-\end{comment}
-
-\begin{comment}
-a few frequency bins are hidden and can be
-recovered from their neighborhood, both in time and frequency. Masking
-one full beat is a natural extension, and the solution is easy as
-music notes are often sustained over many beats. Two or three missing
-beats remain solvable as music bare many repetitions. One can usually
-find a similar section from an unmasked part of the song (think about
-a repeated chorus for instance).  The real challenge arises from
-masking many consecutive beats.
-\end{comment}
 
 
 The difficult nature of multi-frame imputation of music data is
@@ -330,10 +295,10 @@ values, it appears that we need to encourage sparsity in our
 solutions.  Entropy is a natural measure of the sparsity of a
 distribution and therefore it makes sense to consider related metrics.
 We examined the (symmetric) Kullback-Leibler divergence, (approximate)
-conditional entropy~\cite{Peng2005}, Jensen difference~\cite{Michel1994}, and
-the normalize difference entropy (\textbf{D-ENT})
-\cite{Mentzelopoulos2004}.
-The Jensen difference of two distribution $x_1$ and $x_2$ is given by
+conditional entropy~\cite{Peng2005}, Jensen
+difference~\cite{Michel1994}, and the normalize difference entropy
+(D-ENT) \cite{Mentzelopoulos2004}.  The Jensen difference of two
+distribution $x_1$ and $x_2$ is given by
 %
 $$
 J(x_1,x_2) = H\left(\frac{x_1+x_2}{2}\right) - \frac{H(x_1) + H(x_2)}{2}
@@ -354,7 +319,7 @@ matter.
 
 Another idea to measure the ``sharpness'' of a reconstruction compared
 to the original using the first-order difference of the feature
-vectors across time. We compute the \textbf{delta difference} by summing
+vectors across time. We compute the  delta difference by summing
 the absolute value of the delta, then taking the absolutec
 difference. Once again, the position of the delta values does not
 matter.
@@ -366,30 +331,6 @@ fundamental way. We believe we need a combination of measures to
 quantify the quality of music patterns, Euclidean distance being one
 of them. In the next section, we investigate which measures behave in
 a similar way, thus helping us to decide which ones are useful.
-
-\begin{comment}
-The smoothing phenomena described above explains why reconstruction
-such as in Figure \ref{fig:basic} ($5$th and $6$th rows).  
-Learning an overly
-smoothed solution and avoiding extreme values is rewarded by some
-metrics.  Figure~\ref{fig:square} suggests that $d_{1/2}$ might
-perform well for real imputation tasks
-
-$d_{1/2}$ seems to be a solution from the toy example in
-Figure \ref{fig:square}, but we will see in Section \ref{sec:exp} that
-it is not really the case in practice.  Similarly, Kullback-Leibler divergence
-(KL), conditional entropy and Jensen difference \cite{Michel1994} are
-two measures based on entropy, thus should not behave necessarily in
-the same way as $d_p$.  Once again, it is not the case in practice. We
-now look into other measures that would differ from $d_2$.  Upon
-visual inspection, they should reward granularity which is missing in
-Figure \ref{fig:basic} for instance. Delta chromas are the finite
-difference along the time axis of the chromas. Deltas of over-smoothed
-solution are closed to $0$ whereas features of typical songs have more
-variation over time.  \textbf{ddiff} measures the absolute difference
-between the sum of absolute values of the deltas for the original data
-and its reconstruction.
-\end{comment}
 
 \begin{comment} % merged with figure 1 ``basic''
 \begin{figure}[t]
@@ -426,16 +367,6 @@ nearest neighbor 5) using random.
 \end{figure}
 
 
-\begin{comment}
-  Reconstruction error between a square wave and two approximations, a
-  square wave translated by a quarter of the period, and the average
-  function. Average error between original and translated wave is
-  always $0.5$ for any Minkowski measure $d_p$ on $[0,1]$.  For the
-  average function, the errors are $0.25$, $0.5$ and $0.71$ for $d_2$,
-  $d_1$ and $d_{1/2}$ respectively.
-\end{comment}
-
-
 \section{EXPERIMENTS}
 \label{sec:exp}
 We present results using different algorithms for imputing masked
@@ -452,33 +383,32 @@ As multi-frame imputation has not been studied before, we report
 results on a variety of benchmark algorithms. We realize that such
 methods have a low probability of success at solving the task, but
 their relative performance is of interest.  Simple methods include
-\textbf{random} where each chroma bin is drawn from a uniform $[0,1)$
-distribution (Figure \ref{fig:basic}, $3$rd row).  One can also
-pick a beat at random from the song, or take the average of all
-visible beats. Taking the \textbf{average} of the beats within a certain
-range of the missing patch (Figure \ref{fig:basic}, $5$th row)
-create a smooth reconstruction, but still solves the case of
-sustained notes.
+random where each chroma bin is drawn from a uniform $[0,1)$
+distribution (Figure \ref{fig:basic}, $3$rd row).  One can also pick a
+beat at random from the song, or take the average of all visible
+beats. Taking the average of the beats within a certain range
+of the missing patch (Figure \ref{fig:basic}, $5$th row) create a
+smooth reconstruction, but still solves the case of sustained notes.
 
-Our first trained model is linear regression (also called
-\textbf{linear transform} in the text) where we use $N$ previous beats
-to predict the next one.  As it explicitly learns to minimize
-Euclidean distance on the visible data, this methods performs very
-well under certain metrics (See Figure \ref{fig:basic}). From our
-experiments, $N=1$ or $N=2$ work best.
+Our first trained model is linear regression (also called linear
+transform in the text) where we use $N$ previous beats to predict the
+next one.  As it explicitly learns to minimize Euclidean distance on
+the visible data, this methods performs very well under certain
+metrics (See Figure \ref{fig:basic}). From our experiments, $N=1$ or
+$N=2$ work best.
 
-Nearest neighbor ($\mathbf{1}$\textbf{NN}) is an appropriate technique
+Nearest neighbor ($1$NN) is an appropriate technique
 to take advantage of the repetitions within a song. By looking at the
 nearby beats of the missing data, we can impute a reconstruction by
 spotting a similar neighborhood. Note that instead of using the
-visible part of the song, one can use a \textbf{codebook} made of
+visible part of the song, one can use a codebook made of
 other songs.  $k$NN with $k>1$ is ongoing research.
 
 Previous methods rely on local, low-level information which should not
 be enough to solve multi-frame imputation. HMM or NMF should better
 leverage long term dependencies and nearby information.  We experiment
 with shift invariant probabilistic latent component analysis
-(\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}, a probabilistic
+(SIPLCA) \cite{Smaragdis2009,Weiss2010}, a probabilistic
 variant of convolutive NMF. SIPLCA learn how to encode the signal as a
 set of overlapping patches. The missing data is inferred by maximizing
 expectation. As a gross simplification, one  could compare SIPLCA to
@@ -498,28 +428,28 @@ As we mentioned in Subsection \ref{ssec:measures}, there exist
 numerous metrics to evaluate the reconstruction of a signal. Euclidean
 distance is a natural first choice, but does not necessarily reward
 highly-structured imputations. In order to rationalize the set of
-measures we report in our experiments, we first compute the
-empirical agreement of these metrics.
-Pearson's correlation is defined as
-\[  \rho_{X,Y}={\mathrm{cov}(X,Y) \over \sigma_X
+measures we report in our experiments, we first compute the empirical
+agreement of these metrics.  Pearson's correlation is defined as
+$$
+\rho_{X,Y}={\mathrm{cov}(X,Y) \over \sigma_X
     \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
-\]
+$$
 $\rho_{X,Y}$. Note that $-1 \leq \rho_{X,Y} \leq 1$, and absolute
 value close to $1$ means high correlation. $\rho_{X,Y}$ is computed
 for many error measures based on results obtained by three methods on
 two multi-frame imputation tasks. The results are shown in
 Table~\ref{tab:corrs}.
 
-The first conclusion is that a large set of measures are strongly correlated
-with Euclidean distance. It might not be a surprise for cosine
-distance and $d_{1/2}$ as they are similar in their
-formulation. However, the fact that entropy-based measures such as KL divergence
-have high correlation with Euclidean distance means it might not serve
-our purpose. Two measures still stand out from the pack.
-Delta difference and D-ENT are global statistics, the first looking at the
-variance in time and the second at the histogram of values. From
-Table~\ref{tab:corrs}, they do seem to bring an added value to our set
-of metrics.
+The first conclusion is that a large set of measures are strongly
+correlated with Euclidean distance. It might not be a surprise for
+cosine distance and $d_{1/2}$ as they are similar in their
+formulation. However, the fact that entropy-based measures such as KL
+divergence have high correlation with Euclidean distance means it
+might not serve our purpose. Two measures still stand out from the
+pack.  Delta difference and D-ENT are global statistics, the first
+looking at the variance in time and the second at the histogram of
+values. From Table~\ref{tab:corrs}, they do seem to bring an added
+value to our set of metrics.
 
 % MEASURES IN ORDER: (bad matfile saving)
 %array(['condent', 'binary', 'cos', 'eucl', 'lhalf', 'lhalf_delta', 'dent',
@@ -531,29 +461,24 @@ of metrics.
     \begin{center}
       \begin{tabular}{@{}l c c c c c @{}}
         \toprule
-                    & Euclidean  & $d_{1/2}$ & Jensen & Delta diff. & D-ENT \\ 
+                            & Euclidean       & $d_{1/2}$ & Jensen & Delta diff. & D-ENT \\ 
         \midrule
-        Euclidean   & $1$    & $0.90$ & $0.84$ & $0.21$  & $0.12$ \\ 
-        $d_{1/2}$.    & $0.90$ & $1$    & $0.71$ & $0.22$  & $0.27$ \\ 
-        Jensen      & $0.84$ & $0.71$ & $1$    & $-0.04$ & $0.20$ \\ 
-        \midrule
+        Euclidean           & $1$             & $0.90$ & $0.84$ & $0.21$  & $0.12$ \\ 
+        $d_{1/2}$             & $0.90$          & $1$    & $0.71$ & $0.22$  & $0.27$ \\ 
+        Jensen              & $0.84$          & $0.71$ & $1$    & $-0.04$ & $0.20$ \\ 
+        %\midrule
         Delta diff. & $\mathbf{0.21}$ & $0.22$ & $-0.04$ & $1$ & -$0.02$ \\ 
-        D-ENT       & $\mathbf{0.12}$ & $0.27$ & $0.20$  & $-0.02$ & $1$ \\
-        \midrule
-        cosine      & $0.88$ & $0.76$ & $0.97$ & $-0.03$ & $0.20$ \\
-        KL          & $0.77$ & $0.64$ & $0.95$ & $-0.04$ & $0.17$ \\ 
-        cond. ent.  & $0.58$ & $0.68$ & $0.37$ & $0.32$  & $0.18$ \\
-        threshold   & $0.68$ & $0.91$ & $0.51$ & $0.20$  & $0.35$ \\ 
+        D-ENT               & $\mathbf{0.12}$ & $0.27$ & $0.20$  & $-0.02$ & $1$ \\
+        %\midrule
+        %Cosine      & $0.88$ & $0.76$ & $0.97$ & $-0.03$ & $0.20$ \\
+        %KL          & $0.77$ & $0.64$ & $0.95$ & $-0.04$ & $0.17$ \\ 
+        %Cond. Ent.  & $0.58$ & $0.68$ & $0.37$ & $0.32$  & $0.18$ \\
+        %Threshold   & $0.68$ & $0.91$ & $0.51$ & $0.20$  & $0.35$ \\ 
         \bottomrule
       \end{tabular}
-      \caption{Pearson correlation between measures. Based on all results
-        from random, average, $1$NN and linear transform on $5000$K songs
-        with $1$ and $10$ missing beats. $1$ or $-1$ means high correlation,
-        $0$ means none. ``Jensen'' is Jensen difference, ``cos'' is cosine
-        distance, ``cond. ent.'' is conditional entropy, ``thresh.'' is the
-        greyed area measure from Figure \ref{fig:measures} with $\delta =
-        0.2$.
-        \label{tab:corrs}}
+      \caption{Pearson correlation between measures computed using the full dataset 
+               with several imputation schemes and amounts of missing data.}
+      \label{tab:corrs}
     \end{center}
 %  \end{small}
 \end{table}
