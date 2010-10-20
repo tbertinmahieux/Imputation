@@ -153,11 +153,10 @@ models.  % needs to be reworded?
 
 The difficult nature of multi-frame imputation of music data is
 demonstrated in Figure \ref{fig:basic}.
-%
-Linear regression\FIXME[ronw]{isn't it really prediction?}, which
+Linear prediction, which
 explicitly minimizes Euclidean distance, is used to impute the missing
-data in Figure~\ref{fig:basic}.  However, it is clear from visual
-inspection that linear regression yields an overly-smooth
+data in Figure~\ref{fig:basic} $6$th row.  However, it is clear from
+visual inspection that linear prediction yields an overly-smooth
 reconstruction and is unable to predict the temporal evolution within
 the missing section.
 %
@@ -167,7 +166,7 @@ such as knowledge of repetitions within a song (note that the missing
 sequence in Figure~\ref{fig:basic} is repeated at frame 70) is
 necessary to achieve a musically coherent reconstruction.
 %
-Unfortunately, simple algorithms such as linear regression are often
+Unfortunately, simple algorithms such as linear prediction are often
 prone to identifying poor solutions, despite optimizing standard
 metrics such as Euclidean distance.
 %
@@ -257,7 +256,7 @@ for algorithmic details). Song longer than shown here.
 
 \subsection{ALGORITHMS}
 \label{ssec:algo}
-As multi-frame imputation has not been studied before, we report
+As multi-beat imputation has not been studied before, we report
 results on a variety of benchmark algorithms. We realize that such
 methods have a low probability of success at solving the task, but
 their relative performance is of interest.  Simple methods include
@@ -268,7 +267,7 @@ beats. Taking the average of the beats within a certain range
 of the missing patch (Figure \ref{fig:basic}, $5$th row) create a
 smooth reconstruction, but still solves the case of sustained notes.
 
-Our first trained model is linear regression (also called linear
+Our first trained model is linear prediction (also called linear
 transform in the text) where we use $N$ previous beats to predict the
 next one.  As it explicitly learns to minimize Euclidean distance on
 the visible data, this methods performs very well under certain
