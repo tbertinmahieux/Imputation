@@ -314,6 +314,9 @@ reconstruction is considered valid if it is between some $\delta$ of
 the original and wrong otherwise.  The Minkowski distance approximates
 this case with an increasingly smaller $\delta$ as $p \rightarrow 0$.
 In the experiments described below, we consider $p=0.5$ and $p=2$.
+With $p=0.5$, on the example of Figure \ref{fig:square}, the
+translated square wave is now favored (reconstruction error is $0.5$)
+to the second signal (reconstruction error is $0.71$).
 %\FIXME[ronw]{elaborate on this, it's kind of unclear}
 
 Looking at the differences between the original data and the imputed
@@ -325,33 +328,28 @@ conditional entropy~\cite{}, Jensen difference~\cite{Michel1994}, and
 the normalize difference entropy (\textbf{D-ENT})
 \cite{Mentzelopoulos2004}.
 
-Another idea is to look at the histogram of values and compute its
-entropy.  Once again, sustained solutions should measure differently
-than the original.  Absolute normalize difference entropy
-(\textbf{D-ENT}) \cite{Mentzelopoulos2004} between two vectors is
-computed as follow: we discretize $(0,1)$ in $10$ bins and create the
-normalized histogram of values.  The entropy of each of the bins
-$b_{bi}$ is $e_b = - log_2 b_b$ for each of the two vectors
-$i$. Finally:
+Jensen entropy of two distribution $x_1$ and $x_2$ is given by
+\[
+\mbox{Jensen} = entropy(\frac{x_1+x_2}{2}) - \frac{entropy(x_1) + entropy(x_2)}{2}
+\]
+For D-ENT, we build a $10$-bins histogram of the grey scale values,
+and compute the difference of entropy for each bin between an original
+distribution and its approximation. With $e_b = - log_2 b_b$
+entropy of one bin, it means that:
 \[
 \mbox{D-ENT} = \left( \Sigma_b \frac{e_{b1} - e_{b2}}{e_{b1}} \right) / (\mbox{\# bins})
 \]
 Note that D-ENT is not symmetric. In our experiment, the first vector
-is the original one.  If we look at Figure \ref{fig:avgnnrand}, the
-reconstruction with the lowest D-ENT is using nearest neighbor and not
-averaging as with Euclidean distance.
+is the original one. Also, the position of the different values does not
+matter.
 
-Note that we tried other entropy related measures,
-i.e. Kullback-Leibler divergence (KL) and Jensen difference
-\cite{Michel1994}. As for $d_{1/2}$, they behave in a surprisingly
-similar fashion as the Euclidean distance.  We explained above why
-Euclidean distance justifies disappointing reconstructions. At the
-same time, we do not argue that we should ignore or replace
-it. Euclidean distance measures reconstruction in a fundamental
-way. We believe we need a set of measures to quantify the quality of
-music patterns, Euclidean distance being one of them. In the next
-section, we investigate which measures behave in a similar way, thus
-helping us to decide which ones are useful to report.
+We explained above why Euclidean distance can justify disappointing
+reconstructions. At the same time, we do not argue that we should
+ignore or replace it. Euclidean distance measures reconstruction in a
+fundamental way. We believe we need a set of measures to quantify the
+quality of music patterns, Euclidean distance being one of them. In
+the next section, we investigate which measures behave in a similar
+way, thus helping us to decide which ones are useful to report.
 
 \begin{comment}
 The smoothing phenomena described above explains why reconstruction
