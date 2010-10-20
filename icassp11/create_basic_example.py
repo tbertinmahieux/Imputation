@@ -18,6 +18,12 @@ import imputation_plca as IMPUTATION_PLCA
 def nice_nums(val):
     return evaluation.nice_nums(val)
 
+def errs_to_str(errs):
+    s = 'eucl. = ' + nice_num(errs['eucl'])
+    s += ', delta diff. = ' + nice_num(errs['ddiff'])
+    s += ', D-ENT = ' + nice_num(errs['dent'])
+    return s
+
 # load btchroma, create mask
 btchroma = sio.loadmat('/home/thierry/Columbia/covers80/coversongs/covers32kENmats/john_lennon+Double_Fantasy+05-I_m_Losing_You.mp3.mat')['btchroma']
 p1=185;p2=p1+15;mask=np.ones(btchroma.shape);mask[:,p1:p2]=0.
@@ -64,33 +70,35 @@ P.imshow(recon_rand[:,pos1:pos2],**pargs)
 P.gca().grid(False)
 P.yticks([4,8])
 P.xticks([])
-P.title('allo')
+P.title('RANDOM, ' + errs_to_str(err_rand))
 # nn
 P.subplot(714)
 P.imshow(recon_nn[:,pos1:pos2],**pargs)
 P.gca().grid(False)
 P.yticks([4,8])
 P.xticks([])
+P.title('1NN, ' + errs_to_str(err_nn))
 # avg
 P.subplot(715)
 P.imshow(recon_avg[:,pos1:pos2],**pargs)
 P.gca().grid(False)
 P.yticks([4,8])
 P.xticks([])
+P.title('AVERAGE, ' + errs_to_str(err_avg))
 # siplca
 P.subplot(716)
 P.imshow(recon_siplca[:,pos1:pos2],**pargs)
 P.gca().grid(False)
 P.yticks([4,8])
 P.xticks([])
-# lintran
+P.title('SIPLCA, ' + errs_to_str(err_siplca))
+# lintrans
 P.subplot(717)
 P.imshow(recon_lintrans[:,pos1:pos2],**pargs)
 P.gca().grid(False)
 P.yticks([4,8])
 #P.xticks([])  we let the last one!
-
-#%evaluation.plot_oneexample(btchroma2,mask,p1,p2,methods=['lintrans'],methods_args=[{'win':1}],measures=('eucl','kl','dent'),plotrange=(p1-10,p2+70))
+P.title('LIN. TRANS., ' + errs_to_str(err_lintrans))
 
 
 P.show()
