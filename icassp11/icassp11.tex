@@ -370,7 +370,7 @@ perform well for real imputation tasks
 
 $d_{1/2}$ seems to be a solution from the toy example in
 Figure \ref{fig:square}, but we will see in Section \ref{sec:exp} that
-it is not really the case in practice.  Similarly, Kullback-Leibler
+it is not really the case in practice.  Similarly, Kullback-Leibler divergence
 (KL), conditional entropy and Jensen difference \cite{Michel1994} are
 two measures based on entropy, thus should not behave necessarily in
 the same way as $d_p$.  Once again, it is not the case in practice. We
@@ -429,12 +429,12 @@ nearest neighbor 5) using random.
 
 \section{EXPERIMENTS}
 \label{sec:exp}
-We present results from different algorithms for imputing masked
-beats.  Features are beat-aligned chromas and the dataset is made of
-$5000$ songs from the morecowbell.dj dataset
-\cite{Bertin-Mahieux2010a}. Songs has to be of length at least $100$
-beats.  The masked part is chosen at random, excluding the first and
-last $30$ beats.
+We present results using different algorithms for imputing masked
+sections of beat-aligned chromagrams.  The evaluation dataset is made
+of $5000$ songs from the \emph{morecowbell.dj} data described in
+\cite{Bertin-Mahieux2010a}.  We ensure that songs have a length of at
+least $100$ beats.  The masked part is chosen at random, excluding the
+first and last $30$ beats.
 
 
 \subsection{ALGORITHMS}
@@ -470,40 +470,40 @@ be enough to solve multi-frame imputation. HMM or NMF should better
 leverage long term dependencies and nearby information.  We experiment
 with shift invariant probabilistic latent component analysis
 (\textbf{SIPLCA}) \cite{Smaragdis2009,Weiss2010}, a probabilistic
-version of NMF. SIPLCA learn how to encode the signal as overlapping
-patches. The missing data is inferred by maximizing expectation.
-Problems arise when the number of missing beats is similar or larger
-to the patch size. SIPLCA can activate patches or not without any
-penalty. Thus, we regularize the activation by applying a second level
-of SIPLCA.  Still, results are not impressive and improvements are
-part of our ongoing research. We refer the interested reader to our
-code for more details.
-
+variant of convolutive NMF. SIPLCA learn how to encode the signal as a
+set of overlapping patches. The missing data is inferred by maximizing
+expectation.  Problems arise when the number of missing beats is
+similar or larger to the patch size. SIPLCA can activate patches or
+not without any penalty. Thus, we regularize the activation by
+applying a second level of SIPLCA.  Still, results are not impressive
+and improvements are part of our ongoing research. We refer the
+interested reader to our code for more details.
+\FIXME[ronw]{The last half of this paragraph is confusing...}
 
 
 \subsection{RESULTS}
 \label{ssec:results}
 As we mentioned in Subsection \ref{ssec:measures}, there exist
 numerous metrics to evaluate the reconstruction of a signal. Euclidean
-distance is a natural first choice, but does not necessarily rewards
-highly-structures imputations. In order to rationalize the set of
-measures we should report in our experiments, we first compute the
+distance is a natural first choice, but does not necessarily reward
+highly-structured imputations. In order to rationalize the set of
+measures we report in our experiments, we first compute the
 empirical agreement of these metrics.
 Pearson's correlation is defined as
 \[  \rho_{X,Y}={\mathrm{cov}(X,Y) \over \sigma_X
     \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
 \]
-$\rho_{X,Y}$. Remember that $-1 \leq \rho_{X,Y} \leq 1$, an absolute
-value close to $1$ meaning high correlation. $\rho_{X,Y}$ is computed
+$\rho_{X,Y}$. Note that $-1 \leq \rho_{X,Y} \leq 1$, and absolute
+value close to $1$ means high correlation. $\rho_{X,Y}$ is computed
 for many error measures based on results obtained by three methods on
-two multi-frame imputation tasks. See results in
+two multi-frame imputation tasks. The results are shown in
 Table~\ref{tab:corrs}.
 
-The first conclusion is that a large set of measures tend to agree
+The first conclusion is that a large set of measures are strongly correlated
 with Euclidean distance. It might not be a surprise for cosine
 distance and $d_{1/2}$ as they are similar in their
-formulation. However, the fact that entropy-based measures such as KL
-has high correlation with Euclidean distance means it might not serve
+formulation. However, the fact that entropy-based measures such as KL divergence
+have high correlation with Euclidean distance means it might not serve
 our purpose. Two measures still stand out from the pack.
 Delta difference and D-ENT are global statistics, the first looking at the
 variance in time and the second at the histogram of values. From
@@ -629,7 +629,7 @@ dataset of thousands of songs for benchmark algorithms and peek at
 ongoing research with SIPLCA. Finally, as the goal is to encourage
 researchers to further explore this task, the code and data to
 reproduce these results is available
-online\footnote{\url{http://www.columbia.edu/~tb2332/proj/imputation.html}}.
+online\footnote{\scriptsize\url{http://www.columbia.edu/~tb2332/proj/imputation.html}}.
 
 
 %\section{ACKNOWLEDGEMENTS}
