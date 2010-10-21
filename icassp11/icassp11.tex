@@ -51,35 +51,44 @@
 \maketitle
 %
 \begin{abstract}
-  We investigate the task of missing data imputation in music signals
-  as a means of evaluating the ability of different signal models to
-  accurately capture the temporal structure of music.
+
+Building models of the structure in musical signals raises the 
+question of how to evaluate and compare different modeling 
+approaches.  One possibility is to use the model to impute 
+deliberately-removed patches of missing data, then to compare 
+the model's predictions with the part that was removed.  
+%
+%  We investigate the task of missing data imputation in music signals
+%  as a means of evaluating the ability of different signal models to
+%  accurately capture the temporal structure of music.
   %
-  We analyze beat-synchronous chroma features and compare imputation
+  We analyze a corpus of popular music audio represented 
+  as beat-synchronous chroma features, and compare imputation
   based on simple linear prediction to more complex
-  signal models including nearest neighbor selection and
+  models including nearest neighbor selection and
   shift-invariant probabilistic latent component analysis.
   %
-  Simple predictive models perform best according to a Euclidean
-  distance metric, despite producing stationary results which are not
+  Simple linear models perform best according to Euclidean
+  distance, despite producing stationary results which are not
   musically meaningful.  We therefore investigate alternate evaluation
   measures % which emphasize musical consistency
-  and find that an entropy difference %information theoretic
-  metric tends to correlate
+  and observe that an entropy difference %information theoretic
+  metric correlates 
   better with our %intuitive
   expectations for musically consistent reconstructions.
   %
-  The imputation algorithm which performs best under this
-  entropy-based metric over a large data set of popular music
+  Under this measure, the best-performing imputation algorithm 
+  %which performs best under this
+  %entropy-based metric over a large data set of popular music
   reconstructs masked sections by choosing the nearest neighbor to the
   surrounding observations within the song.
   %
-  This result is consistent with the highly repetitive structure 
+  This result is consistent with the large amount of repetition  
   found in pop music.
 \end{abstract}
 %
 \begin{keywords}
-Missing data imputation, chroma features, entropy difference,
+Missing data imputation, music audio, chroma features, entropy difference,
 music sequence models
 \end{keywords}
 %
@@ -96,35 +105,38 @@ music sequence models
 \label{sec:intro}
 As with many classes of time-series data, musical signals contain
 substantial amounts of complex structural information.  Given the
-intricate nature of this data, learning models of music in an
-unsupervised fashion is a particularly challenging task.  In addition
-to musicological implications, large-scale models of music data have
-numerous commercial applications, including recommendation systems,
-digital rights management, and creative tools.  In many of these cases
-we are interested in models that capture local patterns
-(i.e. ``patches'') in the data.  Finding robust sequential patterns
-may prove useful for tasks such as song similarity (recognizing songs
+intricate nature of this structure, unsupervised modeling of music 
+is a particularly alluring yet challenging task.  
+Precise models based on large music archives could have a 
+great impact, not only on musicology but also in numerous commercial 
+applications, including recommendation systems,
+digital rights management, and creative tools.  %In many of these cases
+We are particularly interested in models that capture local patterns
+(or ``patches'') in the data.  
+A successful method for describing music as a collection of patches 
+would be useful for tasks such as song similarity (recognizing songs
 with similar patterns), song segmentation (labeling chorus/verse
 structure), and cover song recognition (identifying songs with similar
 high-level patterns).  All of these tasks would benefit from patch
-models that exhibit high-level musical characteristics while remaining
+models that capture high-level musical characteristics while remaining
 faithful to the observed signal data.
 %\FIXME[gg]{Do we need to back this up more?}
 %Therefore, we are interested in patterns that not only explain the
 %low-level signal, but also contain musical characteristics.  
-However, the requirement that patches be musically sensible makes it
-unclear how to evaluate the quality of this type of model.  In this
-paper, we propose a task based on missing data imputation and discuss
-various performance metrics which are sensitive to musically
+It is unclear, however, how to evaluate the extent to which a model 
+captures ``musically sensible'' structure.  This is the question 
+addressed in the current work through the task of missing 
+data imputation, and via a number of metrics which are sensitive to musically
 meaningful aspects of the data.
 
-Imputation refers to a family of techniques used to fill in missing
-data entries.  Previous work on audio-related applications has
+Imputation refers to the problem of filling in
+data items that have been lost or deleted.  
+Previous work on audio-related applications has
 included speech denoising~\cite{Cooke1996,Raj1998}, source
 separation~\cite{Reyes-Gomez2005}, bandwidth
 expansion~\cite{Smaragdis2009}, and model
-evaluation~\cite{Hoffman2010}.  However, much of the previous work has
-focused on at most a single time-frame.
+evaluation~\cite{Hoffman2010}.  Much of this work has 
+focused on small deletions such as a single time-frame.
 %However, to the best of
 %our knowledge, previous research has only considered at most a single
 %missing time frame.
@@ -134,9 +146,10 @@ focused on at most a single time-frame.
 %  figure 3 of
 %  {\footnotesize \url{http://www.ee.columbia.edu/~mjr59/AISTATS-defspec.pdf}}
 %}.
-The single-frame imputation problem is often somewhat easy since the
-harmonic content of music tends to change more slowly than a single
-frame.  However as the amount of missing data increases, the problem
+The relatively slowly-varying properties of music allow 
+single-frame deletions to be imputed with good accuracy based 
+on simple extrapolation.
+However as the amount of missing data increases, the problem
 becomes significantly more challenging.
 %
 We therefore focus on the task of \emph{multi-frame} imputation in
@@ -144,34 +157,32 @@ We therefore focus on the task of \emph{multi-frame} imputation in
 which long segments of the signal are missing.
 %
 Obtaining good performance on this task requires the use of models
-which can take advantage of the highly structured nature of music.  It
+that effectively exploit longer-term musical structure.  The task 
 therefore serves as a good way to
-% This allows us to
 more carefully evaluate the temporal aspects of competing
 models.  % needs to be reworded?
 % mention real-world packet-loss case?
 
 
-The difficult nature of multi-frame imputation of music data is
-demonstrated in Figure \ref{fig:basic}.  Linear prediction, which
-explicitly minimizes Euclidean distance, is used to impute the missing
-data and is shown in the $6$th row of Figure~\ref{fig:basic}.
-However, it is clear from visual inspection that linear prediction
-yields an overly-smooth reconstruction and is unable to predict the
+The difficulties of multi-frame imputation of music data are 
+illustrated in Figure \ref{fig:basic}.  For instance, linear prediction, which
+we found to give the smallest Euclidean distances over a large 
+test set, is used to impute the missing
+data as shown in the $6$th row.% of Figure~\ref{fig:basic}.
+Visually, it is evident that linear prediction
+yields an overly-smooth reconstruction and is unable to restore any 
 temporal evolution within the missing section.
 %
-A more sophisticated signal model which makes better use of long-term temporal information, 
-% better leverages the surrounding context and makes use of long-term
-% temporal information
-such as knowledge of repetitions within a song, 
+A more musically-coherent representation demands a model better 
+that is able to employ long-span information, 
+such as knowledge of repetitions within a song. 
 %(note that the missing sequence in Figure~\ref{fig:basic} is repeated at frame 70) 
-is necessary to achieve a musically coherent reconstruction.
 %
-Unfortunately, simple algorithms such as linear prediction are often
-prone to identifying poor solutions, despite optimizing standard
-metrics such as Euclidean distance.
+Unfortunately, simple measures like Euclidean distance are not 
+sensitive to musical coherence, and will lead to solutions like 
+linear prediction.  
 %
-In this paper, we argue that a more extensive set of metrics is needed
+In this paper, we argue for a more extensive set of metrics, able 
 to properly evaluate a model's ability to predict musical sequences.
 %more for proper evaluation.
 
@@ -181,15 +192,16 @@ to properly evaluate a model's ability to predict musical sequences.
 
 \subsection{DATA AND FEATURES}
 \label{ssec:feats}
-In the experiments described below, we use a set of $5000$ songs taken
-from the \emph{morecowbell.dj} dataset~\cite{Bertin-Mahieux2010a}.
-This dataset contains a wide variety of (predominantly western) pop
-music.  The raw audio was then converted to a chromagram
+%In the experiments described below, 
+We use a set of $5000$ songs taken
+from the \emph{morecowbell.dj} dataset~\cite{Bertin-Mahieux2010a}, 
+which consists of a wide variety of (predominantly western) pop
+music.  The raw audio is converted to a chromagram
 representation using the online Echo Nest
 API.\footnote{\url{http://developer.echonest.com}} A chromagram is
 similar in spirit to a \mbox{constant-Q} spectrogram except that pitch
-content across all octaves has been folded into $12$ discrete bins,
-each of which corresponds to a semitone (e.g. piano key).
+content is folded into a single octave of $12$ discrete bins,
+each corresponding to a particular semitone (e.g. one key on a piano).
 %In the chroma representation, the pitch content at each point in time
 %is folded into a $12$ binsintensity associated with each of the 12
 %semitones (e.g. piano keys) across all octaves.
@@ -202,14 +214,14 @@ each of which corresponds to a semitone (e.g. piano key).
 %\cite{EchoNest} 
 %that computes chroma from a constant-Q spectrogram.
 
-Music naturally evolves over a time scale expressed in beats, as
-opposed to the fixed-length frames commonly used in other audio
-processing applications.  Beat-aligned chroma can be formed by
-resampling a chromagram so that each chroma (column) vector spans a
+Music naturally evolves over a time scale expressed in beats, 
+so instead of the fixed-length frames commonly used in other audio
+processing, we form beat-aligned chroma by
+resampling a chromagram to make each chroma (column) vector span a
 single beat.  This representation has been successfully used for cover
 song recognition~\cite{Ellis2007a}, segmentation~\cite{Weiss2010}, and
-in our previous work on patch modeling~\cite{Bertin-Mahieux2010a}.  As
-a post-processing step, we remove variability due to loudness by
+in our previous work on patch modeling~\cite{Bertin-Mahieux2010a}. 
+Loudness variation is removed by 
 normalizing each column to have a maximum value of one.
 
 % ronw: this sentence is unnecessary
@@ -260,14 +272,15 @@ normalizing each column to have a maximum value of one.
 
 \subsection{ALGORITHMS}
 \label{ssec:algo}
-As multi-beat imputation has not been studied before, we report
-results on a variety of benchmark algorithms. We realize that such
-methods have a low probability of success at solving the task, but
+
+To better understand the multi-beat imputation task, we present 
+several benchmark algorithms of varying sophistication.  While the simpler 
+algorithms cannot be expected to provide high-quality imputations, 
 their relative performance is of interest.  Simple methods include
-random where each chroma bin is drawn from a uniform $[0,1)$
-distribution (Figure \ref{fig:basic}, $3$rd row).  Other baseline
-algorithms include picking a beat at random from the song and taking
-the average of all visible beats.
+filling the missing chroma bins with draws from a uniform $[0,1)$
+distribution (Figure \ref{fig:basic}, $3$rd row), or using a beat picked 
+at random from elsewhere in the song, or using
+the average of all remaining beats.
 %Taking the average of the beats
 %within a certain range of the missing patch (Figure \ref{fig:basic},
 %$5$th row) creates a smooth
@@ -276,22 +289,22 @@ the average of all visible beats.
 Our first trained model uses a linear transform to predict the next beat from the previous $N$ beats.
 % linear prediction (also called linear transform in the text) where
 % we use $N$ previous beats to predict the next one.
-As it explicitly learns to minimize Euclidean distance on the visible
+As it explicitly learns to minimize Euclidean distance on the remaining 
 data, this method performs very well under certain metrics (see Figure
 \ref{fig:basic}). From our experiments, $N=1$ or $N=2$ works best.
 
-Nearest neighbor ($1$NN) is an appropriate technique to take advantage
-of the repetitions within a song.  By looking at the nearby beats of
-the missing data, we can impute a reconstruction by spotting a similar
-neighborhood. Note that instead of using the visible part of the song,
-one can use a codebook constructed from other songs.  $k$NN with $k>1$
-is ongoing research.
+Nearest neighbor ($1$NN) is a promising technique given 
+the repetitious structure of songs.  By looking at the beats near to 
+the missing data, we can impute a reconstruction by spotting and copying a similar
+neighborhood. Note that instead of using the remaining part of the song,
+one could also use a codebook constructed from other songs, which 
+could involve $k$NN with $k>1$. % is ongoing research.
 
-The algorithms discussed above rely on low-level information which is
-unlikely be adequate for the multi-frame imputation problem.
-Therefore, we experiment with shift-invariant probabilistic latent
+The algorithms mentioned so far rely on low-level information which is
+unlikely be sufficient for a fully satisfactory multi-frame imputation.
+Therefore, we also try shift-invariant probabilistic latent
 component analysis (SIPLCA) \cite{Smaragdis2009,Weiss2010}, which is
-capable of capturing temporal dependencies.
+able to capture more subtle temporal dependencies.
 %a probabilistic variant of convolutive NMF.  SIPLCA learn how to
 %encode the signal as a set of overlapping patches.
 %As a gross simplification, one
@@ -306,14 +319,14 @@ capable of capturing temporal dependencies.
 %In our case, we use a
 %hierarchical SIPLCA model which will be described in detail in a
 %future publication.  
-The SIPLCA algorithm extracts template chroma patches that are
+SIPLCA extracts template chroma patches that are
 consistently repeated throughout a song.  Missing data is imputed by
 identifying templates consistent with the features neighboring the
 missing segment.  In the case of missing segments longer than the
 identified templates, our imputation algorithm utilizes a hierarchical
 reconstruction scheme, whose detailed explanation is beyond the scope
 of this paper.  SIPLCA for imputation is ongoing research and we refer
-the interested reader to our code until then.
+the interested reader to our code for the moment.
 
 
 %\subsection{MEASURES}
@@ -544,8 +557,7 @@ Euclidean distance.
 %time evaluation.plot_2_measures_dataset(test,methods=['knn_eucl','average','lintrans'],measures=['eucl','dent'],methods_args=[{'win':8},{'win':1},{'win':1}],ncols=[1,2,5,10])
 \begin{figure}[t]
 \begin{center}
-%\includegraphics[width=.8\columnwidth]{recon_score_in_2d_5k}
-\includegraphics[width=.8\columnwidth]{recon_score_in_2d_5k_enhanced}
+\includegraphics[width=.8\columnwidth]{recon_score_in_2d_5k}
 \end{center}
 \caption{Reconstruction error as a function of imputation algorithm
   and number of masked beats.  The error metrics shown are D-ENT
@@ -622,7 +634,7 @@ reported on the right.
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=.75\columnwidth]{basic3}
+\includegraphics[width=.70\columnwidth]{basic3}
 \end{center}
 \caption{$20$ beats imputation example, rows are 1) original 2) original masked,
 then reconstruction using same algorithms as Fig~\ref{fig:basic} (except random).
