@@ -245,7 +245,7 @@ normalizing each column to have a maximum value of one.
   (2) masked data, (3) random reconstruction, (4) nearest-neighbor
   reconstruction, (5) reconstruction using average of nearby beats, 
   (6) reconstruction using linear transform of one previous beat, 
-  and (7) SIPLCA (see Subsection \ref{ssec:algo} for algorithmic details). 
+  and (7) SIPLCA (see Section \ref{ssec:algo} for algorithmic details). 
   Note that only excerpts are shown.
   %Song longer than shown here.
   \label{fig:basic}}
@@ -335,7 +335,7 @@ preference for smooth solutions.
 %a model is unsure of a value, it gets the most reward from a smooth
 %solution.
 To see why, consider the toy example of Figure \ref{fig:square}. We
-impute the original one-dimensional signal, a square wave (solid
+approximate the original one-dimensional signal, a square wave (solid
 line), by two signals: a translated identical square wave (dot-dashed
 line), and a constant signal (dashed line). The first signal has an
 average reconstruction error of $0.50$ using Euclidean distance. The
@@ -384,7 +384,7 @@ approximation:
 $$
 \mbox{D-ENT}(\mathbf{b}_1,\mathbf{b}_2) = \frac{1}{10}\sum_{i=1}^{10} \frac{\log_2 b_{1,i} - \log_2 b_{2,i}}{\log_2 b_{1,i}} % / (\mbox{\# bins})
 $$
-\FIXME[gg]{Use N instead of 10?}
+%\FIXME[gg]{Use N instead of 10?}
 where $\mathbf{b}_1$ is the set of bins for $x_1$.  Note that D-ENT is
 not symmetric. In our experiments, we set the first vector to be the
 original features. Also, the position of the different values does not
@@ -448,34 +448,46 @@ nearest neighbor 5) using random.
 %\cite{Bertin-Mahieux2010a}.  We ensure that songs have a length of at
 %least $100$ beats.  The masked part is chosen at random, excluding the
 %first and last $30$ beats.
-As we mentioned in Subsection \ref{ssec:measures}, there exist
-numerous metrics to evaluate the reconstruction of a signal. Euclidean
-distance is a natural first choice, but does not necessarily reward
-highly-structured imputations. In order to rationalize the set of
-measures we report in our experiments, we first compute the empirical
-agreement of these metrics.  Pearson's correlation is defined as
+As we mentioned in Section \ref{ssec:measures}, there exist numerous
+metrics to evaluate the reconstruction of a signal. Euclidean distance
+is a natural first choice, but does not necessarily reward musical
+structure. In order to justify our set of reported measures, we
+computed the statistical similarity between a number of distance
+metrics.  We use Pearson's correlation which is defined as:
 $$
 \rho_{X,Y}={\mathrm{cov}(X,Y) \over \sigma_X
     \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
 $$
-$\rho_{X,Y}$. Note that $-1 \leq \rho_{X,Y} \leq 1$, and absolute
-value close to $1$ means high correlation. $\rho_{X,Y}$ is computed
-for many error measures based on results obtained by three methods on
-two multi-frame imputation tasks. The results are shown in
-Table~\ref{tab:corrs}.
+Note that $-1 \leq \rho_{X,Y} \leq 1$, and an absolute value close to
+$1$ means high correlation. $\rho_{X,Y}$ is computed for many error
+measures based on results obtained by three methods on two multi-frame
+imputation tasks.  The results are shown in Table~\ref{tab:corrs}.
+Note that we experimented with a number of other distance metrics,
+including symmetric Kullback-Leibler divergence, conditional entropy,
+and cosine distance.  Although we do not include detailed results due
+to lack of space, all of these metrics were highly correlated with
+Euclidean distance.  
 
+It is worth pointing out that the delta difference and D-ENT metrics
+differ from the rest in that they compare patches in a holistic
+manner.  This stands in contrast to the other measures which work in a
+point-by-point fashion.  Additionally, these two metrics measure a
+fundamentally different quality of the patch data in that they assess
+patch ``granularity'' as opposed to individual chroma bin levels.
+
+\begin{comment}
 The first conclusion is that a large set of measures are strongly
 correlated with Euclidean distance. This includes measures not
 reported here for lack of space, such as KL or conditional entropy.
-It might not be a surprise for
-cosine distance and $d_{1/2}$ as they are similar in their
-formulation. However, the fact that entropy-based measures such as KL
-divergence have high correlation with Euclidean distance means it
-might not serve our purpose. Two measures still stand out from the
-pack.  Delta difference and D-ENT are global statistics, the first
-looking at the variance in time and the second at the histogram of
-values. From Table~\ref{tab:corrs}, they do seem to bring an added
-value to our set of metrics.
+It might not be a surprise for cosine distance and $d_{1/2}$ as they
+are similar in their formulation. However, the fact that entropy-based
+measures such as KL divergence have high correlation with Euclidean
+distance means it might not serve our purpose. Two measures still
+stand out from the pack.  Delta difference and D-ENT are global
+statistics, the first looking at the variance in time and the second
+at the histogram of values. From Table~\ref{tab:corrs}, they do seem
+to bring an added value to our set of metrics.
+\end{comment}
 
 % MEASURES IN ORDER: (bad matfile saving)
 %array(['condent', 'binary', 'cos', 'eucl', 'lhalf', 'lhalf_delta', 'dent',
@@ -510,21 +522,21 @@ value to our set of metrics.
 %  \end{small}
 \end{table}
 
-We take a closer look at the divergence between two measures in
-Figure~\ref{fig:2dscore}.  It shows the performance of three methods
-for different numbers of missing beats. We report Euclidean distance
-and D-ENT. As we saw, they have a low empirical correlation of
-$0.12$. Nearest neighbor (NN) method creates a reconstruction with a
-granularity similar to the original for all mask sizes. We can assume
-that D-ENT is approximately constant throughout a song. Thus, an
-imputation from NN easily preserve this characteristic.  Regarding the
-linear transform, it learns to minimize the Euclidean distance and
-does it successfully. But as it can be seen with D-ENT and in Figure
-\ref{fig:basic} $6$th row, it is done by a large amount of
-smoothing. The average reconstruction has the same D-ENT as the linear
-transform, which is consistent with
-Figure~\ref{fig:basic}.  However, due to less
-smoothing (or a less intelligent one), it does not do as well with the
+We take a closer look at the divergence between two of the measures
+(Eucliean and D-ENT) in Figure~\ref{fig:2dscore}.  This shows the
+performance of three methods for different numbers of missing beats.
+As we can see from Table~\ref{tab:corrs}, they have a low empirical
+correlation of $0.12$.  The nearest neighbor (NN) method creates a
+reconstruction with a granularity similar to the original for all mask
+sizes.  This implies that D-ENT is approximately constant throughout
+the songs and imputation using NN can easily preserve this
+characteristic.  Tthe linear transform successfully learns to minimize
+the Euclidean distance.  However, as is the case with D-ENT, the
+linear transform results in a substantial amount of smoothing (see the
+$6$th row of Figure \ref{fig:basic}). The average reconstruction has
+the same D-ENT as the linear transform which is consistent with
+Figure~\ref{fig:basic}.  However, due to less smoothing (or perhaps
+less intelligent smoothing), it does not do as well in terms of
 Euclidean distance.
 
 % to create this figure:
@@ -540,32 +552,35 @@ the higher the Euclidean distance. Lower left is better.
 \label{fig:2dscore}}
 \end{figure}
 
-Figure~\ref{fig:basic3} shows another example of imputation by
-different algorithms. Algorithms are ordered according to Euclidean
-distance.  However, we can see that for that case, delta difference
-would have ranked first NN followed by SIPLCA whose reconstructions
-seem more faithful to the original.
+Figure~\ref{fig:basic3} shows another example of imputation using
+different algorithms.  The algorithms are ordered according to
+Euclidean distance.  However, we can see that in this case, delta
+difference would have ranked NN first, followed by SIPLCA whose
+reconstructions seem more faithful to the original.
 
-We now report results of a $15$ beat imputation on $5000$ songs in
-Table \ref{tab:res}. The linear transform is a clear winner based on
+Table \ref{tab:res} shows the results of $15$-beat imputation using
+$5000$ songs. The linear transform is a clear winner based on
 Euclidean distance. As before, nearest neighbor's strength is to
-preserve the texture of the original patch as can be seen from his
-D-ENT score. We can not present all results (other number of missing
-beats, other error measures, etc) due to space constraints, but they
-are no serious surprises with other measures as can be expected from
-Table \ref{tab:corrs}.
+preserve the texture of the original patch as can be seen from the
+D-ENT score.  We do not present all possible results (different
+numbers of missing beats, other error measures, etc.) due to space
+constraints, but given many of the other measures' high correlations
+to Euclidean distance, the differences are generally small.
+
+%they are no serious surprises with other measures as
+%can be expected from Table \ref{tab:corrs}.
 
 \begin{table}[t]
 \begin{small}
 \begin{center}
-\begin{tabular}{|l||c|c|c|} \hline
-method & Euclidean & delta diff. & D-ENT \\ \hline
+\begin{tabular}{@{}l c c c @{}} \hline
+method & Euclidean & delta diff. & D-ENT \\ \toprule
 random & $0.168$ & $0.135$ & $0.252$ \\
-average & $0.079$ & $0.180$ & $0.430$ \\ \hline
+average & $0.079$ & $0.180$ & $0.430$ \\ 
 1NN & $0.072$ & $\mathbf{0.028}$ & $\mathbf{0.123}$ \\
-codebook & & & \\ \hline
+codebook & & & \\ 
 lin. trans. & $\mathbf{0.056}$ & $0.170$ & $0.479$ \\
-SIPLCA & $0.060$ & $0.149$ & $0.395$ \\ \hline
+SIPLCA & $0.060$ & $0.149$ & $0.395$ \\ \bottomrule
 \end{tabular}
 \caption{Results on $15$ missing beats by different methods
 on $5000$ songs and measured using Euclidean distance, delta
