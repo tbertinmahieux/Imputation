@@ -23,7 +23,7 @@ P.plot(r,y2,'g-.',label='L1')
 P.plot(r,y3,'r--',label='L1/2')
 #P.plot(r,y4,'m-',label='L.1')
 P.yticks([0.2,0.4,0.6,0.8])
-P.axvspan(-.1,.1,ymin=0,ymax=1,alpha=.2,label='L0')
+P.axvspan(-.1,.1,ymin=0,ymax=1,alpha=.3,label='L0')
 P.legend(loc='lower right')
 P.hold(False)
 P.show(mainloop=False)  # set to False for non blocking

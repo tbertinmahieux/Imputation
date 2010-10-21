@@ -25,6 +25,7 @@ try:
 except ImportError:
     print 'dont seem you have HMM stuff, cant use it'
 HASMLAB=False
+"""  useless unless for Mutual Information measure
 try:
     # for MI Matlab package
     warnings.filterwarnings('ignore',category=DeprecationWarning)
@@ -37,6 +38,7 @@ try:
 except ImportError:
     print 'no Matlab wrapper'
     HASMLAB = False
+"""
 
 import masking as MASKING
 

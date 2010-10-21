@@ -237,8 +237,10 @@ def imputation(btchroma,p1,p2,nstates=3,niter=500,nstates_subseq=0,hmm=None,seed
         transmat_prior = 1.
     # normalize transmat
     #transmat += np.finfo('float').eps # add eps
-    for ridx,r in enumerate(transmat):
-        transmat[ridx,:] /= r.sum()
+    for ridx in range(transmat.shape[0]):
+        transmat[ridx,:] /= transmat[ridx,:].sum()
+    for r in transmat:
+        assert r.sum() == 1.,'bad normalization for transmat'
     transmat_zeros = np.where(transmat==0.)
     # create hmm
     if hmm is None:
