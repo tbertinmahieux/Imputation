@@ -378,7 +378,7 @@ J(x_1,x_2) = H\left(\frac{x_1+x_2}{2}\right) - \frac{H(x_1) + H(x_2)}{2}
 $$
 %
 where $H(x)$ denotes the entropy of $x$.  For D-ENT, we build a
-$10$-bin histogram of the feature values, and compute the difference
+$10$-bin histogram of feature values, and compute the difference
 of entropy for each bin between the original distribution and its
 approximation:
 $$
@@ -450,7 +450,7 @@ nearest neighbor 5) using random.
 %first and last $30$ beats.
 As we mentioned in Section \ref{ssec:measures}, there exist numerous
 metrics to evaluate the reconstruction of a signal. Euclidean distance
-is a natural first choice, but does not necessarily reward musical
+is a natural first choice, but it does not necessarily reward musical
 structure. In order to justify our set of reported measures, we
 computed the statistical similarity between a number of distance
 metrics.  We use Pearson's correlation which is defined as:
@@ -459,9 +459,10 @@ $$
     \sigma_Y} ={E[(X-\mu_X)(Y-\mu_Y)] \over \sigma_X\sigma_Y}
 $$
 Note that $-1 \leq \rho_{X,Y} \leq 1$, and an absolute value close to
-$1$ means high correlation. $\rho_{X,Y}$ is computed for many error
-measures based on results obtained by three methods on two multi-frame
-imputation tasks.  The results are shown in Table~\ref{tab:corrs}.
+$1$ means high correlation. We compute $\rho_{X,Y}$ for all pairs of error
+measures using the results obtained by the three imputation methods 
+described in Subsection~\ref{ssec:algo} on a two multi-frame
+imputation task.  The results are shown in Table~\ref{tab:corrs}.
 Note that we experimented with a number of other distance metrics,
 including symmetric Kullback-Leibler divergence, conditional entropy,
 and cosine distance.  Although we do not include detailed results due
@@ -545,10 +546,10 @@ Euclidean distance.
 \begin{center}
 \includegraphics[width=.8\columnwidth]{recon_score_in_2d_5k}
 \end{center}
-\caption{Reconstruction error for $3$ methods and different
-number of masked beats. Errors are D-ENT and Euclidean
-distance. In all cases, the larger the number of masked beats,
-the higher the Euclidean distance. Lower left is better.
+\caption{Reconstruction error as a function of imputation algorithm
+  and number of masked beats.  The error metrics shown are D-ENT
+  and Euclidean distance. In all cases, Euclidean distance increases
+   with the number of masked beats. Lower left is better.
 \label{fig:2dscore}}
 \end{figure}
 
